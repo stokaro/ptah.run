@@ -24,7 +24,8 @@ homepage, the install page and the 404 page.
 | `robots.txt`, `sitemap.xml` | Crawl policy and the two indexable URLs; add a row to the sitemap when a page is added |
 | `.nojekyll` | Tells GitHub Pages not to run Jekyll over the files |
 | `LICENSE` | MIT, for the site's own code |
-| `.github/workflows/deploy.yml` | Checks local references, then deploys `main` to GitHub Pages |
+| `scripts/stamp-version.mjs` | Writes a release tag into the pages; run by the deploy workflow |
+| `.github/workflows/deploy.yml` | Checks local references, stamps the latest release, deploys to GitHub Pages |
 
 ## Working on it
 
@@ -55,11 +56,16 @@ Every command, output line, database name and claim on these pages comes from
 the `stokaro/ptah` repository and its documentation site. When a command or its
 output changes there, change it here. Do not invent output.
 
-The release version shown on the pages (`v0.3.0` in the HTML) is the last known
-release. On load, `assets/site.js` asks the GitHub API for the latest release
-and rewrites every element marked `data-version` or `data-version-bare`; when
-the request fails, the HTML value stands. Bump the HTML value when cutting a
-release so the page is right without JavaScript too.
+The release version on the pages has three layers. The HTML in git carries
+the last release known when it was committed (`v0.3.0`). At deploy time the
+workflow asks the GitHub API for the latest `stokaro/ptah` release with the
+Actions token and writes it into every element marked `data-version` or
+`data-version-bare` (`scripts/stamp-version.mjs`); the workflow also runs on a
+schedule every six hours and on a `ptah-release` repository dispatch, so the
+served value stays recent. In the browser, `assets/site.js` asks the same API
+once per session and rewrites the elements again; when that request fails
+(offline, anonymous rate limit), the deploy-time value stands. Bump the value
+in git occasionally so a local preview is not far off.
 
 The ASCII wordmark in the hero and in `og.png` is the one the binaries print
 on their entry screen: copy it verbatim from `cmd/internal/banner/banner.go` in

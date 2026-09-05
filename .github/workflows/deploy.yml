@@ -3,6 +3,14 @@ name: Deploy
 on:
   push:
     branches: [main]
+  # Re-stamp the release version into the pages a few times a day, so the
+  # value a visitor gets when the GitHub API is unreachable is recent.
+  schedule:
+    - cron: "17 */6 * * *"
+  # `gh api repos/stokaro/ptah.run/dispatches -f event_type=ptah-release`
+  # from a release pipeline redeploys right after a release.
+  repository_dispatch:
+    types: [ptah-release]
   workflow_dispatch:
 
 permissions:
@@ -39,6 +47,15 @@ jobs:
       - name: CNAME names the production domain
         run: test "$(tr -d '[:space:]' < CNAME)" = "ptah.run"
 
+      - name: The version stamp works on a copy of the pages
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          cp -R index.html install 404.html scripts "$tmp/"
+          (cd "$tmp" && node scripts/stamp-version.mjs v9.9.9 && node scripts/stamp-version.mjs v9.9.9 --check)
+          ! (cd "$tmp" && node scripts/stamp-version.mjs v0.0.1 --check) || { echo "::error::--check did not detect a stale version"; exit 1; }
+          rm -rf "$tmp"
+
   deploy:
     name: Deploy to GitHub Pages
     needs: check
@@ -53,6 +70,23 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
+
+      # The pages leave the repository with the last release known at commit
+      # time. Ask GitHub for the current one and write it in before uploading,
+      # so a browser that cannot reach the API still sees a recent version.
+      # When this lookup fails, the committed value stays: a stale number is
+      # better than a missed deploy.
+      - name: Stamp the latest Ptah release into the pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          tag="$(gh api repos/stokaro/ptah/releases/latest --jq .tag_name 2>/dev/null || true)"
+          if [ -z "$tag" ]; then
+            echo "::warning::could not read the latest stokaro/ptah release; keeping the committed version"
+            exit 0
+          fi
+          node scripts/stamp-version.mjs "$tag"
 
       - name: Upload the site
         uses: actions/upload-pages-artifact@v5
