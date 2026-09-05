@@ -25,7 +25,7 @@
 <link rel="preload" href="/assets/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/site.css">
-<script>(function(){var d=document.documentElement;try{var t=localStorage.getItem("ptah-theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.setAttribute("data-theme",t)}catch(e){}d.classList.add("js")})();</script>
+<script>(function(){var d=document.documentElement,t=null;try{t=localStorage.getItem("ptah-theme")}catch(e){}if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.setAttribute("data-theme",t);d.classList.add("js")})();</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -187,10 +187,10 @@ ptah inference cutover
       </div>
       <pre class="diagram" role="img" aria-label="Schema files, Go models or a live database flow into ptah, which validates, plans, lints, applies and checks drift against the database.">schema.sql · models/*.go · live db
         │
-        ▼
+        ↓
       <b>ptah</b>  validate → plan → lint → apply → drift
         │
-        ▼
+        ↓
      database</pre>
     </div>
   </section>

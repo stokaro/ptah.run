@@ -21,15 +21,27 @@
   /* ---------- Theme ---------- */
 
   var themeBtn = $(".theme-btn");
+  var THEME_COLORS = { light: "#fbfbfa", dark: "#161311" };
+  function currentTheme() {
+    var t = root.getAttribute("data-theme");
+    if (t === "light" || t === "dark") return t;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
   function labelTheme() {
     if (!themeBtn) return;
+    var theme = currentTheme();
     // Fixed name ("Dark theme") plus a pressed state, never a changing verb.
-    themeBtn.setAttribute("aria-pressed", root.getAttribute("data-theme") === "dark" ? "true" : "false");
+    themeBtn.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+    // Browser chrome follows the page, not only the system setting.
+    $$('meta[name="theme-color"]').forEach(function (m) {
+      m.removeAttribute("media");
+      m.setAttribute("content", THEME_COLORS[theme]);
+    });
   }
   if (themeBtn) {
     labelTheme();
     themeBtn.addEventListener("click", function () {
-      var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      var next = currentTheme() === "dark" ? "light" : "dark";
       root.setAttribute("data-theme", next);
       try {
         localStorage.setItem("ptah-theme", next);
