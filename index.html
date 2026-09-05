@@ -54,10 +54,10 @@
         <li><a href="/install/">Install</a></li>
         <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
       </ul>
-      <button class="icon-btn theme-btn" type="button" aria-label="Switch theme">
+      <button class="icon-btn theme-btn" type="button" aria-label="Dark theme" aria-pressed="false">
         <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/></svg>
       </button>
-      <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+      <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">
         <svg class="icon-menu" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         <svg class="icon-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
@@ -76,11 +76,11 @@
 |  __/| || (_| | | | |
 |_|    \__\__,_|_| |_|</pre>
         <h1 id="hero-title">Database migrations without surprises.</h1>
-        <p class="lede">Ptah compares the schema you want with a live database and either writes versioned migrations or applies an approved plan. It also migrates persistent inference state, such as re-embedding a pgvector table. PostgreSQL, MySQL, MariaDB, SQLite and more. Open source, MIT, one binary.</p>
+        <p class="lede">Ptah compares the schema you want with a live database and either writes versioned migrations or applies an approved plan. It also migrates persistent inference state, such as re-embedding a pgvector table. PostgreSQL, MySQL, MariaDB, SQLite and more. Open source, MIT, no toolchain to install.</p>
         <div class="install">
           <div class="cmd">
             <pre id="install-cmd" data-copy-text="curl -fsSL https://stokaro.github.io/ptah/install.sh | sh"><span class="p">$</span> curl -fsSL https://stokaro.github.io/ptah/install.sh | sh</pre>
-            <button class="copy" type="button" data-copy="install-cmd" aria-label="Copy the install command">Copy</button>
+            <button class="copy" type="button" data-copy="install-cmd" data-copy-name="install command"><span class="copy-text">Copy</span><span class="sr-only"> install command</span></button>
           </div>
           <p class="meta"><span><span class="v" data-version>v0.3.0</span> · pre-GA · MIT</span><span>Windows: <code>irm https://stokaro.github.io/ptah/install.ps1 | iex</code></span></p>
         </div>
@@ -100,6 +100,8 @@
 
 <span class="p">$</span> ptah schema apply --schema-file schema.sql \
     --db-url sqlite://app.db --auto-approve
+<span class="m">Planned schema changes:</span>
+<span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span>
 <span class="m">Auto-approval enabled; applying schema changes.</span>
 Schema apply completed successfully.
 
@@ -147,6 +149,7 @@ Wrote ./migrations/ptah.sum
     --db-url sqlite://app.db \
     --migrations-dir ./migrations
 Current Version: 1700000000
+Total Migrations: 1
 Applied Migrations: 1
 Pending Migrations: 0</pre></div>
           <p><code>ptah.sum</code> records a checksum per file; later commands verify it before running anything.</p>
@@ -174,13 +177,12 @@ ptah inference cutover
     <div class="wrap">
       <div class="sources-copy">
         <h2 id="sources-title">Works with the schemas you already have.</h2>
-        <p>Every source parses into the same internal schema before planning. Sources repeat and mix freely; the merged result is the desired schema. No proprietary format is required.</p>
+        <p>Every source parses into the same internal schema before planning. <code>--schema-file</code> and <code>--root-dir</code> repeat and mix freely; the merged result is the desired schema. No proprietary format is required.</p>
         <dl class="flags">
           <dt>--schema-file</dt><dd>SQL, YAML, HCL, DBML</dd>
           <dt>--root-dir</dt><dd>Annotated Go structs</dd>
           <dt>--schema-cmd</dt><dd>Any program that emits SQL, HCL or YAML — an ORM exporter</dd>
-          <dt>--db-url</dt><dd>A live database, introspected into source</dd>
-          <dt>--dir</dt><dd>An existing migration directory</dd>
+          <dt>--db-url</dt><dd>A live database, introspected into Go models with <code>ptah introspect</code></dd>
         </dl>
       </div>
       <pre class="diagram" role="img" aria-label="Schema files, Go models or a live database flow into ptah, which validates, plans, lints, applies and checks drift against the database.">schema.sql · models/*.go · live db
@@ -224,6 +226,7 @@ ptah inference cutover
   </div>
 </footer>
 
+<div class="sr-only" role="status" id="copy-status"></div>
 <script src="/assets/site.js" defer></script>
 </body>
 </html>

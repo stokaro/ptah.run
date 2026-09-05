@@ -38,10 +38,10 @@
         <li><a href="/install/" aria-current="page">Install</a></li>
         <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
       </ul>
-      <button class="icon-btn theme-btn" type="button" aria-label="Switch theme">
+      <button class="icon-btn theme-btn" type="button" aria-label="Dark theme" aria-pressed="false">
         <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/></svg>
       </button>
-      <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+      <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">
         <svg class="icon-menu" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         <svg class="icon-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
@@ -55,10 +55,11 @@
     <div class="page-head">
       <h1>Install Ptah</h1>
       <p class="lede">The release installer downloads the archive for your OS and architecture, verifies its SHA-256 checksum, and installs <code>ptah</code>, <code>ptah-compat</code> and <code>ptah-ls</code> without administrator rights.</p>
-      <p class="meta">Current release <span class="v" data-version>v0.3.0</span> · pre-GA: the native command tree and public Go API can still change · MIT</p>
+      <p class="meta"><span>Current release <span class="v" data-version>v0.3.0</span> · pre-GA: the native command tree and public Go API can still change · MIT</span></p>
     </div>
 
     <div class="tabs">
+      <div class="tabs-head">
       <div class="tablist" role="tablist" aria-label="Installation method">
         <button class="tab" role="tab" id="tab-macos" data-tab="macos" aria-controls="panel-macos" aria-selected="true">macOS</button>
         <button class="tab" role="tab" id="tab-linux" data-tab="linux" aria-controls="panel-linux" aria-selected="false" tabindex="-1">Linux</button>
@@ -66,14 +67,15 @@
         <button class="tab" role="tab" id="tab-brew" data-tab="brew" aria-controls="panel-brew" aria-selected="false" tabindex="-1">Homebrew</button>
         <button class="tab" role="tab" id="tab-go" data-tab="go" aria-controls="panel-go" aria-selected="false" tabindex="-1">Go</button>
         <button class="tab" role="tab" id="tab-source" data-tab="source" aria-controls="panel-source" aria-selected="false" tabindex="-1">Source</button>
-        <span class="detected" aria-live="polite"></span>
+      </div>
+      <span class="detected" aria-live="polite"></span>
       </div>
 
       <div class="panel" role="tabpanel" id="panel-macos" aria-labelledby="tab-macos">
         <div class="panel-title">macOS</div>
         <div class="cmd">
           <pre id="cmd-macos" data-copy-text="curl -fsSL https://stokaro.github.io/ptah/install.sh | sh"><span class="p">$</span> curl -fsSL https://stokaro.github.io/ptah/install.sh | sh</pre>
-          <button class="copy" type="button" data-copy="cmd-macos" aria-label="Copy the macOS install command">Copy</button>
+          <button class="copy" type="button" data-copy="cmd-macos" data-copy-name="macOS install command"><span class="copy-text">Copy</span><span class="sr-only"> macOS install command</span></button>
         </div>
         <p>Installs to <code>~/.local/bin</code>. Needs a terminal, <code>tar</code>, and <code>curl</code>. Homebrew works too: <code>brew install stokaro/ptah/ptah</code>. Fetch archives with <code>curl</code> or <code>gh</code>, not a browser — browser downloads carry a quarantine attribute that Gatekeeper rejects on the ad-hoc-signed binaries.</p>
       </div>
@@ -84,7 +86,7 @@
           <pre id="cmd-linux" data-copy-text="curl -fsSL https://stokaro.github.io/ptah/install.sh | sh"><span class="p">$</span> curl -fsSL https://stokaro.github.io/ptah/install.sh | sh
 <span class="m"># without curl</span>
 <span class="p">$</span> wget -qO- https://stokaro.github.io/ptah/install.sh | sh</pre>
-          <button class="copy" type="button" data-copy="cmd-linux" aria-label="Copy the Linux install command">Copy</button>
+          <button class="copy" type="button" data-copy="cmd-linux" data-copy-name="Linux install command"><span class="copy-text">Copy</span><span class="sr-only"> Linux install command</span></button>
         </div>
         <p>Installs to <code>~/.local/bin</code>. Archives: <code>ptah_<span data-version-bare>0.3.0</span>_linux_amd64.tar.gz</code>, <code>ptah_<span data-version-bare>0.3.0</span>_linux_arm64.tar.gz</code>.</p>
       </div>
@@ -93,7 +95,7 @@
         <div class="panel-title">Windows</div>
         <div class="cmd">
           <pre id="cmd-windows" data-copy-text="irm https://stokaro.github.io/ptah/install.ps1 | iex"><span class="p">PS&gt;</span> irm https://stokaro.github.io/ptah/install.ps1 | iex</pre>
-          <button class="copy" type="button" data-copy="cmd-windows" aria-label="Copy the Windows install command">Copy</button>
+          <button class="copy" type="button" data-copy="cmd-windows" data-copy-name="Windows install command"><span class="copy-text">Copy</span><span class="sr-only"> Windows install command</span></button>
         </div>
         <p>PowerShell 5.1 or later. Installs to <code>%LOCALAPPDATA%\Ptah\bin</code> and updates the user <code>Path</code> unless disabled. Pin a version with <code>$env:PTAH_INSTALL_VERSION = '<span data-version>v0.3.0</span>'</code>.</p>
       </div>
@@ -104,7 +106,7 @@
           <pre id="cmd-brew" data-copy-text="brew install stokaro/ptah/ptah"><span class="p">$</span> brew install stokaro/ptah/ptah
 <span class="m"># development branch, builds from source</span>
 <span class="p">$</span> brew install --HEAD stokaro/ptah/ptah-edge</pre>
-          <button class="copy" type="button" data-copy="cmd-brew" aria-label="Copy the Homebrew install command">Copy</button>
+          <button class="copy" type="button" data-copy="cmd-brew" data-copy-name="Homebrew install command"><span class="copy-text">Copy</span><span class="sr-only"> Homebrew install command</span></button>
         </div>
         <p>macOS or Linux. Both formulas provide binaries with the same names; remove one before switching to the other.</p>
       </div>
@@ -172,6 +174,7 @@ Version: &lt;installed version&gt;</pre>
   </div>
 </footer>
 
+<div class="sr-only" role="status" id="copy-status"></div>
 <script src="/assets/site.js" defer></script>
 </body>
 </html>

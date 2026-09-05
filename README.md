@@ -20,8 +20,11 @@ homepage, the install page and the 404 page.
 | `assets/fonts/` | Self-hosted font subsets and their licenses |
 | `assets/logo.svg`, `favicon.svg` | The Ptah mark, copied from `stokaro/ptah` (`docs/site/src/assets/logo.svg`) |
 | `og.png`, `apple-touch-icon.png`, `favicon.ico` | Generated from the mark and the ASCII wordmark |
-| `CNAME` | The custom domain |
-| `.github/workflows/deploy.yml` | Deploys `main` to GitHub Pages |
+| `CNAME` | The custom domain, as a record (see "Deployment settings") |
+| `robots.txt`, `sitemap.xml` | Crawl policy and the two indexable URLs; add a row to the sitemap when a page is added |
+| `.nojekyll` | Tells GitHub Pages not to run Jekyll over the files |
+| `LICENSE` | MIT, for the site's own code |
+| `.github/workflows/deploy.yml` | Checks local references, then deploys `main` to GitHub Pages |
 
 ## Working on it
 
@@ -36,6 +39,16 @@ python3 -m http.server 8000
 Every push to `main` deploys. The workflow first checks that every local
 `href`/`src` on the three pages points at a file that exists.
 
+## Deployment settings
+
+GitHub Pages for this repository is configured once, outside the files here:
+the source is **GitHub Actions** (not "deploy from a branch"), and the custom
+domain `ptah.run` is set under Settings → Pages. With an Actions deploy the
+`CNAME` file in the repository does not configure the domain by itself; it is
+kept so the repository states the domain it is meant to serve, and the deploy
+workflow checks it still says `ptah.run`. "Enforce HTTPS" can be turned on once
+GitHub has issued the certificate for the domain.
+
 ## Content rules
 
 Every command, output line, database name and claim on these pages comes from
@@ -47,6 +60,12 @@ release. On load, `assets/site.js` asks the GitHub API for the latest release
 and rewrites every element marked `data-version` or `data-version-bare`; when
 the request fails, the HTML value stands. Bump the HTML value when cutting a
 release so the page is right without JavaScript too.
+
+Documentation links point at the `edge` build of the docs site
+(`https://docs.ptah.run/edge/...`), the same choice the Ptah README makes: it
+always exists and always documents the current command tree, and the docs site
+has a version switcher. Do not "fix" them to a release path without changing
+this rule.
 
 Design source: the "Ptah website" design project (option 2a for the homepage,
 1d for install, 1f for mobile, 1g for dark mode). Type is Instrument Sans for
@@ -63,10 +82,11 @@ DNS for `ptah.run` points at GitHub Pages:
 | --- | --- |
 | `A` (apex) | `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` |
 | `AAAA` (apex) | `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153` |
-| `CNAME www` | `stokaro.github.io` |
 
-GitHub redirects `www.ptah.run` to the apex. Keep the Cloudflare proxy off
-(DNS only) so GitHub can issue and renew the TLS certificate.
+There is no `www` record yet. Adding `CNAME www` → `stokaro.github.io` (DNS
+only) would make GitHub redirect `www.ptah.run` to the apex. Keep the
+Cloudflare proxy off for every record that points at GitHub Pages so GitHub can
+issue and renew the TLS certificate.
 
 ## Fonts
 

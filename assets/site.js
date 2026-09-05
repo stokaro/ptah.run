@@ -23,9 +23,8 @@
   var themeBtn = $(".theme-btn");
   function labelTheme() {
     if (!themeBtn) return;
-    var dark = root.getAttribute("data-theme") === "dark";
-    themeBtn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
-    themeBtn.setAttribute("aria-pressed", dark ? "true" : "false");
+    // Fixed name ("Dark theme") plus a pressed state, never a changing verb.
+    themeBtn.setAttribute("aria-pressed", root.getAttribute("data-theme") === "dark" ? "true" : "false");
   }
   if (themeBtn) {
     labelTheme();
@@ -49,7 +48,12 @@
     function setMenu(open) {
       header.classList.toggle("is-open", open);
       menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
-      menuBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      // The links precede the button in the DOM, so put focus on the first
+      // one when the menu opens; otherwise Tab would skip the menu entirely.
+      if (open) {
+        var first = $(".nav-links a", header);
+        if (first) first.focus();
+      }
     }
     menuBtn.addEventListener("click", function () {
       setMenu(!header.classList.contains("is-open"));
@@ -67,20 +71,25 @@
 
   /* ---------- Copy buttons ---------- */
 
+  var copyStatus = $("#copy-status");
   $$("[data-copy]").forEach(function (btn) {
     var target = doc.getElementById(btn.getAttribute("data-copy"));
     if (!target) return;
-    var idle = btn.textContent;
+    var label = $(".copy-text", btn) || btn;
+    var idle = label.textContent;
+    var name = btn.getAttribute("data-copy-name") || "command";
     var timer = null;
     btn.addEventListener("click", function () {
       var text = target.getAttribute("data-copy-text") || target.textContent.replace(/^\$\s+/, "");
       var done = function () {
         btn.setAttribute("data-state", "done");
-        btn.textContent = "Copied";
+        label.textContent = "Copied";
+        if (copyStatus) copyStatus.textContent = "Copied the " + name + " to the clipboard.";
         clearTimeout(timer);
         timer = setTimeout(function () {
           btn.removeAttribute("data-state");
-          btn.textContent = idle;
+          label.textContent = idle;
+          if (copyStatus) copyStatus.textContent = "";
         }, 1600);
       };
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -134,7 +143,7 @@
     }
     var names = { macos: "macOS", linux: "Linux", windows: "Windows" };
     var detected = detectPlatform();
-    var detectedEl = $(".detected", tablist);
+    var detectedEl = $(".detected");
     if (detectedEl) detectedEl.textContent = "detected: " + names[detected];
 
     function select(id, opts) {
