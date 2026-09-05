@@ -73,8 +73,10 @@ this rule.
 
 Design source: the "Ptah website" design project (option 2a for the homepage,
 1d for install, 1f for mobile, 1g for dark mode). Type is Instrument Sans for
-prose and interface chrome, IBM Plex Mono for anything that can be pasted into a
-terminal, and JetBrains Mono for the ASCII wordmark only. Two-pixel radii,
+prose and interface chrome and IBM Plex Mono for anything that can be pasted
+into a terminal; the ASCII wordmark is set in the system monospace stack
+(`ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+"Courier New", monospace`), the way a terminal would show it. Two-pixel radii,
 one-pixel rules, no shadows; the primary button is black, blue is reserved for
 links.
 

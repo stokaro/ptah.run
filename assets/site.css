@@ -3,8 +3,9 @@
  * Tokens and measurements come from the Ptah website design (the 2a
  * consolidated homepage, the 1d install page, 1f mobile and 1g dark).
  * Fonts are self-hosted subsets of Instrument Sans (prose and interface
- * chrome), IBM Plex Mono (anything that can be pasted into a terminal) and
- * JetBrains Mono (the ASCII wordmark only). See assets/fonts/LICENSES.md.
+ * chrome) and IBM Plex Mono (anything that can be pasted into a terminal); the
+ * ASCII wordmark uses the system monospace stack, as a terminal would. See
+ * assets/fonts/LICENSES.md.
  */
 
 /* ---------- Fonts ---------- */
@@ -86,20 +87,12 @@
   unicode-range: U+2190-2193, U+2500-257F;
 }
 
-@font-face {
-  font-family: "JetBrains Mono";
-  font-style: normal;
-  font-weight: 500 600;
-  font-display: swap;
-  src: url("fonts/jetbrains-mono-var-latin.woff2") format("woff2");
-}
-
 /* ---------- Tokens ---------- */
 
 :root {
   --sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
-  --ascii: "JetBrains Mono", Menlo, Consolas, "DejaVu Sans Mono", "Liberation Mono",
+  --ascii: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
 
   --bg: #fbfbfa;
