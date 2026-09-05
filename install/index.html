@@ -76,7 +76,7 @@
       <div class="panel" role="tabpanel" id="panel-macos" aria-labelledby="tab-macos">
         <div class="panel-title">macOS</div>
         <div class="cmd">
-          <pre id="cmd-macos" data-copy-text="curl -fsSL https://stokaro.github.io/ptah/install.sh | sh"><span class="p">$</span> curl -fsSL https://stokaro.github.io/ptah/install.sh | sh</pre>
+          <pre id="cmd-macos" data-copy-text="curl -fsSL https://ptah.run/install.sh | sh"><span class="p">$</span> curl -fsSL https://ptah.run/install.sh | sh</pre>
           <button class="copy" type="button" data-copy="cmd-macos" data-copy-name="macOS install command"><span class="copy-text">Copy</span><span class="sr-only"> macOS install command</span></button>
         </div>
         <p>Installs to <code>~/.local/bin</code>. Needs a terminal, <code>tar</code>, and <code>curl</code>. Homebrew works too: <code>brew install stokaro/ptah/ptah</code>. Fetch archives with <code>curl</code> or <code>gh</code>, not a browser — browser downloads carry a quarantine attribute that Gatekeeper rejects on the ad-hoc-signed binaries.</p>
@@ -85,9 +85,9 @@
       <div class="panel" role="tabpanel" id="panel-linux" aria-labelledby="tab-linux">
         <div class="panel-title">Linux</div>
         <div class="cmd">
-          <pre id="cmd-linux" data-copy-text="curl -fsSL https://stokaro.github.io/ptah/install.sh | sh"><span class="p">$</span> curl -fsSL https://stokaro.github.io/ptah/install.sh | sh
+          <pre id="cmd-linux" data-copy-text="curl -fsSL https://ptah.run/install.sh | sh"><span class="p">$</span> curl -fsSL https://ptah.run/install.sh | sh
 <span class="m"># without curl</span>
-<span class="p">$</span> wget -qO- https://stokaro.github.io/ptah/install.sh | sh</pre>
+<span class="p">$</span> wget -qO- https://ptah.run/install.sh | sh</pre>
           <button class="copy" type="button" data-copy="cmd-linux" data-copy-name="Linux install command"><span class="copy-text">Copy</span><span class="sr-only"> Linux install command</span></button>
         </div>
         <p>Installs to <code>~/.local/bin</code>. Archives: <code>ptah_<span data-version-bare>0.3.0</span>_linux_amd64.tar.gz</code>, <code>ptah_<span data-version-bare>0.3.0</span>_linux_arm64.tar.gz</code>.</p>
@@ -96,7 +96,7 @@
       <div class="panel" role="tabpanel" id="panel-windows" aria-labelledby="tab-windows">
         <div class="panel-title">Windows</div>
         <div class="cmd">
-          <pre id="cmd-windows" data-copy-text="irm https://stokaro.github.io/ptah/install.ps1 | iex"><span class="p">PS&gt;</span> irm https://stokaro.github.io/ptah/install.ps1 | iex</pre>
+          <pre id="cmd-windows" data-copy-text="irm https://ptah.run/install.ps1 | iex"><span class="p">PS&gt;</span> irm https://ptah.run/install.ps1 | iex</pre>
           <button class="copy" type="button" data-copy="cmd-windows" data-copy-name="Windows install command"><span class="copy-text">Copy</span><span class="sr-only"> Windows install command</span></button>
         </div>
         <p>PowerShell 5.1 or later. Installs to <code>%LOCALAPPDATA%\Ptah\bin</code> and updates the user <code>Path</code> unless disabled. Pin a version with <code>$env:PTAH_INSTALL_VERSION = '<span data-version>v0.3.0</span>'</code>.</p>
@@ -153,7 +153,7 @@ Version: &lt;installed version&gt;</pre>
     <section class="tips" aria-label="More options">
       <div class="tip"><strong>Pin a release</strong><code>install.sh | sh -s -- --version <span data-version>v0.3.0</span></code></div>
       <div class="tip"><strong>Verify the signature</strong><span><code>checksums.txt</code> is signed with Sigstore; verify with <code>cosign verify-blob</code> or pass <code>--verify-signature</code>.</span></div>
-      <div class="tip"><strong>Inspect before running</strong><code>curl -fsSL https://stokaro.github.io/ptah/install.sh -o install.sh &amp;&amp; less install.sh</code></div>
+      <div class="tip"><strong>Inspect before running</strong><code>curl -fsSL https://ptah.run/install.sh -o install.sh &amp;&amp; less install.sh</code></div>
     </section>
 
     <div class="actions">

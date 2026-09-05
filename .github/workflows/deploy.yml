@@ -47,6 +47,13 @@ jobs:
       - name: CNAME names the production domain
         run: test "$(tr -d '[:space:]' < CNAME)" = "ptah.run"
 
+      - name: No github.io address on the pages
+        run: |
+          if grep -n "github\.io" index.html install/index.html 404.html; then
+            echo "::error::the pages must use ptah.run addresses, never github.io"
+            exit 1
+          fi
+
       - name: The version stamp works on a copy of the pages
         run: |
           set -euo pipefail
@@ -87,6 +94,26 @@ jobs:
             exit 0
           fi
           node scripts/stamp-version.mjs "$tag"
+
+      # https://ptah.run/install.sh and /install.ps1 are the installers from the
+      # master branch of stokaro/ptah (docs/site/public/). They are not kept in
+      # this repository: every deploy fetches them, so the site never serves a
+      # copy that drifted from the source. A failed fetch fails the deploy and
+      # leaves the previous deployment, installers included, in place.
+      - name: Fetch the installers from stokaro/ptah master
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for f in install.sh install.ps1; do
+            gh api "repos/stokaro/ptah/contents/docs/site/public/$f?ref=master" \
+              -H "Accept: application/vnd.github.raw+json" > "$f"
+            test "$(wc -c < "$f")" -gt 4096
+            grep -q "PTAH_INSTALL" "$f"
+          done
+          head -1 install.sh | grep -qx '#!/bin/sh'
+          sh -n install.sh
+          ls -la install.sh install.ps1
 
       - name: Upload the site
         uses: actions/upload-pages-artifact@v5

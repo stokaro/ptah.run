@@ -20,6 +20,7 @@ homepage, the install page and the 404 page.
 | `assets/fonts/` | Self-hosted font subsets and their licenses |
 | `assets/logo.svg`, `favicon.svg` | The Ptah mark, copied from `stokaro/ptah` (`docs/site/src/assets/logo.svg`) |
 | `og.png`, `apple-touch-icon.png`, `favicon.ico` | Generated from the mark and the ASCII wordmark |
+| `install.sh`, `install.ps1` | Not in git: the deploy fetches them from `docs/site/public/` on the master branch of `stokaro/ptah` (see "Installers") |
 | `CNAME` | The custom domain, as a record (see "Deployment settings") |
 | `robots.txt`, `sitemap.xml` | Crawl policy and the two indexable URLs; add a row to the sitemap when a page is added |
 | `.nojekyll` | Tells GitHub Pages not to run Jekyll over the files |
@@ -50,7 +51,22 @@ kept so the repository states the domain it is meant to serve, and the deploy
 workflow checks it still says `ptah.run`. "Enforce HTTPS" can be turned on once
 GitHub has issued the certificate for the domain.
 
+## Installers
+
+`https://ptah.run/install.sh` and `https://ptah.run/install.ps1` are the
+installers from the master branch of `stokaro/ptah` (`docs/site/public/`).
+The deploy workflow fetches both with the Actions token, checks that they are
+non-trivial and that the shell script parses, and uploads them with the pages.
+Nothing is committed here, so the site cannot serve a stale copy; a fetch that
+fails stops the deploy and the previous deployment stays live. Because the
+workflow also runs every six hours, a change on master reaches ptah.run within
+that window, or at once through a `ptah-release` dispatch.
+
 ## Content rules
+
+Addresses on the pages are `ptah.run` addresses: the installers, the docs at
+`docs.ptah.run`, the repository on `github.com`. No `github.io` address appears
+on any page; the deploy workflow refuses one.
 
 Every command, output line, database name and claim on these pages comes from
 the `stokaro/ptah` repository and its documentation site. When a command or its
