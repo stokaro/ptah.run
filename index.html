@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ptah — database migrations without surprises</title>
+<meta name="description" content="Open-source database change management. Ptah compares the schema you want with a live database and either writes versioned migrations or applies an approved plan. PostgreSQL, MySQL, MariaDB, SQLite and more.">
+<link rel="canonical" href="https://ptah.run/">
+<meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161311" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ptah">
+<meta property="og:title" content="Ptah — database migrations without surprises">
+<meta property="og:description" content="Open-source database change management. Ptah compares the schema you want with a live database and either writes versioned migrations or applies an approved plan.">
+<meta property="og:url" content="https://ptah.run/">
+<meta property="og:image" content="https://ptah.run/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Ptah ASCII wordmark above the line: Database migrations without surprises.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="/assets/fonts/instrument-sans-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script>(function(){var d=document.documentElement;try{var t=localStorage.getItem("ptah-theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.setAttribute("data-theme",t)}catch(e){}d.classList.add("js")})();</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Ptah",
+  "url": "https://ptah.run/",
+  "description": "Open-source database change management for schemas and persistent inference state.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows",
+  "license": "https://github.com/stokaro/ptah/blob/master/LICENSE",
+  "downloadUrl": "https://github.com/stokaro/ptah/releases",
+  "sameAs": ["https://github.com/stokaro/ptah", "https://docs.ptah.run/"],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/assets/logo.svg" alt="" width="22" height="22">Ptah</a>
+    <nav class="nav" aria-label="Site">
+      <ul class="nav-links" id="nav-links">
+        <li><a href="https://docs.ptah.run/">Docs</a></li>
+        <li><a href="/install/">Install</a></li>
+        <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
+      </ul>
+      <button class="icon-btn theme-btn" type="button" aria-label="Switch theme">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/></svg>
+      </button>
+      <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+        <svg class="icon-menu" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg class="icon-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap">
+      <div class="hero-copy">
+        <pre class="banner" role="img" aria-label="Ptah"> ____  _        _
+|  _ \| |_ __ _| |__
+| |_) | __/ _` | '_ \
+|  __/| || (_| | | | |
+|_|    \__\__,_|_| |_|</pre>
+        <h1 id="hero-title">Database migrations without surprises.</h1>
+        <p class="lede">Ptah compares the schema you want with a live database and either writes versioned migrations or applies an approved plan. It also migrates persistent inference state, such as re-embedding a pgvector table. PostgreSQL, MySQL, MariaDB, SQLite and more. Open source, MIT, one binary.</p>
+        <div class="install">
+          <div class="cmd">
+            <pre id="install-cmd" data-copy-text="curl -fsSL https://stokaro.github.io/ptah/install.sh | sh"><span class="p">$</span> curl -fsSL https://stokaro.github.io/ptah/install.sh | sh</pre>
+            <button class="copy" type="button" data-copy="install-cmd" aria-label="Copy the install command">Copy</button>
+          </div>
+          <p class="meta"><span><span class="v" data-version>v0.3.0</span> · pre-GA · MIT</span><span>Windows: <code>irm https://stokaro.github.io/ptah/install.ps1 | iex</code></span></p>
+        </div>
+        <div class="actions">
+          <a class="btn" href="https://docs.ptah.run/edge/start/quick-start/">Get started</a>
+          <a class="btn btn-ghost" href="https://github.com/stokaro/ptah">View on GitHub</a>
+        </div>
+      </div>
+
+      <div class="hero-demo">
+        <div class="term">
+          <div class="term-bar" aria-hidden="true"><span>sh</span><span>ptah-quick-start</span></div>
+          <pre><span class="p">$</span> ptah schema apply --schema-file schema.sql \
+    --db-url sqlite://app.db --dry-run
+<span class="m">Planned schema changes:</span>
+<span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span>
+
+<span class="p">$</span> ptah schema apply --schema-file schema.sql \
+    --db-url sqlite://app.db --auto-approve
+<span class="m">Auto-approval enabled; applying schema changes.</span>
+Schema apply completed successfully.
+
+<span class="p">$</span> ptah schema drift --schema-file schema.sql \
+    --db-url sqlite://app.db
+No schema drift detected.
+<span class="p">$</span> echo $?
+0</pre>
+        </div>
+        <p class="caption">Know exactly what your migration will do before it touches the database. The plan is the review surface; drift is the proof.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section week" aria-labelledby="week-title">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="week-title">Three things it does in a typical week.</h2>
+        <p>Real commands, real output. Exit codes are stable across all of them: 0 success, 1 a negative check result, 2 a usage or connection failure.</p>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <div class="card-head">
+            <div class="label">01 · Gate a pull request</div>
+            <h3>Fail CI when the schema drifted or a migration is unsafe.</h3>
+          </div>
+          <div class="term"><pre><span class="p">$</span> ptah migrations lint --dir ./migrations \
+    --dialect postgres
+No lint findings.
+<span class="p">$</span> ptah schema drift \
+    --schema-file schema.sql \
+    --db-url "$PTAH_DATABASE_URL"
+No schema drift detected.</pre></div>
+          <p>Or <a href="https://github.com/stokaro/ptah-action"><code>uses: stokaro/ptah-action@v1</code></a>, which posts the plan to the pull request and writes a destructive-change check run.</p>
+        </article>
+        <article class="card">
+          <div class="card-head">
+            <div class="label">02 · Seal a migration directory</div>
+            <h3>Refuse a migration file whose bytes changed after review.</h3>
+          </div>
+          <div class="term"><pre><span class="p">$</span> ptah migrations hash --dir ./migrations
+Wrote ./migrations/ptah.sum
+2 migration file(s) hashed
+<span class="p">$</span> ptah migrations status \
+    --db-url sqlite://app.db \
+    --migrations-dir ./migrations
+Current Version: 1700000000
+Applied Migrations: 1
+Pending Migrations: 0</pre></div>
+          <p><code>ptah.sum</code> records a checksum per file; later commands verify it before running anything.</p>
+        </article>
+        <article class="card">
+          <div class="card-head">
+            <div class="label">03 · Change an embedding model</div>
+            <h3>Re-embed a pgvector table and keep the old vectors until verified.</h3>
+          </div>
+          <div class="term"><pre>ptah inference plan
+ptah inference prepare
+ptah inference backfill
+ptah inference catchup
+ptah inference index
+ptah inference verify
+ptah inference cutover
+<span class="m">ptah inference rollback · retire</span></pre></div>
+          <p>Ptah builds the new generation beside the active one, calls your OpenAI-compatible embeddings endpoint, verifies, and switches queries over when you say so. It never produces a vector itself.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section sources" aria-labelledby="sources-title">
+    <div class="wrap">
+      <div class="sources-copy">
+        <h2 id="sources-title">Works with the schemas you already have.</h2>
+        <p>Every source parses into the same internal schema before planning. Sources repeat and mix freely; the merged result is the desired schema. No proprietary format is required.</p>
+        <dl class="flags">
+          <dt>--schema-file</dt><dd>SQL, YAML, HCL, DBML</dd>
+          <dt>--root-dir</dt><dd>Annotated Go structs</dd>
+          <dt>--schema-cmd</dt><dd>Any program that emits SQL, HCL or YAML — an ORM exporter</dd>
+          <dt>--db-url</dt><dd>A live database, introspected into source</dd>
+          <dt>--dir</dt><dd>An existing migration directory</dd>
+        </dl>
+      </div>
+      <pre class="diagram" role="img" aria-label="Schema files, Go models or a live database flow into ptah, which validates, plans, lints, applies and checks drift against the database.">schema.sql · models/*.go · live db
+        │
+        ▼
+      <b>ptah</b>  validate → plan → lint → apply → drift
+        │
+        ▼
+     database</pre>
+    </div>
+  </section>
+
+  <section class="section facts" aria-label="Databases, tooling and Atlas compatibility">
+    <div class="wrap">
+      <div class="fact">
+        <div class="label">Databases</div>
+        <p>PostgreSQL, MySQL, MariaDB, SQLite, SQL Server, CockroachDB, YugabyteDB, ClickHouse, Oracle, Spanner. Coverage varies by engine. <a href="https://docs.ptah.run/edge/databases/support-matrix/">Support matrix →</a></p>
+      </div>
+      <div class="fact">
+        <div class="label">Tooling</div>
+        <p><code class="product">ptah</code> is the product. <code>ptah-ls</code> gives editor support for Go annotations. <a href="https://github.com/stokaro/ptah-action">GitHub Action</a>, Go packages at <a href="https://pkg.go.dev/go.5x5.cz/ptah"><code>go.5x5.cz/ptah</code></a>.</p>
+      </div>
+      <div class="fact">
+        <div class="label">Coming from Atlas</div>
+        <p><code>ptah-compat</code> keeps Atlas-shaped commands while executing Ptah behavior. Independent clean-room implementation, not affiliated with Ariga. <a href="https://docs.ptah.run/edge/atlas/overview/">Atlas compatibility →</a></p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-brand"><img src="/assets/logo.svg" alt="" width="18" height="18"><span>ptah.run · <span class="v" data-version>v0.3.0</span> · pre-GA · MIT</span></div>
+    <ul class="foot-links">
+      <li><a href="https://github.com/stokaro/ptah">GitHub</a></li>
+      <li><a href="https://github.com/stokaro/ptah/issues">Issues</a></li>
+      <li><a href="https://github.com/stokaro/ptah/releases">Changelog</a></li>
+      <li><a href="https://github.com/stokaro/ptah/blob/master/LICENSE">License</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

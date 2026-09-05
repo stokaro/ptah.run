@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install Ptah</title>
+<meta name="description" content="Install ptah, ptah-compat and ptah-ls with the verified release installer on Linux, macOS or Windows, or use Homebrew, go install, or a source checkout.">
+<link rel="canonical" href="https://ptah.run/install/">
+<meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161311" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ptah">
+<meta property="og:title" content="Install Ptah">
+<meta property="og:description" content="Install ptah, ptah-compat and ptah-ls with the verified release installer on Linux, macOS or Windows, or use Homebrew, go install, or a source checkout.">
+<meta property="og:url" content="https://ptah.run/install/">
+<meta property="og:image" content="https://ptah.run/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Ptah ASCII wordmark above the line: Database migrations without surprises.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="/assets/fonts/instrument-sans-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script>(function(){var d=document.documentElement;try{var t=localStorage.getItem("ptah-theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.setAttribute("data-theme",t)}catch(e){}d.classList.add("js")})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/assets/logo.svg" alt="" width="22" height="22">Ptah</a>
+    <nav class="nav" aria-label="Site">
+      <ul class="nav-links" id="nav-links">
+        <li><a href="https://docs.ptah.run/">Docs</a></li>
+        <li><a href="/install/" aria-current="page">Install</a></li>
+        <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
+      </ul>
+      <button class="icon-btn theme-btn" type="button" aria-label="Switch theme">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/></svg>
+      </button>
+      <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+        <svg class="icon-menu" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg class="icon-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="page">
+  <div class="wrap">
+
+    <div class="page-head">
+      <h1>Install Ptah</h1>
+      <p class="lede">The release installer downloads the archive for your OS and architecture, verifies its SHA-256 checksum, and installs <code>ptah</code>, <code>ptah-compat</code> and <code>ptah-ls</code> without administrator rights.</p>
+      <p class="meta">Current release <span class="v" data-version>v0.3.0</span> · pre-GA: the native command tree and public Go API can still change · MIT</p>
+    </div>
+
+    <div class="tabs">
+      <div class="tablist" role="tablist" aria-label="Installation method">
+        <button class="tab" role="tab" id="tab-macos" data-tab="macos" aria-controls="panel-macos" aria-selected="true">macOS</button>
+        <button class="tab" role="tab" id="tab-linux" data-tab="linux" aria-controls="panel-linux" aria-selected="false" tabindex="-1">Linux</button>
+        <button class="tab" role="tab" id="tab-windows" data-tab="windows" aria-controls="panel-windows" aria-selected="false" tabindex="-1">Windows</button>
+        <button class="tab" role="tab" id="tab-brew" data-tab="brew" aria-controls="panel-brew" aria-selected="false" tabindex="-1">Homebrew</button>
+        <button class="tab" role="tab" id="tab-go" data-tab="go" aria-controls="panel-go" aria-selected="false" tabindex="-1">Go</button>
+        <button class="tab" role="tab" id="tab-source" data-tab="source" aria-controls="panel-source" aria-selected="false" tabindex="-1">Source</button>
+        <span class="detected" aria-live="polite"></span>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-macos" aria-labelledby="tab-macos">
+        <div class="panel-title">macOS</div>
+        <div class="cmd">
+          <pre id="cmd-macos" data-copy-text="curl -fsSL https://stokaro.github.io/ptah/install.sh | sh"><span class="p">$</span> curl -fsSL https://stokaro.github.io/ptah/install.sh | sh</pre>
+          <button class="copy" type="button" data-copy="cmd-macos" aria-label="Copy the macOS install command">Copy</button>
+        </div>
+        <p>Installs to <code>~/.local/bin</code>. Needs a terminal, <code>tar</code>, and <code>curl</code>. Homebrew works too: <code>brew install stokaro/ptah/ptah</code>. Fetch archives with <code>curl</code> or <code>gh</code>, not a browser — browser downloads carry a quarantine attribute that Gatekeeper rejects on the ad-hoc-signed binaries.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-linux" aria-labelledby="tab-linux">
+        <div class="panel-title">Linux</div>
+        <div class="cmd">
+          <pre id="cmd-linux" data-copy-text="curl -fsSL https://stokaro.github.io/ptah/install.sh | sh"><span class="p">$</span> curl -fsSL https://stokaro.github.io/ptah/install.sh | sh
+<span class="m"># without curl</span>
+<span class="p">$</span> wget -qO- https://stokaro.github.io/ptah/install.sh | sh</pre>
+          <button class="copy" type="button" data-copy="cmd-linux" aria-label="Copy the Linux install command">Copy</button>
+        </div>
+        <p>Installs to <code>~/.local/bin</code>. Archives: <code>ptah_<span data-version-bare>0.3.0</span>_linux_amd64.tar.gz</code>, <code>ptah_<span data-version-bare>0.3.0</span>_linux_arm64.tar.gz</code>.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-windows" aria-labelledby="tab-windows">
+        <div class="panel-title">Windows</div>
+        <div class="cmd">
+          <pre id="cmd-windows" data-copy-text="irm https://stokaro.github.io/ptah/install.ps1 | iex"><span class="p">PS&gt;</span> irm https://stokaro.github.io/ptah/install.ps1 | iex</pre>
+          <button class="copy" type="button" data-copy="cmd-windows" aria-label="Copy the Windows install command">Copy</button>
+        </div>
+        <p>PowerShell 5.1 or later. Installs to <code>%LOCALAPPDATA%\Ptah\bin</code> and updates the user <code>Path</code> unless disabled. Pin a version with <code>$env:PTAH_INSTALL_VERSION = '<span data-version>v0.3.0</span>'</code>.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-brew" aria-labelledby="tab-brew">
+        <div class="panel-title">Homebrew</div>
+        <div class="cmd">
+          <pre id="cmd-brew" data-copy-text="brew install stokaro/ptah/ptah"><span class="p">$</span> brew install stokaro/ptah/ptah
+<span class="m"># development branch, builds from source</span>
+<span class="p">$</span> brew install --HEAD stokaro/ptah/ptah-edge</pre>
+          <button class="copy" type="button" data-copy="cmd-brew" aria-label="Copy the Homebrew install command">Copy</button>
+        </div>
+        <p>macOS or Linux. Both formulas provide binaries with the same names; remove one before switching to the other.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-go" aria-labelledby="tab-go">
+        <div class="panel-title">Go</div>
+        <div class="cmd">
+          <pre id="cmd-go"><span class="p">$</span> go install go.5x5.cz/ptah/cmd/ptah@<span data-version>v0.3.0</span>
+<span class="p">$</span> go install go.5x5.cz/ptah/cmd/ptah-compat@<span data-version>v0.3.0</span>
+<span class="p">$</span> go install go.5x5.cz/ptah/cmd/ptah-ls@<span data-version>v0.3.0</span></pre>
+        </div>
+        <p>Binaries land in <code>GOBIN</code>, or <code>$(go env GOPATH)/bin</code> when unset. That directory is not automatically on <code>PATH</code>.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-source" aria-labelledby="tab-source">
+        <div class="panel-title">Source</div>
+        <div class="cmd">
+          <pre id="cmd-source"><span class="p">$</span> git clone https://github.com/stokaro/ptah.git
+<span class="p">$</span> cd ptah
+<span class="p">$</span> make build</pre>
+        </div>
+        <p><code>make build</code> writes <code>ptah</code>, <code>ptah-compat</code>, <code>ptah-ls</code> and the integration-test runner under <code>bin/</code>, using the toolchain declared in <code>go.mod</code>.</p>
+      </div>
+    </div>
+
+    <section class="block" aria-labelledby="expected-title">
+      <div class="label" id="expected-title">Expected output</div>
+      <pre class="code plain">ptah: sha256 verified against checksums.txt
+ptah: installed ptah, ptah-compat, ptah-ls in &lt;install directory&gt;
+Version: &lt;installed version&gt;</pre>
+      <p>The <code>Version:</code> line comes from the installed binary — the script runs it before reporting success. On Linux and macOS, if the destination is not on <code>PATH</code>, the installer prints <code>export PATH="$HOME/.local/bin:$PATH"</code>.</p>
+    </section>
+
+    <section class="block" aria-labelledby="verify-title">
+      <div class="label" id="verify-title">Verify</div>
+      <pre class="code"><span class="p">$</span> ptah version
+<span class="p">$</span> ptah-compat version
+<span class="p">$</span> ptah-ls --version</pre>
+      <p>Each prints a version, commit, build date, Go toolchain and platform. <code>ptah-compat</code> uses a <code>version</code> command rather than a <code>--version</code> flag.</p>
+    </section>
+
+    <section class="tips" aria-label="More options">
+      <div class="tip"><strong>Pin a release</strong><code>install.sh | sh -s -- --version <span data-version>v0.3.0</span></code></div>
+      <div class="tip"><strong>Verify the signature</strong><span><code>checksums.txt</code> is signed with Sigstore; verify with <code>cosign verify-blob</code> or pass <code>--verify-signature</code>.</span></div>
+      <div class="tip"><strong>Inspect before running</strong><code>curl -fsSL https://stokaro.github.io/ptah/install.sh -o install.sh &amp;&amp; less install.sh</code></div>
+    </section>
+
+    <div class="actions">
+      <a class="btn" href="https://docs.ptah.run/edge/start/quick-start/">Next: Quick start →</a>
+      <a class="btn btn-ghost" href="https://docs.ptah.run/edge/start/install-options/">Other installation methods</a>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-brand"><img src="/assets/logo.svg" alt="" width="18" height="18"><span>ptah.run · <span class="v" data-version>v0.3.0</span> · pre-GA · MIT</span></div>
+    <ul class="foot-links">
+      <li><a href="https://github.com/stokaro/ptah">GitHub</a></li>
+      <li><a href="https://github.com/stokaro/ptah/issues">Issues</a></li>
+      <li><a href="https://github.com/stokaro/ptah/releases">Changelog</a></li>
+      <li><a href="https://github.com/stokaro/ptah/blob/master/LICENSE">License</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

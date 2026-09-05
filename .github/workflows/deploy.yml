@@ -1,0 +1,64 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Every page references files that exist
+        run: |
+          set -euo pipefail
+          status=0
+          for page in index.html install/index.html 404.html; do
+            grep -oE '(href|src)="/[^"#?]+' "$page" | sed -E 's/^(href|src)="\///' | sort -u | while read -r path; do
+              # Directory links resolve to their index.html.
+              if [ -d "$path" ] && [ -f "$path/index.html" ]; then continue; fi
+              if [ ! -f "$path" ]; then
+                echo "::error file=$page::references /$path, which does not exist"
+                exit 1
+              fi
+            done || status=1
+          done
+          exit "$status"
+
+      - name: CNAME names the production domain
+        run: test "$(tr -d '[:space:]' < CNAME)" = "ptah.run"
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: .
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
