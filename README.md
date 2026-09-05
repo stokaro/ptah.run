@@ -61,6 +61,10 @@ and rewrites every element marked `data-version` or `data-version-bare`; when
 the request fails, the HTML value stands. Bump the HTML value when cutting a
 release so the page is right without JavaScript too.
 
+The ASCII wordmark in the hero and in `og.png` is the one the binaries print
+on their entry screen: copy it verbatim from `cmd/internal/banner/banner.go` in
+`stokaro/ptah` (the design handoff carried an older, narrower variant).
+
 Documentation links point at the `edge` build of the docs site
 (`https://docs.ptah.run/edge/...`), the same choice the Ptah README makes: it
 always exists and always documents the current command tree, and the docs site
