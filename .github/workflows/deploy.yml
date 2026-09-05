@@ -7,10 +7,12 @@ on:
   # value a visitor gets when the GitHub API is unreachable is recent.
   schedule:
     - cron: "17 */6 * * *"
-  # `gh api repos/stokaro/ptah.run/dispatches -f event_type=ptah-release`
-  # from a release pipeline redeploys right after a release.
+  # stokaro/ptah asks for a deploy at the two moments the pages depend on it:
+  # `ptah-release` when a release is published (the version stamp), and
+  # `installers-updated` when install.sh or install.ps1 change on master.
+  # By hand: `gh api repos/stokaro/ptah.run/dispatches -f event_type=ptah-release`.
   repository_dispatch:
-    types: [ptah-release]
+    types: [ptah-release, installers-updated]
   workflow_dispatch:
 
 permissions:

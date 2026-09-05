@@ -60,7 +60,8 @@ non-trivial and that the shell script parses, and uploads them with the pages.
 Nothing is committed here, so the site cannot serve a stale copy; a fetch that
 fails stops the deploy and the previous deployment stays live. Because the
 workflow also runs every six hours, a change on master reaches ptah.run within
-that window, or at once through a `ptah-release` dispatch.
+that window, or at once through the `installers-updated` dispatch that
+`stokaro/ptah` sends when either script changes on master.
 
 ## Content rules
 
@@ -77,8 +78,9 @@ the last release known when it was committed (`v0.3.0`). At deploy time the
 workflow asks the GitHub API for the latest `stokaro/ptah` release with the
 Actions token and writes it into every element marked `data-version` or
 `data-version-bare` (`scripts/stamp-version.mjs`); the workflow also runs on a
-schedule every six hours and on a `ptah-release` repository dispatch, so the
-served value stays recent. In the browser, `assets/site.js` asks the same API
+schedule every six hours and on the `ptah-release` and `installers-updated`
+repository dispatches that `stokaro/ptah` sends, so the served value stays
+recent. In the browser, `assets/site.js` asks the same API
 once per session and rewrites the elements again; when that request fails
 (offline, anonymous rate limit), the deploy-time value stands. Bump the value
 in git occasionally so a local preview is not far off.
