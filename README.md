@@ -86,6 +86,26 @@ into a terminal; the ASCII wordmark is set in the system monospace stack
 one-pixel rules, no shadows; the primary button is black, blue is reserved for
 links.
 
+## Go vanity import path
+
+Every page, the 404 page included, carries
+
+```html
+<meta name="go-import" content="ptah.run git https://github.com/stokaro/ptah">
+```
+
+so `go get ptah.run/...` resolves to the repository: the `go` tool fetches
+`https://ptah.run/<import path>?go-get=1`, reads the tag from whatever page
+comes back (GitHub Pages answers unknown paths with `404.html`, and `go`
+accepts the tag from a 404 response), then confirms it against
+`https://ptah.run/?go-get=1`. A `go-source` tag beside it gives pkg.go.dev
+links to files and lines on GitHub.
+
+The import path only works once `go.mod` in `stokaro/ptah` declares
+`module ptah.run` and a release carries that. Until then the pages keep
+`go.5x5.cz/ptah` in the install commands and the tooling note; switch those two
+spots when the module path changes.
+
 ## Domain
 
 DNS for `ptah.run` points at GitHub Pages:
