@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ptah.run/testkit</title>
+<meta name="robots" content="noindex">
+<!--
+  The one path on this domain that does NOT live in stokaro/ptah.
+
+  `go` resolves an import by fetching `https://<path>?go-get=1` and reading the
+  first field of the go-import tag as the REPOSITORY ROOT. The site-wide tag in
+  404.html says that root is `ptah.run`, which sends every subpath to
+  stokaro/ptah -- correct for `ptah.run/core/ast`, and wrong for a module that
+  is a separate repository.
+
+  So this page answers for `ptah.run/testkit` with its own root. Without it,
+  `go get ptah.run/testkit` fetches the Ptah repository and finds no such
+  package. Measured before it existed: the previous vanity host served no tag
+  for that subpath at all, and the proxy answered `unrecognized import path
+  ... no go-import meta tags`, so the module had never resolved under any name.
+-->
+<meta name="go-import" content="ptah.run/testkit git https://github.com/stokaro/ptah-testkit">
+<meta name="go-source" content="ptah.run/testkit https://github.com/stokaro/ptah-testkit https://github.com/stokaro/ptah-testkit/tree/master{/dir} https://github.com/stokaro/ptah-testkit/blob/master{/dir}/{file}#L{line}">
+<meta http-equiv="refresh" content="0; url=https://pkg.go.dev/ptah.run/testkit">
+<link rel="canonical" href="https://pkg.go.dev/ptah.run/testkit">
+</head>
+<body>
+<p><a href="https://pkg.go.dev/ptah.run/testkit">ptah.run/testkit</a> — opt-in test helpers for projects embedding Ptah.</p>
+</body>
+</html>
