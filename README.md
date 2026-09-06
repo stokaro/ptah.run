@@ -119,10 +119,10 @@ accepts the tag from a 404 response), then confirms it against
 `https://ptah.run/?go-get=1`. A `go-source` tag beside it gives pkg.go.dev
 links to files and lines on GitHub.
 
-The import path only works once `go.mod` in `stokaro/ptah` declares
-`module ptah.run` and a release carries that. Until then the pages keep
-`go.5x5.cz/ptah` in the install commands and the tooling note; switch those two
-spots when the module path changes.
+Both halves of that are in place: `go.mod` in `stokaro/ptah` declares
+`module ptah.run`, and v0.4.0 is the first release carrying it. The tooling note
+on the page names `ptah.run` accordingly. The install commands never needed the
+switch -- they fetch a script over HTTPS rather than resolving a module path.
 
 ## Domain
 
