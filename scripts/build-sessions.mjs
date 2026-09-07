@@ -73,32 +73,37 @@ const controls = `        <span class="demo-controls" data-demo-controls hidden>
           </button>
         </span>`;
 
-function section(key) {
-  const s = SESSIONS.scenarios[key];
-  const pinned = SESSIONS.pinned.includes(key);
-  return `    <section class="session" id="${key}" aria-labelledby="${key}-title">
-      <div class="session-head">
-        <h2 id="${key}-title">${esc(s.label)}</h2>
-        ${pinned ? '<span class="session-tag">Always on the home page</span>' : ""}
-      </div>
-      <p class="session-note">${esc(s.caption)}</p>
-
-      <div class="term demo" data-demo data-demo-static data-demo-scenario="${key}">
-        <div class="term-bar">
-          <span class="demo-where">${esc(s.where)}</span>
-          <span class="demo-sync" data-demo-sync hidden></span>
-${controls}
-        </div>
-        <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
-        <pre class="demo-transcript" data-demo-transcript>${transcript(s.script)}</pre>
-        <div class="demo-progress" data-demo-progress hidden aria-hidden="true"><span></span></div>
-      </div>
-    </section>`;
+// What the tile says about a session before you open it: the first command it
+// runs, and how much there is. Both are read off the script rather than typed
+// out beside it, so neither can go stale.
+function preview(script) {
+  const cmd = script.find(([kind]) => kind === "cmd");
+  return cmd ? cmd[1].replace(/\s*\\$/, "") : "";
 }
 
-const index = SESSIONS.order
-  .map((key) => `      <li><a href="#${key}">${esc(SESSIONS.scenarios[key].label)}</a></li>`)
-  .join("\n");
+function counts(script) {
+  const commands = script.filter(([kind]) => kind === "cmd").length;
+  const lines = script.filter(([kind]) => kind !== "wait" && kind !== "sync").length;
+  return `${commands} command${commands === 1 ? "" : "s"} · ${lines} lines`;
+}
+
+function tile(key) {
+  const s = SESSIONS.scenarios[key];
+  const pinned = SESSIONS.pinned.includes(key);
+  return `        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="${key}">
+            <span class="tile-head">
+              <span class="tile-name">${esc(s.label)}</span>${
+                pinned ? '<span class="tile-tag">Home page</span>' : ""
+              }
+            </span>
+            <span class="tile-note">${esc(s.caption)}</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ${esc(preview(s.script))}</span>
+            <span class="tile-meta">${counts(s.script)}</span>
+          </button>
+          <pre class="tile-transcript" aria-label="${esc(s.label)} transcript">${transcript(s.script)}</pre>
+        </li>`;
+}
 
 const page = `<!doctype html>
 <html lang="en">
@@ -159,17 +164,13 @@ const page = `<!doctype html>
 
     <div class="page-head">
       <h1>Sessions</h1>
-      <p class="lede">${SESSIONS.order.length} recorded sessions, printed in full. Every command and every line of output was captured by running Ptah; nothing here is executed and nothing is invented. Read them, or press Play on any one to watch it typed.</p>
+      <p class="lede">${SESSIONS.order.length} recorded sessions. Every command and every line of output was captured by running Ptah; nothing here is executed and nothing is invented. Open one to read the whole transcript at once, or press Play to watch it typed.</p>
       <p class="meta"><span>Two of them are always on the home page; the rest take turns there, two per visit.</span></p>
     </div>
 
-    <nav class="session-index" aria-label="Sessions">
-      <ul>
-${index}
-      </ul>
-    </nav>
-
-${SESSIONS.order.map(section).join("\n\n")}
+    <ul class="tiles">
+${SESSIONS.order.map(tile).join("\n")}
+    </ul>
 
     <div class="actions">
       <a class="btn" href="https://docs.ptah.run/edge/start/quick-start/">Next: Quick start →</a>
@@ -179,7 +180,23 @@ ${SESSIONS.order.map(section).join("\n\n")}
   </div>
 </main>
 
-<dialog class="demo-modal" data-demo-modal aria-label="Ptah session, expanded"></dialog>
+<div class="term demo" data-demo data-demo-scenario="${SESSIONS.pinned[0]}" hidden>
+  <div class="term-bar">
+    <span class="demo-where">${esc(SESSIONS.scenarios[SESSIONS.pinned[0]].where)}</span>
+    <span class="demo-sync" data-demo-sync hidden></span>
+${controls}
+  </div>
+  <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
+  <pre class="demo-transcript" data-demo-transcript></pre>
+  <div class="demo-progress" data-demo-progress hidden aria-hidden="true"><span></span></div>
+</div>
+
+<dialog class="demo-modal" data-demo-modal aria-labelledby="session-title">
+  <div class="demo-modal-head">
+    <h2 id="session-title" data-demo-title></h2>
+    <p data-demo-caption></p>
+  </div>
+</dialog>
 
 <footer class="site-footer">
   <div class="wrap">

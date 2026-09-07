@@ -102,12 +102,21 @@ the rest on each load, so a second visit has something new without the others
 hiding behind a "more examples" link. The picker markup carries two empty slots
 that JavaScript labels.
 
-`/sessions/` is the whole set, printed. Each session is a heading, a sentence,
-and its transcript in full, because a reader who came to read should not have to
-wait for a typewriter; the player is offered on every block rather than imposed
-on the page, and starting one stops whichever was playing, since two typewriters
-in one column is two things to read and neither gets read. The page and the home
-page's transcript are both generated:
+`/sessions/` is the whole set as a grid. A tile carries the session's name, one
+sentence, the first command it runs and how much there is; pressing one opens the
+overlay, which grows out of the tile it came from and shrinks back into it. The
+overlay opens settled -- the whole transcript at once, because a reader who came
+to read should not have to wait for a typewriter -- with Play beside it for one
+who would rather watch.
+
+Twenty-four transcripts stacked down a column was the first shape and the wrong
+one: nobody reaches the bottom of a fifteen-thousand-pixel page. The transcripts
+are still in the markup behind each tile and are what the page is without
+JavaScript, where the tiles do nothing and are hidden. With it they are
+`display: none`, because twenty-four transcripts in the tab order would be
+twenty-four detours around the thing the tile is for.
+
+The page and the home page's transcript are both generated:
 
     node scripts/build-sessions.mjs           write them
     node scripts/build-sessions.mjs --check   fail when they are out of date

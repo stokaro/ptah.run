@@ -406,7 +406,25 @@
     ["out", "3 source rows, 3 target rows"],
     ["new", "every deterministic layer passed"],
     ["sync", "verified"],
-    ["note", "# Queries still read the old vectors. Cutover is its own approved step."]
+    ["note", "# Queries still read the old vectors. Cutover is its own step."],
+    ["cmd", "ptah inference cutover"],
+    ["mute", "plan 5bbecb32c113"],
+    ["err", "cutover refused:"],
+    ["err", "  - this policy requires an approval and none was given"],
+    ["err", "error: cutover refused"],
+    ["sync", "needs approval"],
+    ["note", "# Approve that plan by its digest, and only that one."],
+    ["cmd", "export PTAH_APPROVE=5bbecb32c113"],
+    ["cmd", "ptah inference cutover --approver 'quick-start check'"],
+    ["new", "queries now read generation b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866 (plan 5bbecb32c113)"],
+    ["mute", "  - this is the first generation over this target, so there is no previous one to keep current and nothing to roll back to"],
+    ["sync", "cut over"],
+    ["note", "# The pointer the queries follow now names it."],
+    ["cmd", "psql -c 'SELECT target_table, active_generation FROM ptah_embedding_pointer;'"],
+    ["mute", " target_table |                        active_generation"],
+    ["mute", "--------------+------------------------------------------------------------------"],
+    ["new", " docs         | b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866"],
+    ["mute", "(1 row)"]
   ];
 
   // A schema published as an immutable artifact, the way an image is.
@@ -665,9 +683,9 @@
       label: "Migrate embeddings",
       where: "sh · ptah-inference",
       caption:
-        "A new embedding model is built and checked beside the one being " +
-        "served. Queries keep reading the old vectors until an approved " +
-        "cutover moves them."
+        "A new embedding model built and checked beside the one being served, " +
+        "then a cutover that refuses to run without an approval naming that " +
+        "exact plan."
     },
     guard: {
       script: GUARD,

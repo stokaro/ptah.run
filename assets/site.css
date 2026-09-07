@@ -656,75 +656,137 @@ button {
   outline-offset: 3px;
 }
 
-/* The sessions page. Every session is printed rather than played, because a
- * reader who came to read should not have to wait for a typewriter; the player
- * is offered on each one rather than imposed on all of them. */
-.session-index {
-  margin-top: 26px;
-  padding: 14px 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-.session-index ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 20px;
+/* The sessions page. Twenty-four transcripts stacked down a column was a page
+ * nobody reached the bottom of; a grid is a thing you scan. A tile says what
+ * the session is and what it starts with, and opening one puts the whole
+ * transcript in front of the reader at once -- readable immediately, playable
+ * if they would rather watch. */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
-.session-index a {
-  font: 500 13px var(--sans);
-  color: var(--mute);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-}
-.session-index a:hover {
-  color: var(--fg);
-  border-bottom-color: var(--line);
-}
-.session {
-  margin-top: 42px;
-  /* The anchor lands under the sticky header without a jump. */
-  scroll-margin-top: 76px;
-}
-.session-head {
+.tile-slot {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px 12px;
+  min-width: 0;
 }
-.session h2 {
-  font: 500 22px/1.25 var(--sans);
-  letter-spacing: -0.01em;
-}
-.session-tag {
-  padding: 1px 7px;
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 15px 13px;
   border: 1px solid var(--line);
   border-radius: 2px;
-  font: 500 11.5px var(--sans);
+  background: none;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.tile:hover {
+  border-color: var(--fg2);
+}
+.tile:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+.tile-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tile-name {
+  font: 500 15px/1.3 var(--sans);
+  color: var(--fg);
+}
+.tile-tag {
+  flex: none;
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font: 500 11px var(--sans);
   color: var(--mute);
   white-space: nowrap;
 }
-.session-note {
-  margin: 8px 0 14px;
-  font: 15px/1.55 var(--sans);
+.tile-note {
+  font: 13.5px/1.5 var(--sans);
   color: var(--fg2);
   text-wrap: pretty;
-  max-width: 62ch;
 }
-/* A printed session is a block to read, not a page to scroll past: twenty-four
- * of them at full height would bury the last one. Capped and scrollable, with
- * the player and the expanded view free to be as tall as they need. */
-.session .demo-transcript {
-  max-height: 420px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--termline) transparent;
+/* The first command, so a tile says what the session does in the language the
+ * session is written in. One line, clipped: it is a label, not the session. */
+.tile-cmd {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--line2);
+  font: 12px var(--mono);
+  color: var(--mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.session .demo.is-open .demo-transcript {
-  max-height: min(72vh, 640px);
+.tile-prompt {
+  color: var(--acc);
+}
+.tile-meta {
+  font: 11.5px var(--sans);
+  color: var(--mute);
+}
+/* Without the script the tiles do nothing, so the transcripts they stand for
+ * are the page instead. With it, the overlay is where a session is read and
+ * twenty-four transcripts in the tab order would be twenty-four detours. */
+.tile-transcript {
+  margin-top: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--term);
+  color: var(--termfg);
+  font: 13px/1.55 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 2;
+}
+.tile-transcript .l {
+  display: block;
+  padding-inline-start: 2ch;
+  text-indent: -2ch;
+}
+.js .tile-transcript {
+  display: none;
+}
+html:not(.js) .tile {
+  display: none;
+}
+html:not(.js) .tile-slot {
+  display: block;
+}
+
+/* The overlay names what it is showing, above the frame rather than inside it:
+ * the terminal bar is the session's own chrome and has no room for a title. */
+.demo-modal-head {
+  margin-bottom: 12px;
+}
+.demo-modal-head h2 {
+  font: 500 19px/1.3 var(--sans);
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+.demo-modal-head p {
+  margin-top: 4px;
+  max-width: 70ch;
+  font: 14px/1.5 var(--sans);
+  color: var(--fg2);
+  text-wrap: pretty;
+}
+/* On the way out the page comes back before the frame has finished shrinking
+ * into the tile it came from, so the two read as one movement. */
+.demo-modal.is-leaving::backdrop {
+  opacity: 0;
 }
 
 .demo.is-live .demo-transcript {

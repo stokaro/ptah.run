@@ -289,6 +289,7 @@
     // slot with no scenario on it is not a button yet.
     var pickBtns;
     var caption = $("[data-demo-caption]");
+    var title = $("[data-demo-title]");
 
     var SCENARIOS = SESSIONS.scenarios;
 
@@ -715,6 +716,7 @@
       SCRIPT = scenario.script;
       where.textContent = scenario.where;
       if (caption) caption.textContent = scenario.caption;
+      if (title) title.textContent = scenario.label;
       for (var i = 0; i < pickBtns.length; i++) {
         pickBtns[i].setAttribute(
           "aria-pressed",
@@ -763,6 +765,11 @@
       });
     }
 
+    // On a grid page the player has no place of its own: it lives out of sight
+    // until a tile asks for it, and goes back out of sight when the overlay
+    // closes. On the home page it is the hero and is never hidden.
+    var hiddenAtHome = demo.hidden;
+
     // Expanding moves the terminal rather than copying it: one node, one
     // running session, so the script does not restart and the two copies
     // cannot disagree about where it is.
@@ -775,7 +782,7 @@
     // the move: measure where it was, let it land, then play the difference.
     var flight = null;
 
-    function fly(from) {
+    function fly(from, to, done) {
       // Drop the handlers before cancelling: `cancel` is delivered later, and a
       // late `land` would clear the flight that replaced it. An interrupted
       // flight leaves from wherever it had got to, because `from` was measured
@@ -786,25 +793,40 @@
         flight.cancel();
         flight = null;
       }
-      if (still.matches || !demo.animate || !from.width) return;
-      var to = demo.getBoundingClientRect();
-      if (!to.width) return;
-      var offset =
-        "translate(" +
-        (from.left - to.left) +
-        "px," +
-        (from.top - to.top) +
-        "px) scale(" +
-        from.width / to.width +
-        "," +
-        from.height / to.height +
-        ")";
+      if (still.matches || !demo.animate || !from.width || !to || !to.width) {
+        if (done) done();
+        return;
+      }
+      // The frame sits at `from` and has to read as arriving at `to`. Opening
+      // moves the node first and plays the difference backwards; closing plays
+      // it forwards and moves the node when it lands, because a frame inside a
+      // closed dialog has no box left to fly to.
+      var offset = function (a, b) {
+        return (
+          "translate(" +
+          (a.left - b.left) +
+          "px," +
+          (a.top - b.top) +
+          "px) scale(" +
+          a.width / b.width +
+          "," +
+          a.height / b.height +
+          ")"
+        );
+      };
+      var here = demo.getBoundingClientRect();
+      var frames = done
+        ? [
+            { transform: "none", transformOrigin: "0 0", opacity: 1 },
+            { transform: offset(to, here), transformOrigin: "0 0", opacity: 0.4 }
+          ]
+        : [
+            { transform: offset(from, here), transformOrigin: "0 0" },
+            { transform: "none", transformOrigin: "0 0" }
+          ];
       demo.classList.add("is-flying");
       flight = demo.animate(
-        [
-          { transform: offset, transformOrigin: "0 0" },
-          { transform: "none", transformOrigin: "0 0" }
-        ],
+        frames,
         // Long enough to read as one movement, and eased at both ends: a curve
         // that spends most of its distance in the first third arrives before
         // the eye has followed it, which reads as a jump with a tail.
@@ -813,40 +835,76 @@
       var land = function () {
         demo.classList.remove("is-flying");
         flight = null;
+        if (done) done();
       };
       flight.onfinish = land;
       flight.oncancel = land;
     }
 
-    function setOpen(open) {
-      // Read the box before anything moves; every later measurement is of the
-      // destination.
-      var from = demo.getBoundingClientRect();
+    // The tile a session was opened from, so closing goes back to it rather
+    // than nowhere. On the home page there is no tile and the hero is the
+    // anchor, which is why the two directions are not one code path: the hero's
+    // box is only knowable after the node has moved back into it, and a tile's
+    // box is knowable at any time.
+    var anchor = null;
+
+    function setOpen(open, from) {
       expandBtn.setAttribute("aria-expanded", open ? "true" : "false");
       expandBtn.setAttribute("aria-label", (open ? "Close" : "Expand") + " the demo");
       expandBtn.setAttribute("title", open ? "Close" : "Expand");
       demo.classList.toggle("is-open", open);
+
       if (open) {
+        anchor = from || null;
+        var origin = from || demo.getBoundingClientRect();
         modal.appendChild(demo);
         modal.showModal();
-      } else {
-        // Home first, then close: a closed dialog is `display: none`, and a
-        // frame inside one has no box left to fly back to.
+        screen.scrollTop = screen.scrollHeight;
+        return fly(origin, demo.getBoundingClientRect());
+      }
+
+      var goHome = function () {
+        modal.classList.remove("is-leaving");
         homeParent.insertBefore(demo, home);
+        demo.hidden = hiddenAtHome;
         if (modal.open) modal.close();
+        screen.scrollTop = screen.scrollHeight;
         // Back in the hero it is ambient again. A run that ended under the
         // overlay's one-shot rule starts over; one still playing carries on.
         if (!playing && autoplays()) start();
+      };
+
+      // With a tile to return to, the frame shrinks back into it while the page
+      // comes out from under the dim; without one, the node goes home first and
+      // the difference is played from there.
+      if (anchor) {
+        var back = anchor;
+        anchor = null;
+        modal.classList.add("is-leaving");
+        return fly(demo.getBoundingClientRect(), back, goHome);
       }
-      // The height changed under a stream that may be mid-scroll.
-      screen.scrollTop = screen.scrollHeight;
-      fly(from);
+      var was = demo.getBoundingClientRect();
+      goHome();
+      fly(was, demo.getBoundingClientRect());
     }
 
     expandBtn.addEventListener("click", function () {
       enliven();
       setOpen(expandBtn.getAttribute("aria-expanded") !== "true");
     });
+
+    // On a page that is a grid rather than a hero, the tiles are the control:
+    // one player, opened onto whichever session was pressed, growing out of the
+    // tile that was pressed so the reader keeps hold of what they clicked.
+    var tiles = $$("[data-demo-tile]");
+    for (var t = 0; t < tiles.length; t++) {
+      tiles[t].addEventListener("click", function () {
+        demo.hidden = false;
+        choose(this.getAttribute("data-demo-scenario"));
+        enliven();
+        setOpen(true, this.getBoundingClientRect());
+      });
+    }
     // Escape closes the dialog itself, which would strip the frame of the box
     // the return flight is measured from, so it is refused and routed through
     // the same path the button takes.
