@@ -284,18 +284,16 @@
     // marks the added column, in the file and again in the database.
     var CHANGE = [
       ["sync", "no drift"],
-      ["note", "# Start from a schema the database already matches."],
-      ["cmd", "cat schema.sql"],
-      ["out", "CREATE TABLE users ("],
-      ["out", "    id         INTEGER PRIMARY KEY,"],
-      ["out", "    email      TEXT NOT NULL"],
-      ["out", ");"],
-      ["blank"],
-      ["note", "# Prove it. Drift compares the file with the live database."],
+      ["note", "# Ask the database what it has. This is Ptah reading, not a file."],
+      ["cmd", "ptah db read --db-url sqlite://app.db"],
+      ["sql", 'CREATE TABLE "users" ('],
+      ["sql", '  "id" INTEGER PRIMARY KEY,'],
+      ["sql", '  "email" TEXT NOT NULL'],
+      ["sql", ");"],
+      ["note", "# schema.sql says the same thing. Drift proves it."],
       ["cmd", "ptah schema drift --schema-file schema.sql \\"],
       ["cont", "    --db-url sqlite://app.db"],
       ["out", "No schema drift detected."],
-      ["blank"],
       ["note", "# Add a column by describing the result, not the change."],
       ["cmd", "cat > schema.sql <<'SQL'"],
       ["out", "CREATE TABLE users ("],
@@ -305,13 +303,11 @@
       ["out", ");"],
       ["out", "SQL"],
       ["sync", "drift"],
-      ["blank"],
       ["note", "# Ask what it would take to get there. A dry run executes nothing."],
       ["cmd", "ptah schema apply --schema-file schema.sql \\"],
       ["cont", "    --db-url sqlite://app.db --dry-run"],
       ["mute", "Planned schema changes:"],
       ["sql", 'ALTER TABLE "users" ADD COLUMN "created_at" TEXT;'],
-      ["blank"],
       ["note", "# Run the reviewed plan. --auto-approve suits a disposable file."],
       ["cmd", "ptah schema apply --schema-file schema.sql \\"],
       ["cont", "    --db-url sqlite://app.db --auto-approve"],
@@ -320,7 +316,6 @@
       ["mute", "Auto-approval enabled; applying schema changes."],
       ["wait", 400],
       ["out", "Schema apply completed successfully."],
-      ["blank"],
       ["note", "# Ask the database what it has now."],
       ["cmd", "ptah db read --db-url sqlite://app.db"],
       ["sql", 'CREATE TABLE "users" ('],
@@ -328,7 +323,6 @@
       ["sql", '  "email" TEXT NOT NULL,'],
       ["new", '  "created_at" TEXT'],
       ["sql", ");"],
-      ["blank"],
       ["note", "# The file and the database agree again."],
       ["cmd", "ptah schema drift --schema-file schema.sql \\"],
       ["cont", "    --db-url sqlite://app.db"],
@@ -346,7 +340,6 @@
       ["note", "# A migration somebody opened a pull request with."],
       ["cmd", "cat migrations/1700000100_drop_email.up.sql"],
       ["sql", 'ALTER TABLE "users" DROP COLUMN "email";'],
-      ["blank"],
       ["note", "# Check it before it reaches a database."],
       ["cmd", "ptah migrations lint --dir ./migrations \\"],
       ["cont", "    --dialect postgres"],
@@ -357,7 +350,6 @@
       ["out", "2 finding(s)."],
       ["mute", "warning: DS110P ran without the baseline schema it reads, so this analysis is thinner than the same directory would get against a dev database the run can read"],
       ["sync", "blocked"],
-      ["blank"],
       ["note", "# The exit code is what fails the build."],
       ["cmd", "echo $?"],
       ["out", "1"]
@@ -387,15 +379,33 @@
     // What each event is expected to cost. The typing jitter makes the real
     // figure vary by a few per cent, which is invisible on a two-pixel rule and
     // much cheaper than measuring a duration nobody knows before it runs.
-    // How long to sit on a finished command before announcing the next one,
-    // and how long to leave a note standing once it is typed.
-    var DWELL = 1700;
-    var READ = 1300;
-    // The beat between pressing enter and the first line of output.
-    var ENTER = 800;
-    // Typing speed, as a factor on the per-character delays. The estimates in
-    // cost() carry it too, so the progress rule keeps up with the keyboard.
+    // Every beat is proportional to what the reader has just been given. A
+    // one-line answer needs a moment; the lint diagnostic is a paragraph and
+    // needs several. Fixed beats were the same length after both, which is why
+    // the long one read as too fast and the short one as a stall.
     var TYPE_SCALE = 1.2;
+
+    function typeTime(text) {
+      return 460 + text.length * 32 * TYPE_SCALE;
+    }
+
+    // Prose is read; a command is scanned for its flags. Both scale, at
+    // different rates, and both have a floor so a short line still lands.
+    function readTime(text, kind) {
+      if (kind === "note") return 900 + text.length * 30;
+      return 700 + text.length * 14;
+    }
+
+    // The beat after output, before the next step is announced. Capped, because
+    // past a few seconds a pause stops reading as deliberate.
+    function outputBeat(printed) {
+      return Math.min(4600, 1000 + printed * 11);
+    }
+
+    function isOutput(kind) {
+      return kind !== "wait" && kind !== "sync" && kind !== "blank" &&
+        kind !== "note" && kind !== "cmd" && kind !== "cont";
+    }
 
     // Whether the event at index i is a command line the next line continues.
     function continues(i) {
@@ -403,28 +413,44 @@
       return !!next && next[0] === "cont";
     }
 
-    function cost(event, i) {
-      var kind = event[0];
-      if (kind === "wait") return event[1];
-      if (kind === "cmd" || kind === "cont") {
-        return 460 + event[1].length * 32 * TYPE_SCALE + (continues(i) ? 0 : ENTER);
+    // The duration of every event, walked in order so the beats that depend on
+    // preceding output are computed exactly as the run will compute them. The
+    // progress rule reads this, so it cannot drift from the keyboard.
+    function plan(script) {
+      var out = [];
+      var printed = 0;
+      for (var i = 0; i < script.length; i++) {
+        var event = script[i];
+        var kind = event[0];
+        var ms;
+        if (kind === "wait") {
+          ms = event[1];
+        } else if (kind === "note") {
+          ms = outputBeat(printed) + 60 + typeTime(event[1]) + readTime(event[1], "note");
+          printed = 0;
+        } else if (kind === "cmd" || kind === "cont") {
+          ms = typeTime(event[1]);
+          if (!(script[i + 1] && script[i + 1][0] === "cont")) {
+            ms += readTime(event[1], "cmd");
+            printed = 0;
+          }
+        } else if (kind === "blank") {
+          ms = 60;
+        } else if (kind === "sync") {
+          ms = 120;
+        } else {
+          ms = 70;
+          printed += event[1].length;
+        }
+        out.push(ms);
       }
-      // A note is the dwell that follows the last output plus the time it
-      // takes to type itself.
-      if (kind === "note") return DWELL + 380 + event[1].length * 26 * TYPE_SCALE + READ;
-      if (kind === "blank") return 60;
-      if (kind === "sync") return 120;
-      return 70;
-    }
-
-    function total(script) {
-      var sum = 0;
-      for (var i = 0; i < script.length; i++) sum += cost(script[i], i + 1);
-      return sum;
+      return out;
     }
 
     var elapsed = 0;
     var duration = 0;
+    var timings = [];
+    var printed = 0;
 
     // Set where the rule is going and how long it has to get there, so the
     // browser animates between events and the script never has to tick.
@@ -470,18 +496,17 @@
         html += head + (cls ? '<span class="' + cls + '">' + body + "</span>" : body);
       } else if (idle || paused) {
         // A shell that is not being typed at still shows a caret, and the
-        // blink is how a reader tells waiting from finished. Without this the
-        // caret vanished for the whole beat between one command and the next
-        // note, which is the longest and most deliberate silence in the run.
+        // blink is how a reader tells waiting from finished.
         //
-        // On its own line rather than at the end of the last one: appended to
-        // output it is a block among words, in the place the eye has just
-        // left; on a line of its own it is a shell waiting.
+        // At the end of the last line, not on a new one: the pause belongs
+        // BEFORE the line break. You finish a line, the caret sits where you
+        // stopped while you read it, and only then does the session move on.
+        // Breaking first and waiting after puts the beat in the wrong place --
+        // the reader is looking at an empty row while the thing they were
+        // meant to read has already scrolled up a line.
         //
         // `idle` is set only for the beats that are waits. Setting it for the
-        // gaps between output lines would add and remove a line every 70ms and
-        // shake the whole frame.
-        if (html) html += "\n";
+        // gaps between output lines would add and remove a caret every 70ms.
         html += CURSOR;
       }
       // Whether to follow is decided before the write, because writing is what
@@ -517,6 +542,7 @@
     // runs so that whatever paints next paints without it.
     function hold(ms, fn) {
       idle = true;
+      printed = 0;
       paint();
       after(ms, function () {
         idle = false;
@@ -532,13 +558,20 @@
           // A note is finished being typed but not finished being read: the
           // last words land at the same moment the command would start, and
           // the eye cannot be in two places.
-          if (kind === "note") return hold(READ, step);
+          if (kind === "note") return hold(readTime(text, "note"), step);
           // A command that continues on the next line has not been entered
           // yet, so the beat belongs after its last line rather than inside
           // it.
           if (continues(at)) return after(140, step);
-          hold(ENTER, step);
+          hold(readTime(text, "cmd"), step);
         });
+      }
+      // The blank row that separates blocks belongs to the note, and it
+      // arrives when the note does. Emitting it earlier would end the previous
+      // beat on an empty line, which is exactly the line break the beat is
+      // supposed to come before.
+      if (n === 0 && kind === "note" && lines.length && lines[lines.length - 1] !== "") {
+        lines.push("");
       }
       typing = { text: text.slice(0, n), kind: kind };
       paint();
@@ -573,16 +606,17 @@
       }
       at++;
       var kind = event[0];
-      advance(cost(event, at));
+      advance(timings[at - 1] || 0);
       if (kind === "wait") return hold(event[1], step);
       // A note introduces the next step, so the beat before it is the beat
       // after the last one finished: time to read what just happened before
       // being told what happens next.
       if (kind === "note") {
-        return hold(DWELL, function () {
+        return hold(outputBeat(printed), function () {
           type(kind, event[1], 0);
         });
       }
+      if (isOutput(kind)) printed += event[1].length;
       if (kind === "sync") {
         setSync(event[1]);
         return after(120, step);
@@ -627,7 +661,9 @@
       playing = true;
       paused = false;
       elapsed = 0;
-      duration = total(SCRIPT);
+      printed = 0;
+      timings = plan(SCRIPT);
+      duration = timings.reduce(function (a, b) { return a + b; }, 0);
       advance(0);
       demo.classList.add("is-playing");
       label();

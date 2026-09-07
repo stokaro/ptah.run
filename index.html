@@ -105,14 +105,14 @@
 
           <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
 
-          <pre class="demo-transcript" data-demo-transcript><span class="c"># Start from a schema the database already matches.</span>
-<span class="p">$</span> cat schema.sql
-CREATE TABLE users (
-    id         INTEGER PRIMARY KEY,
-    email      TEXT NOT NULL
-);
+          <pre class="demo-transcript" data-demo-transcript><span class="c"># Ask the database what it has. This is Ptah reading, not a file.</span>
+<span class="p">$</span> ptah db read --db-url sqlite://app.db
+<span class="a">CREATE TABLE "users" (
+  "id" INTEGER PRIMARY KEY,
+  "email" TEXT NOT NULL
+);</span>
 
-<span class="c"># Prove it. Drift compares the file with the live database.</span>
+<span class="c"># schema.sql says the same thing. Drift proves it.</span>
 <span class="p">$</span> ptah schema drift --schema-file schema.sql \
     --db-url sqlite://app.db
 No schema drift detected.
