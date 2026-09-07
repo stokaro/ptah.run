@@ -1,4 +1,4 @@
-/* ptah.run — the demo sessions.
+/* ptah.run — the recorded runs.
  *
  * Every session here was captured by running Ptah, not written: the schema one
  * is the documented direct quick start, and the rest were run on Linux against
@@ -12,8 +12,8 @@
  * demo's own narration (typed too), and everything else arrives whole. `sync`
  * moves the pill in the terminal bar, `wait` is a beat, `blank` is a spacer.
  *
- * Loaded by the home page and by /sessions/, and read by
- * scripts/build-sessions.mjs, which writes the transcripts on that page. Both
+ * Loaded by the home page and by /in-practice/, and read by
+ * scripts/build-runs.mjs, which writes the transcripts on that page. Both
  * ends read this file so neither can drift from it.
  */
 (function (root) {
@@ -228,7 +228,7 @@
   // Downstream of the schema: the API layer that reads the same tables.
   var API = [
     ["sync", "graphql"],
-    ["note", "# The same declaration, exported for the layer above it."],
+    ["note", "# The tables already describe the API that reads them."],
     ["cmd", "ptah schema export --to graphql --root-dir ./entities \\"],
     ["cont", "    --out schema.graphql"],
     ["out", "Exported GraphQL schema to /tmp/app/schema.graphql"],
@@ -253,7 +253,7 @@
   // The same export, aimed at a diagram tool instead of an API.
   var DBML = [
     ["sync", "dbml"],
-    ["note", "# A diagramming tool wants DBML. One flag apart."],
+    ["note", "# A diagramming tool wants DBML instead. Change one flag."],
     ["cmd", "ptah schema export --to dbml --root-dir ./entities \\"],
     ["cont", "    --out schema.dbml"],
     ["out", "Exported DBML schema to /tmp/app/schema.dbml"],
@@ -322,7 +322,7 @@
     ["mute", "SOURCE       FEEDS               KIND"],
     ["new", "users.email  active_users.email  view"],
     ["out", "users.id     active_users.id     view"],
-    ["note", "# Static, and without --db-url it contacts nothing."]
+    ["note", "# The analysis is static: without --db-url it contacts nothing."]
   ];
 
   // The reviewed plan is the plan that runs, and the signature is what says so.
@@ -383,7 +383,7 @@
   // number are the ones that run produced.
   var INFERENCE = [
     ["sync", "1 generation"],
-    ["note", "# A new embedding model. Plan measures what it would take."],
+    ["note", "# A new embedding model. Plan first: what would this take?"],
     ["cmd", "ptah inference plan"],
     ["out", "source.estimated_rows = 3 (measured)"],
     ["out", "target.capability.vector_type = true (measured)"],
@@ -602,7 +602,7 @@
   // The live schema, read back in whichever shape the next tool wants.
   var INSPECT = [
     ["sync", "live"],
-    ["note", "# Read the database back as something else reads."],
+    ["note", "# Read the database back in a shape another tool reads."],
     ["cmd", "ptah schema inspect --db-url sqlite://app.db --format dbml"],
     ["sql", 'Table "users" {'],
     ["sql", '  "id" INTEGER [pk]'],
@@ -670,194 +670,197 @@
       label: "Change a schema",
       where: "sh · ptah-quick-start",
       caption:
-        "Know exactly what your migration will do before it touches the " +
-        "database. The plan is the review surface; drift is the proof."
+        "You write the schema you want. Ptah says what that will cost before " +
+        "anything runs, and drift says whether the database agrees " +
+        "afterwards."
     },
     inference: {
       script: INFERENCE,
       label: "Migrate embeddings",
       where: "sh · ptah-inference",
       caption:
-        "A new embedding model built and checked beside the one being served, " +
-        "then a cutover that refuses to run without an approval naming that " +
-        "exact plan."
+        "Build the new embeddings beside the ones being served, check them, " +
+        "then cut over. The cutover will not run without an approval naming " +
+        "that exact plan."
     },
     guard: {
       script: GUARD,
       label: "Stop an unsafe one",
       where: "sh · ptah-ci",
       caption:
-        "A migration that would delete data is refused before it runs, with " +
-        "the reason and the safer order. Exit code 1 fails the build."
+        "Someone opened a pull request that drops a column. This is the build " +
+        "failing, with the reason and the order that would have been safe."
     },
     entities: {
       script: ENTITIES,
       label: "Go structs to SQL",
       where: "sh · ptah-entities",
       caption:
-        "The schema is annotated Go, and one file renders for each engine " +
-        "in the terms that engine has: PostgreSQL gets a real enum type, " +
-        "SQLite the CHECK constraint that means the same thing."
+        "One Go struct, two engines. PostgreSQL gets a real enum type; SQLite " +
+        "gets the CHECK constraint that means the same thing."
     },
     versioned: {
       script: VERSIONED,
       label: "Write a migration",
       where: "sh · ptah-migrations",
       caption:
-        "The other route: versioned files with an up and a down, applied in " +
-        "order and recorded in a revision table."
+        "The other route. Ptah writes the up and the down, runs what is " +
+        "pending, and remembers what it ran."
     },
     adopt: {
       script: ADOPT,
       label: "Adopt a database",
       where: "sh · ptah-adopt",
       caption:
-        "A database that predates any declaration becomes annotated Go, " +
-        "constraint names and referential actions included."
+        "A database nobody ever declared. Point Ptah at it and the Go comes " +
+        "back, constraint names and referential actions included."
     },
     diagram: {
       script: DIAGRAM,
       label: "Draw the schema",
       where: "sh · ptah-viz",
       caption:
-        "The declaration is the diagram too, with the relationships read " +
-        "off the foreign keys rather than kept in a second file."
+        "The same annotations, drawn. The arrows come off the foreign keys, " +
+        "so the picture cannot disagree with the schema."
     },
     api: {
       script: API,
       label: "Export a GraphQL API",
       where: "sh · ptah-export",
       caption:
-        "One schema, and the layer above it. A foreign key becomes a " +
-        "relation field, so the two cannot drift apart."
+        "The tables already describe the API. A foreign key arrives as a " +
+        "relation field, and nothing has to be kept in step by hand."
     },
     dbml: {
       script: DBML,
       label: "Export to DBML",
       where: "sh · ptah-export",
       caption:
-        "The same source feeds a diagramming tool. HCL, OpenAPI, GraphQL, " +
-        "Protobuf, Markdown and DBML are all one flag."
+        "Your diagramming tool wants DBML. One flag away, and so are HCL, " +
+        "OpenAPI, GraphQL, Protobuf and Markdown."
     },
     capabilities: {
       script: CAPABILITIES,
       label: "Ask what it supports",
       where: "sh · ptah-capabilities",
       caption:
-        "What Ptah resolved for the server in front of it, and where the " +
-        "answer came from. Nothing about a target is guessed."
+        "Ask what Ptah worked out about the server it is talking to, and " +
+        "where each answer came from. Nothing about a target is guessed."
     },
     stats: {
       script: STATS,
-      label: "Chart schema shape",
+      label: "Feed a dashboard",
       where: "sh · ptah-stats",
       caption:
-        "Object counts in OpenMetrics, so schema shape can be charted by " +
-        "the pipeline that already charts everything else."
+        "Schema shape as numbers your metrics pipeline already knows how to " +
+        "chart. Counts of objects, never of rows."
     },
     lineage: {
       script: LINEAGE,
       label: "Trace a column",
       where: "sh · ptah-lineage",
       caption:
-        "Which view columns depend on which base columns, answered before " +
-        "the drop rather than after it."
+        "Before you drop a column, find out what reads it. The analysis is " +
+        "static: without a database URL it contacts nothing."
     },
     approve: {
       script: APPROVE,
       label: "Sign off a plan",
       where: "sh · ptah-release",
       caption:
-        "A plan saved, signed with an SSH key, and refused the moment one " +
-        "identifier in it changes. The reviewed plan is the plan that runs."
+        "Sign the plan with an SSH key. Change one identifier in it " +
+        "afterwards and it stops verifying, which is the case a review gate " +
+        "exists to catch."
     },
     compat: {
       script: COMPAT,
       label: "Run Atlas scripts",
       where: "sh · ptah-compat",
       caption:
-        "ptah-compat answers to the Atlas command surface and writes an " +
-        "Atlas migration directory, so an existing pipeline keeps working."
+        "An Atlas pipeline, untouched. Same flags, same directory, same " +
+        "atlas.sum, and the native surface still underneath."
     },
     ociPublish: {
       script: OCI_PUBLISH,
       label: "Publish the schema",
       where: "sh · ptah-oci",
       caption:
-        "A schema pushed as an OCI artifact, tagged with what was asked for " +
-        "and nothing else, and a moving tag that resolves to a fixed digest."
+        "Push the schema itself. Back comes a digest, the tags you asked for " +
+        "and no others, and a moving tag that resolves to one that cannot " +
+        "move."
     },
     ociInspect: {
       script: OCI_INSPECT,
       label: "Read a remote artifact",
       where: "sh · ptah-oci",
       caption:
-        "What an artifact is, read out of its manifest: the type, the format " +
-        "it was stored in, and the one file it carries. Nothing is downloaded."
+        "What is at that reference? The manifest answers in 843 bytes, and " +
+        "the payload stays where it is."
     },
     ociConsume: {
       script: OCI_CONSUME,
       label: "Build from a registry",
       where: "sh · ptah-oci",
       caption:
-        "A registry reference is a schema source like a file is, and the " +
-        "stored form is canonical HCL rather than one dialect's SQL."
+        "A registry reference works like a filename. Build straight from it, " +
+        "or pull the artifact down as the HCL it was stored as."
     },
     openapi: {
       script: OPENAPI,
-      label: "Derive an OpenAPI spec",
+      label: "Export an OpenAPI spec",
       where: "sh · ptah-export",
       caption:
-        "The HTTP payloads, derived from the tables that carry them. A NOT " +
-        "NULL column arrives as a required property."
+        "The HTTP payloads come off the tables that carry them. A NOT NULL " +
+        "column arrives as a required property, so the two cannot drift " +
+        "apart."
     },
     protobuf: {
       script: PROTOBUF,
-      label: "Emit a wire contract",
+      label: "Keep a wire contract",
       where: "sh · ptah-export",
       caption:
-        "Protobuf, with the compatibility history that makes field numbers " +
-        "a promise: a later export reuses them or refuses to write."
+        "Field numbers are a promise. Ptah keeps the history that makes it " +
+        "one: the next export reuses them, or refuses to write."
     },
     docs: {
       script: DOCS,
       label: "Write the reference",
       where: "sh · ptah-export",
       caption:
-        "The schema reference page nobody keeps up to date by hand, " +
-        "including the foreign keys, in Markdown or HTML."
+        "The schema reference nobody keeps up to date by hand, foreign keys " +
+        "included. Markdown here, HTML with one flag changed."
     },
     diff: {
       script: DIFF,
       label: "Diff two schemas",
       where: "sh · ptah-diff",
       caption:
-        "The SQL between two arbitrary schema states, neither of which has " +
-        "to be a live database."
+        "Two files, and the SQL between them. Neither one has to be a live " +
+        "database."
     },
     inspect: {
       script: INSPECT,
       label: "Read a database back",
       where: "sh · ptah-inspect",
       caption:
-        "The live schema in whichever shape the next tool wants it: DBML, " +
-        "JSON, HCL or SQL."
+        "Read the live schema back in whatever shape the next tool wants it: " +
+        "DBML, JSON, HCL or SQL."
     },
     seed: {
       script: SEED,
       label: "Seed an environment",
       where: "sh · ptah-seed",
       caption:
-        "Reference data scoped to an environment, recorded once applied so " +
-        "a second run is a no-op, and production behind an explicit flag."
+        "Dev data that only lands in dev. Run it twice and the second run " +
+        "does nothing; ask for prod and it says no."
     },
     rollback: {
       script: ROLLBACK,
       label: "Roll one back",
       where: "sh · ptah-migrations",
       caption:
-        "The down file every generated migration came with, and the dry run " +
-        "that says what it would undo before anything runs."
+        "Every migration came with a down file. This is what rolling back " +
+        "would undo, printed before anything undoes it."
     }
   };
 
@@ -872,16 +875,16 @@
     "inspect", "seed", "rollback"
   ];
 
-  var SESSIONS = {
+  var RUNS = {
     scenarios: SCENARIOS,
     // Fixed on the home page: the schema cycle and the inference cycle are
     // what Ptah is for. Everything else takes a turn in the two other slots.
     pinned: ["change", "inference"],
     rotating: ROTATING,
-    // Reading order for /sessions/, where nothing rotates and everything shows.
+    // Reading order for /in-practice/, where nothing rotates and everything shows.
     order: ["change", "inference"].concat(ROTATING)
   };
 
-  if (typeof module !== "undefined" && module.exports) module.exports = SESSIONS;
-  else root.PTAH_SESSIONS = SESSIONS;
+  if (typeof module !== "undefined" && module.exports) module.exports = RUNS;
+  else root.PTAH_RUNS = RUNS;
 })(typeof globalThis !== "undefined" ? globalThis : this);

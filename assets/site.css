@@ -563,7 +563,7 @@ button {
 }
 /* One line, one block, so a line too long for the frame wraps under its own
  * indent instead of restarting at column zero. The printed transcript is built
- * the same way, by scripts/build-sessions.mjs, so a session reads identically
+ * the same way, by scripts/build-runs.mjs, so a session reads identically
  * whether it was played or was already there. */
 .demo-screen .l,
 .demo-transcript .l,

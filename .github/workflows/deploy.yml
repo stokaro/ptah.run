@@ -34,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           status=0
-          for page in index.html install/index.html 404.html sessions/index.html; do
+          for page in index.html install/index.html 404.html in-practice/index.html; do
             grep -oE '(href|src)="/[^"#?]+' "$page" | sed -E 's/^(href|src)="\///' | sort -u | while read -r path; do
               # Directory links resolve to their index.html.
               if [ -d "$path" ] && [ -f "$path/index.html" ]; then continue; fi
@@ -51,19 +51,19 @@ jobs:
 
       - name: No github.io address on the pages
         run: |
-          if grep -n "github\.io" index.html install/index.html 404.html sessions/index.html; then
+          if grep -n "github\.io" index.html install/index.html 404.html in-practice/index.html; then
             echo "::error::the pages must use ptah.run addresses, never github.io"
             exit 1
           fi
 
-      - name: The sessions page and the home transcript match assets/demos.js
-        run: node scripts/build-sessions.mjs --check
+      - name: The in-practice page and the home transcript match assets/runs.js
+        run: node scripts/build-runs.mjs --check
 
       - name: The version stamp works on a copy of the pages
         run: |
           set -euo pipefail
           tmp="$(mktemp -d)"
-          cp -R index.html install 404.html sessions scripts "$tmp/"
+          cp -R index.html install 404.html in-practice scripts "$tmp/"
           (cd "$tmp" && node scripts/stamp-version.mjs v9.9.9 && node scripts/stamp-version.mjs v9.9.9 --check)
           ! (cd "$tmp" && node scripts/stamp-version.mjs v0.0.1 --check) || { echo "::error::--check did not detect a stale version"; exit 1; }
           rm -rf "$tmp"

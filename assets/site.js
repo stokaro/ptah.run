@@ -264,12 +264,12 @@
    * marked the same way, so the eye connects them across the apply that put
    * one there because of the other.
    */
-  var SESSIONS = window.PTAH_SESSIONS;
+  var RUNS = window.PTAH_RUNS;
   // A page may list many sessions; only one of them plays. Two typewriters in
   // one column is two things to read, and neither gets read.
   var stopOthers = null;
 
-  if (SESSIONS) $$("[data-demo]").forEach(setupDemo);
+  if (RUNS) $$("[data-demo]").forEach(setupDemo);
 
   function setupDemo(demo) {
     var screen = $("[data-demo-screen]", demo);
@@ -291,12 +291,12 @@
     var caption = $("[data-demo-caption]");
     var title = $("[data-demo-title]");
 
-    var SCENARIOS = SESSIONS.scenarios;
+    var SCENARIOS = RUNS.scenarios;
 
     // Two of the picker's four buttons are empty slots. Fill them before
     // anything queries the picker: a slot with no scenario is not a button.
     if (pick) {
-      var pool = SESSIONS.rotating.slice();
+      var pool = RUNS.rotating.slice();
       var slots = $$("[data-demo-slot]", pick);
       for (var i = 0; i < slots.length && pool.length; i++) {
         var key = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
@@ -311,7 +311,7 @@
 
     // The session this node starts on: what the markup names, or the first
     // pinned one, which is what the home page's transcript carries.
-    var first = demo.getAttribute("data-demo-scenario") || SESSIONS.pinned[0];
+    var first = demo.getAttribute("data-demo-scenario") || RUNS.pinned[0];
     var SCRIPT = SCENARIOS[first].script;
 
     var CLASS = { mute: "m", sql: "a", new: "n", err: "e", note: "c" };
@@ -435,7 +435,7 @@
     // apart, or the rule that underlines them. Wrapping one turns a table into
     // rubble, which is what a phone did to `oci inspect`, so these scroll
     // instead while the prose around them keeps wrapping. The same two tests
-    // are in scripts/build-sessions.mjs; when one changes, change the other.
+    // are in scripts/build-runs.mjs; when one changes, change the other.
     var COLUMNS = /[^\s] {2,}\S/;
     var TABLE_RULE = /^[-+=|\s]{8,}$/;
 

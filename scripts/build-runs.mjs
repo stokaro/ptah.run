@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-/* Write sessions/index.html from assets/demos.js.
+/* Write in-practice/index.html from assets/runs.js.
  *
  * The page prints every session as a transcript, which is what a reader
  * without JavaScript gets and what a reader who does not want to wait for a
  * typewriter reads. The player takes over one block at a time from the same
  * data. Both come from one file so neither can drift from the other.
  *
- *   node scripts/build-sessions.mjs           write the page
- *   node scripts/build-sessions.mjs --check   fail when it is out of date
+ *   node scripts/build-runs.mjs           write the page
+ *   node scripts/build-runs.mjs --check   fail when it is out of date
  */
 
 import { createRequire } from "node:module";
@@ -17,9 +17,9 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..");
-const out = join(root, "sessions", "index.html");
+const out = join(root, "in-practice", "index.html");
 const require = createRequire(import.meta.url);
-const SESSIONS = require(join(root, "assets", "demos.js"));
+const SESSIONS = require(join(root, "assets", "runs.js"));
 
 // The same mapping the player uses. A kind missing here renders unwrapped,
 // which is what an ordinary line of output is.
@@ -151,9 +151,9 @@ const page = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ptah sessions</title>
-<meta name="description" content="Every Ptah demo session in full: schema drift, versioned migrations, embedding cutover, OCI artifacts, format conversion and the Atlas-compatible surface. Read the transcript or watch it typed.">
-<link rel="canonical" href="https://ptah.run/sessions/">
+<title>Ptah in practice</title>
+<meta name="description" content="Twenty-four recorded runs of Ptah: schema drift, versioned migrations, embedding cutover, OCI artifacts, format conversion and the Atlas-compatible surface. Read one, or watch it typed.">
+<link rel="canonical" href="https://ptah.run/in-practice/">
 <meta name="go-import" content="ptah.run git https://github.com/stokaro/ptah">
 <meta name="go-source" content="ptah.run https://github.com/stokaro/ptah https://github.com/stokaro/ptah/tree/master{/dir} https://github.com/stokaro/ptah/blob/master{/dir}/{file}#L{line}">
 <meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)">
@@ -163,9 +163,9 @@ const page = `<!doctype html>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Ptah">
-<meta property="og:title" content="Ptah sessions">
-<meta property="og:description" content="Every Ptah demo session in full. Read the transcript or watch it typed.">
-<meta property="og:url" content="https://ptah.run/sessions/">
+<meta property="og:title" content="Ptah in practice">
+<meta property="og:description" content="Twenty-four recorded runs of Ptah. Read one, or watch it typed.">
+<meta property="og:url" content="https://ptah.run/in-practice/">
 <meta property="og:image" content="https://ptah.run/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -184,7 +184,7 @@ const page = `<!doctype html>
     <a class="brand" href="/"><img src="/assets/logo.svg" alt="" width="22" height="22">Ptah</a>
     <nav class="nav" aria-label="Site">
       <ul class="nav-links" id="nav-links">
-        <li><a href="/sessions/" aria-current="page">Sessions</a></li>
+        <li><a href="/in-practice/" aria-current="page">In practice</a></li>
         <li><a href="https://docs.ptah.run/">Docs</a></li>
         <li><a href="/install/">Install</a></li>
         <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
@@ -204,9 +204,9 @@ const page = `<!doctype html>
   <div class="wrap">
 
     <div class="page-head">
-      <h1>Sessions</h1>
-      <p class="lede">${SESSIONS.order.length} recorded sessions. Every command and every line of output was captured by running Ptah; nothing here is executed and nothing is invented. Open one to read the whole transcript at once, or press Play to watch it typed.</p>
-      <p class="meta"><span>Two of them are always on the home page; the rest take turns there, two per visit.</span></p>
+      <h1>Ptah in practice</h1>
+      <p class="lede">${SESSIONS.order.length} things Ptah does, recorded as they happened rather than written up afterwards. Every command and every line of output came off a real run; nothing here is staged and nothing is invented. Open one to read it, or press Play to watch it typed.</p>
+      <p class="meta"><span>Two are always on the home page. The rest take turns there, two to a visit.</span></p>
     </div>
 
     <ul class="tiles">
@@ -232,9 +232,9 @@ ${controls}
   <div class="demo-progress" data-demo-progress hidden aria-hidden="true"><span></span></div>
 </div>
 
-<dialog class="demo-modal" data-demo-modal aria-labelledby="session-title">
+<dialog class="demo-modal" data-demo-modal aria-labelledby="run-title">
   <div class="demo-modal-head">
-    <h2 id="session-title" data-demo-title></h2>
+    <h2 id="run-title" data-demo-title></h2>
     <p data-demo-caption></p>
   </div>
 </dialog>
@@ -252,7 +252,7 @@ ${controls}
 </footer>
 
 <div class="sr-only" role="status" id="copy-status"></div>
-<script src="/assets/demos.js" defer></script>
+<script src="/assets/runs.js" defer></script>
 <script src="/assets/site.js" defer></script>
 </body>
 </html>
@@ -287,20 +287,20 @@ if (process.argv.includes("--check")) {
   try {
     current = readFileSync(out, "utf8");
   } catch {
-    console.error("sessions/index.html does not exist; run scripts/build-sessions.mjs");
+    console.error("in-practice/index.html does not exist; run scripts/build-runs.mjs");
     process.exit(1);
   }
   if (current !== page) {
-    console.error("sessions/index.html is out of date; run scripts/build-sessions.mjs");
+    console.error("in-practice/index.html is out of date; run scripts/build-runs.mjs");
     process.exit(1);
   }
   if (home !== homeNext) {
-    console.error(`index.html's transcript is out of date; run scripts/build-sessions.mjs`);
+    console.error(`index.html's transcript is out of date; run scripts/build-runs.mjs`);
     process.exit(1);
   }
-  console.log("sessions/index.html and the home transcript are current");
+  console.log("in-practice/index.html and the home transcript are current");
 } else {
   writeFileSync(out, page);
   writeFileSync(homePath, homeNext);
-  console.log(`wrote sessions/index.html (${SESSIONS.order.length} sessions) and the ${homeKey} transcript in index.html`);
+  console.log(`wrote in-practice/index.html (${SESSIONS.order.length} runs) and the ${homeKey} transcript in index.html`);
 }

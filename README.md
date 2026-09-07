@@ -92,8 +92,8 @@ Trimming a long block to its telling lines is what a transcript does and is
 allowed; reordering it, or writing a line Ptah did not print, is not.
 Re-capture rather than edit when a diagnostic changes wording.
 
-Every session lives in `assets/demos.js`, which both pages load and
-`scripts/build-sessions.mjs` reads. Adding one is an entry in `SCENARIOS` plus
+Every run lives in `assets/runs.js`, which both pages load and
+`scripts/build-runs.mjs` reads. Adding one is an entry in `SCENARIOS` plus
 its key in `ROTATING`, then a run of that script.
 
 The home page offers four at a time. Two are fixed -- the schema cycle and the
@@ -102,7 +102,7 @@ the rest on each load, so a second visit has something new without the others
 hiding behind a "more examples" link. The picker markup carries two empty slots
 that JavaScript labels.
 
-`/sessions/` is the whole set as a grid. A tile carries the session's name, one
+`/in-practice/` is the whole set as a grid. A tile carries the session's name, one
 sentence, the first command it runs and how much there is; pressing one opens the
 overlay, which grows out of the tile it came from and shrinks back into it. The
 overlay opens settled -- the whole transcript at once, because a reader who came
@@ -118,10 +118,10 @@ twenty-four detours around the thing the tile is for.
 
 The page and the home page's transcript are both generated:
 
-    node scripts/build-sessions.mjs           write them
-    node scripts/build-sessions.mjs --check   fail when they are out of date
+    node scripts/build-runs.mjs           write them
+    node scripts/build-runs.mjs --check   fail when they are out of date
 
-The deploy workflow runs `--check`, so a session edited in `assets/demos.js`
+The deploy workflow runs `--check`, so a run edited in `assets/runs.js`
 without regenerating fails before it can ship a page that disagrees with the
 player. `transcript()` in that script mirrors `settle()` in `assets/site.js`
 line for line; when one changes, change the other.
@@ -156,7 +156,7 @@ Alignment is judged per block, not per line -- `Artifact type:` is followed by
 one space because it is the widest label in its table, and on its own it looks
 like prose -- so a run of output lines is wide when any line in it is, and a
 note, a command or a blank ends the run. `wideRuns()` says it in both
-`assets/site.js` and `scripts/build-sessions.mjs`; when one changes, change the
+`assets/site.js` and `scripts/build-runs.mjs`; when one changes, change the
 other.
 
 The first session is also in `index.html` as a transcript, between
