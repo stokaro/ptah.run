@@ -389,8 +389,8 @@
     // much cheaper than measuring a duration nobody knows before it runs.
     // How long to sit on a finished command before announcing the next one,
     // and how long to leave a note standing once it is typed.
-    var DWELL = 1100;
-    var READ = 850;
+    var DWELL = 1700;
+    var READ = 1300;
     // Typing speed, as a factor on the per-character delays. The estimates in
     // cost() carry it too, so the progress rule keeps up with the keyboard.
     var TYPE_SCALE = 1.2;
@@ -460,7 +460,12 @@
       } else if (paused) {
         // Paused between events there is nothing being typed, so without this
         // the caret is simply absent and the frame reads as finished rather
-        // than held. It sits at the end of the last line: where it stopped.
+        // than held.
+        //
+        // On its own line rather than at the end of the last one. Appended to
+        // output it is a block among words, in the place the eye has just left;
+        // on a line of its own it is a shell waiting, which is what it means.
+        if (html) html += "\n";
         html += CURSOR;
       }
       // Whether to follow is decided before the write, because writing is what
