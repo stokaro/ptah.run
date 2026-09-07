@@ -541,6 +541,20 @@ button {
 .demo-screen .e {
   color: var(--termamber);
 }
+/* How far through the session, as the last two pixels of the frame. It is the
+ * one moving thing on the page that is not text, so it stays a rule rather
+ * than becoming a bar with a track, a radius and a label. */
+.demo-progress {
+  height: 2px;
+  background: var(--termline);
+}
+.demo-progress > span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--termacc);
+}
+
 /* The scenario chooser reads as a caption with a choice in it, not as a tab
  * strip: this page spends its chrome on the terminal, and two words in the
  * page's own type are enough to say which session is playing. */

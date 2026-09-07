@@ -272,6 +272,8 @@
     var toggleBtn = $("[data-demo-toggle]", demo);
     var replayBtn = $("[data-demo-replay]", demo);
     var expandBtn = $("[data-demo-expand]", demo);
+    var progress = $("[data-demo-progress]", demo);
+    var progressFill = $("span", progress);
     var modal = $("[data-demo-modal]");
     var where = $(".demo-where", demo);
     var pick = $("[data-demo-pick]");
@@ -377,6 +379,44 @@
     var SCRIPT = CHANGE;
 
     var CLASS = { mute: "m", sql: "a", new: "n", err: "e" };
+
+    // What each event is expected to cost. The typing jitter makes the real
+    // figure vary by a few per cent, which is invisible on a two-pixel rule and
+    // much cheaper than measuring a duration nobody knows before it runs.
+    function cost(event) {
+      var kind = event[0];
+      if (kind === "wait") return event[1];
+      if (kind === "cmd" || kind === "cont") return 460 + event[1].length * 32;
+      if (kind === "blank") return 60;
+      if (kind === "sync") return 120;
+      return 70;
+    }
+
+    function total(script) {
+      var sum = 0;
+      for (var i = 0; i < script.length; i++) sum += cost(script[i]);
+      return sum;
+    }
+
+    var elapsed = 0;
+    var duration = 0;
+
+    // Set where the rule is going and how long it has to get there, so the
+    // browser animates between events and the script never has to tick.
+    function advance(ms) {
+      var to = duration ? Math.min(1, (elapsed + ms) / duration) : 0;
+      progressFill.style.transition = ms && !still.matches ? "width " + ms + "ms linear" : "none";
+      progressFill.style.width = to * 100 + "%";
+      elapsed += ms;
+    }
+
+    function freezeProgress() {
+      var at = progressFill.getBoundingClientRect().width;
+      var of = progress.getBoundingClientRect().width || 1;
+      progressFill.style.transition = "none";
+      progressFill.style.width = (at / of) * 100 + "%";
+      elapsed = duration * (at / of);
+    }
     var at = 0;
     var timer = null;
     var blink = null;
@@ -462,6 +502,7 @@
       }
       at++;
       var kind = event[0];
+      advance(cost(event));
       if (kind === "wait") return after(event[1], step);
       if (kind === "sync") {
         setSync(event[1]);
@@ -493,6 +534,8 @@
       }
       paint();
       playing = false;
+      elapsed = duration = 1;
+      advance(0);
       label();
     }
 
@@ -503,6 +546,9 @@
       typing = null;
       playing = true;
       paused = false;
+      elapsed = 0;
+      duration = total(SCRIPT);
+      advance(0);
       demo.classList.add("is-playing");
       label();
       paint();
@@ -553,6 +599,7 @@
     syncPill.hidden = false;
     controls.hidden = false;
     pick.hidden = false;
+    progress.hidden = false;
 
     for (var b = 0; b < pickBtns.length; b++) {
       pickBtns[b].addEventListener("click", function () {
@@ -598,6 +645,7 @@
       if (!playing) return start();
       paused = !paused;
       clearTimeout(timer);
+      if (paused) freezeProgress();
       label();
       if (!paused) step();
     });
@@ -621,7 +669,8 @@
           // Clear before resuming: one chain of timeouts, always. Calling
           // step() beside a pending one advances the script twice per tick.
           clearTimeout(timer);
-          if (visible) step();
+          if (!visible) return freezeProgress();
+          step();
         }, { threshold: 0.25 }).observe(demo);
       }
     }
