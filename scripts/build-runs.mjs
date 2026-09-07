@@ -19,7 +19,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..");
 const out = join(root, "in-practice", "index.html");
 const require = createRequire(import.meta.url);
-const SESSIONS = require(join(root, "assets", "runs.js"));
+const RUNS = require(join(root, "assets", "runs.js"));
 
 // The same mapping the player uses. A kind missing here renders unwrapped,
 // which is what an ordinary line of output is.
@@ -129,14 +129,11 @@ function counts(script) {
 }
 
 function tile(key) {
-  const s = SESSIONS.scenarios[key];
-  const pinned = SESSIONS.pinned.includes(key);
+  const s = RUNS.scenarios[key];
   return `        <li class="tile-slot">
           <button class="tile" type="button" data-demo-tile data-demo-scenario="${key}">
             <span class="tile-head">
-              <span class="tile-name">${esc(s.label)}</span>${
-                pinned ? '<span class="tile-tag">Home page</span>' : ""
-              }
+              <span class="tile-name">${esc(s.label)}</span><span class="tile-tag">${esc(s.tag)}</span>
             </span>
             <span class="tile-note">${esc(s.caption)}</span>
             <span class="tile-cmd"><span class="tile-prompt">$</span> ${esc(preview(s.script))}</span>
@@ -205,12 +202,12 @@ const page = `<!doctype html>
 
     <div class="page-head">
       <h1>Ptah in practice</h1>
-      <p class="lede">${SESSIONS.order.length} things Ptah does, recorded as they happened rather than written up afterwards. Every command and every line of output came off a real run; nothing here is staged and nothing is invented. Open one to read it, or press Play to watch it typed.</p>
+      <p class="lede">${RUNS.order.length} things Ptah does, recorded as they happened rather than written up afterwards. Every command and every line of output came off a real run; nothing here is staged and nothing is invented. Open one to read it, or press Play to watch it typed.</p>
       <p class="meta"><span>Two are always on the home page. The rest take turns there, two to a visit.</span></p>
     </div>
 
     <ul class="tiles">
-${SESSIONS.order.map(tile).join("\n")}
+${RUNS.order.map(tile).join("\n")}
     </ul>
 
     <div class="actions">
@@ -221,9 +218,9 @@ ${SESSIONS.order.map(tile).join("\n")}
   </div>
 </main>
 
-<div class="term demo" data-demo data-demo-scenario="${SESSIONS.pinned[0]}" hidden>
+<div class="term demo" data-demo data-demo-scenario="${RUNS.pinned[0]}" hidden>
   <div class="term-bar">
-    <span class="demo-where">${esc(SESSIONS.scenarios[SESSIONS.pinned[0]].where)}</span>
+    <span class="demo-where">${esc(RUNS.scenarios[RUNS.pinned[0]].where)}</span>
     <span class="demo-sync" data-demo-sync hidden></span>
 ${controls}
   </div>
@@ -261,7 +258,7 @@ ${controls}
 // The home page carries one session as its no-JS transcript. Written from the
 // same data, between markers, so the two cannot drift.
 const homePath = join(root, "index.html");
-const homeKey = SESSIONS.pinned[0];
+const homeKey = RUNS.pinned[0];
 const OPEN = "<!--session:transcript-->";
 const CLOSE = "<!--/session:transcript-->";
 
@@ -274,7 +271,7 @@ function withHomeTranscript(html) {
   }
   return (
     html.slice(0, from + OPEN.length) +
-    transcript(SESSIONS.scenarios[homeKey].script) +
+    transcript(RUNS.scenarios[homeKey].script) +
     html.slice(to)
   );
 }
@@ -302,5 +299,5 @@ if (process.argv.includes("--check")) {
 } else {
   writeFileSync(out, page);
   writeFileSync(homePath, homeNext);
-  console.log(`wrote in-practice/index.html (${SESSIONS.order.length} runs) and the ${homeKey} transcript in index.html`);
+  console.log(`wrote in-practice/index.html (${RUNS.order.length} runs) and the ${homeKey} transcript in index.html`);
 }

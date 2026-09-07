@@ -667,6 +667,7 @@
   var SCENARIOS = {
     change: {
       script: CHANGE,
+      tag: "Schema change",
       label: "Change a schema",
       where: "sh · ptah-quick-start",
       caption:
@@ -676,6 +677,7 @@
     },
     inference: {
       script: INFERENCE,
+      tag: "Inference",
       label: "Migrate embeddings",
       where: "sh · ptah-inference",
       caption:
@@ -685,6 +687,7 @@
     },
     guard: {
       script: GUARD,
+      tag: "Safety",
       label: "Stop an unsafe one",
       where: "sh · ptah-ci",
       caption:
@@ -693,6 +696,7 @@
     },
     entities: {
       script: ENTITIES,
+      tag: "Go annotations",
       label: "Go structs to SQL",
       where: "sh · ptah-entities",
       caption:
@@ -701,6 +705,7 @@
     },
     versioned: {
       script: VERSIONED,
+      tag: "Schema change",
       label: "Write a migration",
       where: "sh · ptah-migrations",
       caption:
@@ -709,6 +714,7 @@
     },
     adopt: {
       script: ADOPT,
+      tag: "Go annotations",
       label: "Adopt a database",
       where: "sh · ptah-adopt",
       caption:
@@ -717,6 +723,7 @@
     },
     diagram: {
       script: DIAGRAM,
+      tag: "Exports",
       label: "Draw the schema",
       where: "sh · ptah-viz",
       caption:
@@ -725,6 +732,7 @@
     },
     api: {
       script: API,
+      tag: "Exports",
       label: "Export a GraphQL API",
       where: "sh · ptah-export",
       caption:
@@ -733,6 +741,7 @@
     },
     dbml: {
       script: DBML,
+      tag: "Exports",
       label: "Export to DBML",
       where: "sh · ptah-export",
       caption:
@@ -741,6 +750,7 @@
     },
     capabilities: {
       script: CAPABILITIES,
+      tag: "Inspection",
       label: "Ask what it supports",
       where: "sh · ptah-capabilities",
       caption:
@@ -749,6 +759,7 @@
     },
     stats: {
       script: STATS,
+      tag: "Inspection",
       label: "Feed a dashboard",
       where: "sh · ptah-stats",
       caption:
@@ -757,6 +768,7 @@
     },
     lineage: {
       script: LINEAGE,
+      tag: "Inspection",
       label: "Trace a column",
       where: "sh · ptah-lineage",
       caption:
@@ -765,6 +777,7 @@
     },
     approve: {
       script: APPROVE,
+      tag: "Safety",
       label: "Sign off a plan",
       where: "sh · ptah-release",
       caption:
@@ -774,6 +787,7 @@
     },
     compat: {
       script: COMPAT,
+      tag: "Atlas",
       label: "Run Atlas scripts",
       where: "sh · ptah-compat",
       caption:
@@ -782,6 +796,7 @@
     },
     ociPublish: {
       script: OCI_PUBLISH,
+      tag: "Registry",
       label: "Publish the schema",
       where: "sh · ptah-oci",
       caption:
@@ -791,6 +806,7 @@
     },
     ociInspect: {
       script: OCI_INSPECT,
+      tag: "Registry",
       label: "Read a remote artifact",
       where: "sh · ptah-oci",
       caption:
@@ -799,6 +815,7 @@
     },
     ociConsume: {
       script: OCI_CONSUME,
+      tag: "Registry",
       label: "Build from a registry",
       where: "sh · ptah-oci",
       caption:
@@ -807,6 +824,7 @@
     },
     openapi: {
       script: OPENAPI,
+      tag: "Exports",
       label: "Export an OpenAPI spec",
       where: "sh · ptah-export",
       caption:
@@ -816,6 +834,7 @@
     },
     protobuf: {
       script: PROTOBUF,
+      tag: "Exports",
       label: "Keep a wire contract",
       where: "sh · ptah-export",
       caption:
@@ -824,6 +843,7 @@
     },
     docs: {
       script: DOCS,
+      tag: "Exports",
       label: "Write the reference",
       where: "sh · ptah-export",
       caption:
@@ -832,6 +852,7 @@
     },
     diff: {
       script: DIFF,
+      tag: "Schema change",
       label: "Diff two schemas",
       where: "sh · ptah-diff",
       caption:
@@ -840,6 +861,7 @@
     },
     inspect: {
       script: INSPECT,
+      tag: "Inspection",
       label: "Read a database back",
       where: "sh · ptah-inspect",
       caption:
@@ -848,6 +870,7 @@
     },
     seed: {
       script: SEED,
+      tag: "Safety",
       label: "Seed an environment",
       where: "sh · ptah-seed",
       caption:
@@ -856,6 +879,7 @@
     },
     rollback: {
       script: ROLLBACK,
+      tag: "Schema change",
       label: "Roll one back",
       where: "sh · ptah-migrations",
       caption:
@@ -881,8 +905,20 @@
     // what Ptah is for. Everything else takes a turn in the two other slots.
     pinned: ["change", "inference"],
     rotating: ROTATING,
-    // Reading order for /in-practice/, where nothing rotates and everything shows.
-    order: ["change", "inference"].concat(ROTATING)
+    // Reading order for /in-practice/, where nothing rotates and everything
+    // shows. Grouped by tag rather than by how the runs were written: a tag
+    // scattered over a grid is decoration, and the same tag three cards in a
+    // row is a section.
+    order: [
+      "change", "versioned", "rollback", "diff",
+      "inference",
+      "guard", "approve", "seed",
+      "entities", "adopt",
+      "capabilities", "inspect", "lineage", "stats",
+      "api", "openapi", "protobuf", "dbml", "docs", "diagram",
+      "ociPublish", "ociInspect", "ociConsume",
+      "compat"
+    ]
   };
 
   if (typeof module !== "undefined" && module.exports) module.exports = RUNS;
