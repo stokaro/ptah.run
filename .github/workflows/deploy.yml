@@ -3,6 +3,12 @@ name: Deploy
 on:
   push:
     branches: [main]
+  # The checks below are what keeps a generated page from drifting from the
+  # data it is generated out of, and a pull request is where that is worth
+  # knowing. Only the check job runs here; deploy is guarded below, because a
+  # pull request must not publish.
+  pull_request:
+    branches: [main]
   # Re-stamp the release version into the pages a few times a day, so the
   # value a visitor gets when the GitHub API is unreachable is recent.
   schedule:
@@ -70,6 +76,7 @@ jobs:
 
   deploy:
     name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request'
     needs: check
     runs-on: ubuntu-latest
     timeout-minutes: 10
