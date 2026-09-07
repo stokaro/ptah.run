@@ -74,7 +74,11 @@ the `stokaro/ptah` repository and its documentation site. When a command or its
 output changes there, change it here. Do not invent output.
 
 Each command in the demo is introduced by a `#` comment saying what is about to
-happen. Those lines are the demo's own narration, not Ptah's output, and the
+happen. The comment and the command under it are one thought, so the reader is
+not held at the end of the comment while the command it announces waits: half of
+what that comment was worth to read is owed forward and spent on the beat before
+the next step is announced. A page that opens on a comment otherwise holds you
+there before anything has happened. Those lines are the demo's own narration, not Ptah's output, and the
 shell's comment syntax is what makes the difference legible; they are set dimmer
 than Ptah's muted lines for the same reason. Write them as intent -- what the
 reader is about to see and why -- and never as a claim about what a command
