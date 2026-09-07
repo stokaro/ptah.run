@@ -51,6 +51,7 @@
     <a class="brand" href="/"><img src="/assets/logo.svg" alt="" width="22" height="22">Ptah</a>
     <nav class="nav" aria-label="Site">
       <ul class="nav-links" id="nav-links">
+        <li><a href="/sessions/">Sessions</a></li>
         <li><a href="https://docs.ptah.run/">Docs</a></li>
         <li><a href="/install/">Install</a></li>
         <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
@@ -92,7 +93,7 @@
       </div>
 
       <div class="hero-demo">
-        <div class="term demo" data-demo>
+        <div class="term demo" data-demo data-demo-autoplay data-demo-scenario="change">
           <div class="term-bar">
             <span class="demo-where">sh · ptah-quick-start</span>
             <span class="demo-sync" data-demo-sync hidden>no drift</span>
@@ -117,57 +118,7 @@
 
           <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
 
-          <pre class="demo-transcript" data-demo-transcript><span class="c"># Write the database's own schema into a file.</span>
-<span class="p">$</span> ptah db read --db-url sqlite://app.db | tee schema.sql
-<span class="a">CREATE TABLE "users" (
-  "id" INTEGER PRIMARY KEY,
-  "email" TEXT NOT NULL
-);</span>
-
-<span class="c"># Drift compares that file with the database it came from.</span>
-<span class="p">$</span> ptah schema drift --schema-file schema.sql \
-    --db-url sqlite://app.db
-No schema drift detected.
-
-<span class="c"># Now ask for a column, by rewriting the schema you want.</span>
-<span class="p">$</span> cat &gt; schema.sql &lt;&lt;'SQL'
-CREATE TABLE "users" (
-  "id" INTEGER PRIMARY KEY,
-  "email" TEXT NOT NULL,
-  "created_at" TEXT
-);
-SQL
-
-<span class="c"># The same check now has something to report.</span>
-<span class="p">$</span> ptah schema drift --schema-file schema.sql \
-    --db-url sqlite://app.db
-<span class="e">Schema drift detected (highest severity: warning).</span>
-<span class="m">Failure threshold: all. Failing: true.
-Database: sqlite://app.db</span>
-
-<span class="m">Findings:</span>
-- columns_added: 1 (warning)
-
-<span class="c"># Ask what it would take to close it. A dry run executes nothing.</span>
-<span class="p">$</span> ptah schema apply --schema-file schema.sql \
-    --db-url sqlite://app.db --dry-run
-<span class="m">Planned schema changes:</span>
-<span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span>
-
-<span class="c"># Run the reviewed plan. --auto-approve suits a disposable file.</span>
-<span class="p">$</span> ptah schema apply --schema-file schema.sql \
-    --db-url sqlite://app.db --auto-approve
-<span class="m">Planned schema changes:</span>
-<span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span>
-<span class="m">Auto-approval enabled; applying schema changes.</span>
-Schema apply completed successfully.
-
-<span class="c"># And the same check, a third time.</span>
-<span class="p">$</span> ptah schema drift --schema-file schema.sql \
-    --db-url sqlite://app.db
-No schema drift detected.
-<span class="p">$</span> echo $?
-0</pre>
+          <pre class="demo-transcript" data-demo-transcript><!--session:transcript--><span class="l"><span class="c"># Write the database's own schema into a file.</span></span><span class="l"><span class="p">$</span> ptah db read --db-url sqlite://app.db | tee schema.sql</span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># Drift compares that file with the database it came from.</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span><span class="l"> </span><span class="l"><span class="c"># Now ask for a column, by rewriting the schema you want.</span></span><span class="l"><span class="p">$</span> cat &gt; schema.sql &lt;&lt;'SQL'</span><span class="l">CREATE TABLE "users" (</span><span class="l">  "id" INTEGER PRIMARY KEY,</span><span class="l">  "email" TEXT NOT NULL,</span><span class="l"><span class="n">  "created_at" TEXT</span></span><span class="l">);</span><span class="l">SQL</span><span class="l"> </span><span class="l"><span class="c"># The same check now has something to report.</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l"><span class="e">Schema drift detected (highest severity: warning).</span></span><span class="l"><span class="m">Failure threshold: all. Failing: true.</span></span><span class="l"><span class="m">Database: sqlite://app.db</span></span><span class="l"> </span><span class="l"><span class="m">Findings:</span></span><span class="l"><span class="n">- columns_added: 1 (warning)</span></span><span class="l"> </span><span class="l"><span class="c"># Ask what it would take to close it. A dry run executes nothing.</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --dry-run</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"> </span><span class="l"><span class="c"># Run the reviewed plan. --auto-approve suits a disposable file.</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --auto-approve</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"><span class="m">Auto-approval enabled; applying schema changes.</span></span><span class="l">Schema apply completed successfully.</span><span class="l"> </span><span class="l"><span class="c"># And the same check, a third time.</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span><!--/session:transcript--></pre>
 
           <div class="demo-progress" data-demo-progress hidden aria-hidden="true"><span></span></div>
         </div>
@@ -294,6 +245,7 @@ ptah inference cutover
 </footer>
 
 <div class="sr-only" role="status" id="copy-status"></div>
+<script src="/assets/demos.js" defer></script>
 <script src="/assets/site.js" defer></script>
 </body>
 </html>

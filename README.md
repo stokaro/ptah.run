@@ -92,12 +92,30 @@ Trimming a long block to its telling lines is what a transcript does and is
 allowed; reordering it, or writing a line Ptah did not print, is not.
 Re-capture rather than edit when a diagnostic changes wording.
 
-Fourteen sessions ship, and four are offered at a time. Two are fixed -- the
-schema cycle and the inference cycle, which are what Ptah is for -- and two are
-drawn at random from the remaining twelve on each load, so a second visit has
-something new without twelve scenarios hiding behind a "more examples" link.
-Adding one is an entry in `SCENARIOS` plus its key in `ROTATING`; the picker
-markup carries two empty slots that JavaScript labels.
+Every session lives in `assets/demos.js`, which both pages load and
+`scripts/build-sessions.mjs` reads. Adding one is an entry in `SCENARIOS` plus
+its key in `ROTATING`, then a run of that script.
+
+The home page offers four at a time. Two are fixed -- the schema cycle and the
+inference cycle, which are what Ptah is for -- and two are drawn at random from
+the rest on each load, so a second visit has something new without the others
+hiding behind a "more examples" link. The picker markup carries two empty slots
+that JavaScript labels.
+
+`/sessions/` is the whole set, printed. Each session is a heading, a sentence,
+and its transcript in full, because a reader who came to read should not have to
+wait for a typewriter; the player is offered on every block rather than imposed
+on the page, and starting one stops whichever was playing, since two typewriters
+in one column is two things to read and neither gets read. The page and the home
+page's transcript are both generated:
+
+    node scripts/build-sessions.mjs           write them
+    node scripts/build-sessions.mjs --check   fail when they are out of date
+
+The deploy workflow runs `--check`, so a session edited in `assets/demos.js`
+without regenerating fails before it can ship a page that disagrees with the
+player. `transcript()` in that script mirrors `settle()` in `assets/site.js`
+line for line; when one changes, change the other.
 
 The terminal scrolls and expands. Scrolling follows the newest line only while
 the reader is already at the bottom, so scrolling back to re-read a finding is
@@ -123,9 +141,10 @@ under its own indent rather than restarting at column zero. A Go annotation or
 a lint diagnostic broken the other way reads as a new top-level line, which is
 the one thing the shape of a transcript is supposed to tell you.
 
-The whole first session is also in `index.html` as a transcript. That is the
-page without JavaScript, and it is what a crawler and a screen reader read; the
-player hides it from sight and replays it. Keep the two in step.
+The first session is also in `index.html` as a transcript, between
+`<!--session:transcript-->` markers. That is the page without JavaScript, and it
+is what a crawler and a screen reader read; the player hides it from sight and
+replays it. The generator owns those bytes, so the two cannot drift.
 
 The release version on the pages has three layers. The HTML in git carries
 the last release known when it was committed (`v0.3.0`). At deploy time the
