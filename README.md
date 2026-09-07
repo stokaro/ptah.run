@@ -98,7 +98,14 @@ Re-capture rather than edit when a diagnostic changes wording.
 
 Every run lives in `assets/runs.js`, which both pages load and
 `scripts/build-runs.mjs` reads. Adding one is an entry in `SCENARIOS` plus
-its key in `ROTATING`, then a run of that script.
+its key in `ROTATING` and in `order`, then a run of that script.
+
+Each run carries one tag, and `order` groups the grid by it. The vocabulary is
+eight words -- Schema change, Inference, Safety, Go annotations, Inspection,
+Exports, Registry, Atlas -- and it exists to be scanned, so a ninth needs a
+reason better than "this one does not fit the eight". A tag scattered over a
+grid is decoration; the same tag three cards running is a section, which is why
+the order is grouped rather than being the order the runs were written in.
 
 The home page offers four at a time. Two are fixed -- the schema cycle and the
 inference cycle, which are what Ptah is for -- and two are drawn at random from
@@ -106,8 +113,8 @@ the rest on each load, so a second visit has something new without the others
 hiding behind a "more examples" link. The picker markup carries two empty slots
 that JavaScript labels.
 
-`/in-practice/` is the whole set as a grid. A tile carries the session's name, one
-sentence, the first command it runs and how much there is; pressing one opens the
+`/in-practice/` is the whole set as a grid. A tile carries the run's name, its
+tag, one sentence, the first command it runs and how much there is; pressing one opens the
 overlay, which grows out of the tile it came from and shrinks back into it. The
 overlay opens settled -- the whole transcript at once, because a reader who came
 to read should not have to wait for a typewriter -- with Play beside it for one
