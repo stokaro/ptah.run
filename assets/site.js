@@ -491,9 +491,10 @@
       if (paused) return;
       var event = SCRIPT[at];
       if (!event) {
-        // Loop, but only where it started by itself. A reader who pressed Play
-        // asked for one run.
-        if (!autoplays()) {
+        // A reader who pressed Play, or who expanded it, asked for one run.
+        if (!loops()) {
+          elapsed = duration;
+          advance(0);
           playing = false;
           label();
           return;
@@ -576,6 +577,14 @@
       return !still.matches && !narrow.matches;
     }
 
+    // Expanded, the session is something the reader chose to watch, so it runs
+    // once and stops on its last frame. In the hero it is ambient and comes
+    // round again, because a reader arriving mid-session should not have to
+    // guess what the first half said.
+    function loops() {
+      return autoplays() && !demo.classList.contains("is-open");
+    }
+
     function choose(name) {
       var scenario = SCENARIOS[name];
       if (!scenario) return;
@@ -623,6 +632,9 @@
       } else {
         homeParent.insertBefore(demo, home);
         if (modal.open) modal.close();
+        // Back in the hero it is ambient again. A run that ended under the
+        // overlay's one-shot rule starts over; one still playing carries on.
+        if (!playing && autoplays()) start();
       }
       // The height changed under a stream that may be mid-scroll.
       screen.scrollTop = screen.scrollHeight;

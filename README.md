@@ -85,7 +85,10 @@ The terminal scrolls and expands. Scrolling follows the newest line only while
 the reader is already at the bottom, so scrolling back to re-read a finding is
 not undone by the next one. Expanding moves the same node into a `<dialog>` --
 the same session, still playing -- because the hero column is half a page wide
-and Ptah's diagnostics are sentences.
+and Ptah's diagnostics are sentences. Expanded it runs once and stops on its
+last frame, because opening it is a choice to watch; in the hero it comes round
+again, because a reader arriving mid-session should not have to guess what the
+first half said.
 
 The whole first session is also in `index.html` as a transcript. That is the
 page without JavaScript, and it is what a crawler and a screen reader read; the
