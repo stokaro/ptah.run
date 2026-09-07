@@ -336,6 +336,17 @@
       return 700 + text.length * 14;
     }
 
+    // A comment and the command under it are one thought, so the reader is not
+    // held at the end of the comment while the command it announces waits to be
+    // typed -- a page that opens on a comment then holds you there before
+    // anything has happened. Half of what that beat was worth moves to the end
+    // of the block instead, where the next step is announced.
+    var NOTE_BEAT = 260;
+
+    function noteCarry(text) {
+      return Math.round(readTime(text, "note") / 2);
+    }
+
     // The beat after output, before the next step is announced. Capped, because
     // past a few seconds a pause stops reading as deliberate.
     function outputBeat(printed) {
@@ -359,6 +370,7 @@
     function plan(script) {
       var out = [];
       var printed = 0;
+      var carried = 0;
       for (var i = 0; i < script.length; i++) {
         var event = script[i];
         var kind = event[0];
@@ -366,7 +378,8 @@
         if (kind === "wait") {
           ms = event[1];
         } else if (kind === "note") {
-          ms = outputBeat(printed) + 60 + typeTime(event[1]) + readTime(event[1], "note");
+          ms = outputBeat(printed) + carried + 60 + typeTime(event[1]) + NOTE_BEAT;
+          carried = noteCarry(event[1]);
           printed = 0;
         } else if (kind === "cmd" || kind === "cont") {
           ms = typeTime(event[1]);
@@ -391,6 +404,8 @@
     var duration = 0;
     var timings = [];
     var printed = 0;
+    // What the last comment's read beat handed forward, spent at the next one.
+    var owed = 0;
 
     // Set where the rule is going and how long it has to get there, so the
     // browser animates between events and the script never has to tick.
@@ -590,10 +605,13 @@
       if (n > text.length) {
         return after(kind === "note" ? 240 : 320, function () {
           commit(kind, text);
-          // A note is finished being typed but not finished being read: the
-          // last words land at the same moment the command would start, and
-          // the eye cannot be in two places.
-          if (kind === "note") return hold(readTime(text, "note"), step);
+          // A finished comment gets a breath, not a wait: it introduces the
+          // command about to be typed, and half of what it is worth to read is
+          // owed to the beat at the end of the block instead.
+          if (kind === "note") {
+            owed = noteCarry(text);
+            return hold(NOTE_BEAT, step);
+          }
           // A command that continues on the next line has not been entered
           // yet, so the beat belongs after its last line rather than inside
           // it.
@@ -647,7 +665,11 @@
       // after the last one finished: time to read what just happened before
       // being told what happens next.
       if (kind === "note") {
-        return hold(outputBeat(printed), function () {
+        // The beat before a step is announced: time to read what just happened,
+        // plus what the last comment's own beat was owed.
+        var settleFor = outputBeat(printed) + owed;
+        owed = 0;
+        return hold(settleFor, function () {
           type(kind, event[1], 0);
         });
       }
@@ -706,6 +728,7 @@
       paused = false;
       elapsed = 0;
       printed = 0;
+      owed = 0;
       timings = plan(SCRIPT);
       duration = timings.reduce(function (a, b) { return a + b; }, 0);
       advance(0);
