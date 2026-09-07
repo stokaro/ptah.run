@@ -391,14 +391,24 @@
     // and how long to leave a note standing once it is typed.
     var DWELL = 1700;
     var READ = 1300;
+    // The beat between pressing enter and the first line of output.
+    var ENTER = 800;
     // Typing speed, as a factor on the per-character delays. The estimates in
     // cost() carry it too, so the progress rule keeps up with the keyboard.
     var TYPE_SCALE = 1.2;
 
-    function cost(event) {
+    // Whether the event at index i is a command line the next line continues.
+    function continues(i) {
+      var next = SCRIPT[i];
+      return !!next && next[0] === "cont";
+    }
+
+    function cost(event, i) {
       var kind = event[0];
       if (kind === "wait") return event[1];
-      if (kind === "cmd" || kind === "cont") return 460 + event[1].length * 32 * TYPE_SCALE;
+      if (kind === "cmd" || kind === "cont") {
+        return 460 + event[1].length * 32 * TYPE_SCALE + (continues(i) ? 0 : ENTER);
+      }
       // A note is the dwell that follows the last output plus the time it
       // takes to type itself.
       if (kind === "note") return DWELL + 380 + event[1].length * 26 * TYPE_SCALE + READ;
@@ -409,7 +419,7 @@
 
     function total(script) {
       var sum = 0;
-      for (var i = 0; i < script.length; i++) sum += cost(script[i]);
+      for (var i = 0; i < script.length; i++) sum += cost(script[i], i + 1);
       return sum;
     }
 
@@ -448,6 +458,7 @@
     var CURSOR = '<span class="demo-cursor" data-on="1">\u258d</span>';
     var lines = [];
     var typing = null;
+    var idle = false;
 
     function paint() {
       var html = lines.join("\n");
@@ -457,14 +468,19 @@
         var head = typing.kind === "cmd" ? '<span class="p">$</span> ' : "";
         var body = esc(typing.text) + CURSOR;
         html += head + (cls ? '<span class="' + cls + '">' + body + "</span>" : body);
-      } else if (paused) {
-        // Paused between events there is nothing being typed, so without this
-        // the caret is simply absent and the frame reads as finished rather
-        // than held.
+      } else if (idle || paused) {
+        // A shell that is not being typed at still shows a caret, and the
+        // blink is how a reader tells waiting from finished. Without this the
+        // caret vanished for the whole beat between one command and the next
+        // note, which is the longest and most deliberate silence in the run.
         //
-        // On its own line rather than at the end of the last one. Appended to
-        // output it is a block among words, in the place the eye has just left;
-        // on a line of its own it is a shell waiting, which is what it means.
+        // On its own line rather than at the end of the last one: appended to
+        // output it is a block among words, in the place the eye has just
+        // left; on a line of its own it is a shell waiting.
+        //
+        // `idle` is set only for the beats that are waits. Setting it for the
+        // gaps between output lines would add and remove a line every 70ms and
+        // shake the whole frame.
         if (html) html += "\n";
         html += CURSOR;
       }
@@ -497,6 +513,17 @@
       timer = setTimeout(fn, ms);
     }
 
+    // A wait with a caret through it. The flag is cleared before the next thing
+    // runs so that whatever paints next paints without it.
+    function hold(ms, fn) {
+      idle = true;
+      paint();
+      after(ms, function () {
+        idle = false;
+        fn();
+      });
+    }
+
     function type(kind, text, n) {
       if (paused) return;
       if (n > text.length) {
@@ -505,7 +532,12 @@
           // A note is finished being typed but not finished being read: the
           // last words land at the same moment the command would start, and
           // the eye cannot be in two places.
-          after(kind === "note" ? READ : 140, step);
+          if (kind === "note") return hold(READ, step);
+          // A command that continues on the next line has not been entered
+          // yet, so the beat belongs after its last line rather than inside
+          // it.
+          if (continues(at)) return after(140, step);
+          hold(ENTER, step);
         });
       }
       typing = { text: text.slice(0, n), kind: kind };
@@ -525,6 +557,11 @@
       var event = SCRIPT[at];
       if (!event) {
         // A reader who pressed Play, or who expanded it, asked for one run.
+        // Nothing is waiting for the reader once the session is over, so the
+        // caret goes. Left blinking on a finished frame it asks for input that
+        // does not exist, which is the one thing a caret should never say.
+        idle = false;
+        paint();
         if (!loops()) {
           elapsed = duration;
           advance(0);
@@ -536,13 +573,13 @@
       }
       at++;
       var kind = event[0];
-      advance(cost(event));
-      if (kind === "wait") return after(event[1], step);
+      advance(cost(event, at));
+      if (kind === "wait") return hold(event[1], step);
       // A note introduces the next step, so the beat before it is the beat
       // after the last one finished: time to read what just happened before
       // being told what happens next.
       if (kind === "note") {
-        return after(DWELL, function () {
+        return hold(DWELL, function () {
           type(kind, event[1], 0);
         });
       }
@@ -586,6 +623,7 @@
       at = 0;
       lines = [];
       typing = null;
+      idle = false;
       playing = true;
       paused = false;
       elapsed = 0;
@@ -729,9 +767,15 @@
       }
     }
 
+    // A caret blinks when it is waiting for you and holds steady when it is
+    // busy being typed at. Blinking under the keystrokes made the two states
+    // one state, and the reader lost the only signal that says "this beat is
+    // deliberate, the next line is coming".
     blink = setInterval(function () {
       var cursor = $(".demo-cursor", screen);
-      if (cursor) cursor.setAttribute("data-on", cursor.getAttribute("data-on") === "1" ? "0" : "1");
+      if (!cursor) return;
+      if (typing !== null && !paused) return cursor.setAttribute("data-on", "1");
+      cursor.setAttribute("data-on", cursor.getAttribute("data-on") === "1" ? "0" : "1");
     }, 530);
     void blink;
   }
