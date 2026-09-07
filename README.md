@@ -80,22 +80,48 @@ than Ptah's muted lines for the same reason. Write them as intent -- what the
 reader is about to see and why -- and never as a claim about what a command
 prints, which is the transcript's job.
 
-The hero demo is held to that rule twice over, because it moves. Both sessions
-were captured by running Ptah, not written: the schema one is the documented
-direct quick start (`docs/site/src/content/docs/start/quick-start-direct.mdx`)
-executed against a real `app.db`, and the lint one is `ptah migrations lint`
-over a one-file directory that drops a column, exit code 1. Every line in
-`assets/site.js` is that output verbatim, including the trailing note about the
-thinner analysis. Re-capture rather than edit when a diagnostic changes wording.
+The hero demo is held to that rule hardest, because it moves. Every session in
+`assets/site.js` was captured by running Ptah, not written. The schema one is
+the documented direct quick start
+(`docs/site/src/content/docs/start/quick-start-direct.mdx`) executed against a
+real `app.db`; the rest were run on Linux against a throwaway sqlite database in
+`/tmp/app`, which is why absolute paths in the transcripts read the way they do.
+Output shown is stdout: the scanning, dependency-order and progress lines these
+commands write go to stderr and are not what a reader sees in a pipeline.
+Trimming a long block to its telling lines is what a transcript does and is
+allowed; reordering it, or writing a line Ptah did not print, is not.
+Re-capture rather than edit when a diagnostic changes wording.
+
+Fourteen sessions ship, and four are offered at a time. Two are fixed -- the
+schema cycle and the inference cycle, which are what Ptah is for -- and two are
+drawn at random from the remaining twelve on each load, so a second visit has
+something new without twelve scenarios hiding behind a "more examples" link.
+Adding one is an entry in `SCENARIOS` plus its key in `ROTATING`; the picker
+markup carries two empty slots that JavaScript labels.
 
 The terminal scrolls and expands. Scrolling follows the newest line only while
 the reader is already at the bottom, so scrolling back to re-read a finding is
 not undone by the next one. Expanding moves the same node into a `<dialog>` --
 the same session, still playing -- because the hero column is half a page wide
-and Ptah's diagnostics are sentences. Expanded it runs once and stops on its
-last frame, because opening it is a choice to watch; in the hero it comes round
-again, because a reader arriving mid-session should not have to guess what the
-first half said.
+and Ptah's diagnostics are sentences. The frame travels between the two places
+rather than one panel vanishing and another appearing: the move is measured
+before and after and played back as a transform, which is the only reason the
+node move has to happen before `close()` rather than after. Expanded it runs
+once and stops on its last frame, because opening it is a choice to watch; in
+the hero it comes round again, because a reader arriving mid-session should not
+have to guess what the first half said.
+
+Playback speed cycles 0.5x, 1x, 2x, 3x. The scripts, the beat lengths and the
+progress rule are all in planned milliseconds; the rate turns those into real
+milliseconds in `after()` and in the progress transition, and nowhere else, so
+the bar and the keyboard cannot disagree about where in the session they are.
+A speed change re-times the beat already in flight, or the control reads as
+broken during a four-second pause.
+
+Each line on screen is its own block, so a line too long for the frame wraps
+under its own indent rather than restarting at column zero. A Go annotation or
+a lint diagnostic broken the other way reads as a new top-level line, which is
+the one thing the shape of a transcript is supposed to tell you.
 
 The whole first session is also in `index.html` as a transcript. That is the
 page without JavaScript, and it is what a crawler and a screen reader read; the

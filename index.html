@@ -97,36 +97,58 @@
             <span class="demo-where">sh · ptah-quick-start</span>
             <span class="demo-sync" data-demo-sync hidden>no drift</span>
             <span class="demo-controls" data-demo-controls hidden>
-              <button class="demo-btn" type="button" data-demo-toggle aria-label="Pause the demo">Pause</button>
-              <button class="demo-btn" type="button" data-demo-replay>Replay</button>
-              <button class="demo-btn" type="button" data-demo-expand aria-expanded="false">Expand</button>
+              <button class="demo-btn demo-btn-speed" type="button" data-demo-speed aria-label="Playback speed, 1×. Press to change." title="Speed"><span data-demo-speed-label>1×</span></button>
+              <button class="demo-btn" type="button" data-demo-toggle aria-label="Pause the demo" title="Pause">
+                <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.25 3.5h1.9v9h-1.9zM8.85 3.5h1.9v9h-1.9z" fill="currentColor"/></svg>
+                <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.5 3.4l7 4.6-7 4.6z" fill="currentColor"/></svg>
+                <span class="i-pause">Pause</span><span class="i-play">Play</span>
+              </button>
+              <button class="demo-btn" type="button" data-demo-replay aria-label="Replay the demo" title="Replay">
+                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13.2 8a5.2 5.2 0 1 1-1.75-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12.4 1.9v2.9H9.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Replay</span>
+              </button>
+              <button class="demo-btn" type="button" data-demo-expand aria-expanded="false" aria-label="Expand the demo" title="Expand">
+                <svg class="i-expand" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6.2 2.6H2.6v3.6M9.8 13.4h3.6V9.8M13.4 6.2V2.6H9.8M2.6 9.8v3.6h3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg class="i-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span class="i-expand">Expand</span><span class="i-close">Close</span>
+              </button>
             </span>
           </div>
 
           <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
 
-          <pre class="demo-transcript" data-demo-transcript><span class="c"># Ask the database what it has.</span>
-<span class="p">$</span> ptah db read --db-url sqlite://app.db
+          <pre class="demo-transcript" data-demo-transcript><span class="c"># Write the database's own schema into a file.</span>
+<span class="p">$</span> ptah db read --db-url sqlite://app.db | tee schema.sql
 <span class="a">CREATE TABLE "users" (
   "id" INTEGER PRIMARY KEY,
   "email" TEXT NOT NULL
 );</span>
 
-<span class="c"># schema.sql says the same thing. Drift proves it.</span>
+<span class="c"># Drift compares that file with the database it came from.</span>
 <span class="p">$</span> ptah schema drift --schema-file schema.sql \
     --db-url sqlite://app.db
 No schema drift detected.
 
-<span class="c"># Add a column by describing the result, not the change.</span>
+<span class="c"># Now ask for a column, by rewriting the schema you want.</span>
 <span class="p">$</span> cat &gt; schema.sql &lt;&lt;'SQL'
-CREATE TABLE users (
-    id         INTEGER PRIMARY KEY,
-    email      TEXT NOT NULL,
-    created_at TEXT
+CREATE TABLE "users" (
+  "id" INTEGER PRIMARY KEY,
+  "email" TEXT NOT NULL,
+  "created_at" TEXT
 );
 SQL
 
-<span class="c"># Ask what it would take to get there. A dry run executes nothing.</span>
+<span class="c"># The same check now has something to report.</span>
+<span class="p">$</span> ptah schema drift --schema-file schema.sql \
+    --db-url sqlite://app.db
+<span class="e">Schema drift detected (highest severity: warning).</span>
+<span class="m">Failure threshold: all. Failing: true.
+Database: sqlite://app.db</span>
+
+<span class="m">Findings:</span>
+- columns_added: 1 (warning)
+
+<span class="c"># Ask what it would take to close it. A dry run executes nothing.</span>
 <span class="p">$</span> ptah schema apply --schema-file schema.sql \
     --db-url sqlite://app.db --dry-run
 <span class="m">Planned schema changes:</span>
@@ -140,15 +162,7 @@ SQL
 <span class="m">Auto-approval enabled; applying schema changes.</span>
 Schema apply completed successfully.
 
-<span class="c"># Ask the database what it has now.</span>
-<span class="p">$</span> ptah db read --db-url sqlite://app.db
-<span class="a">CREATE TABLE "users" (
-  "id" INTEGER PRIMARY KEY,
-  "email" TEXT NOT NULL,
-  "created_at" TEXT
-);</span>
-
-<span class="c"># The file and the database agree again.</span>
+<span class="c"># And the same check, a third time.</span>
 <span class="p">$</span> ptah schema drift --schema-file schema.sql \
     --db-url sqlite://app.db
 No schema drift detected.
@@ -160,7 +174,9 @@ No schema drift detected.
         <dialog class="demo-modal" data-demo-modal aria-label="Ptah demo, expanded"></dialog>
         <p class="demo-pick" data-demo-pick hidden>
           <button class="demo-pick-btn" type="button" data-demo-scenario="change" aria-pressed="true">Change a schema</button>
-          <button class="demo-pick-btn" type="button" data-demo-scenario="guard" aria-pressed="false">Stop an unsafe one</button>
+          <button class="demo-pick-btn" type="button" data-demo-slot aria-pressed="false" hidden></button>
+          <button class="demo-pick-btn" type="button" data-demo-slot aria-pressed="false" hidden></button>
+          <button class="demo-pick-btn" type="button" data-demo-scenario="inference" aria-pressed="false">Migrate embeddings</button>
         </p>
         <p class="caption" data-demo-caption>Know exactly what your migration will do before it touches the database. The plan is the review surface; drift is the proof.</p>
       </div>

@@ -477,15 +477,54 @@ button {
   display: flex;
   gap: 6px;
 }
+/* A shape and a word. The shape is what the eye finds on a second visit; the
+ * word is what removes the doubt on the first, and Play beside Replay is
+ * exactly the pair a lone triangle and a lone arc would leave ambiguous. */
 .demo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   border: 1px solid var(--termline);
   border-radius: 2px;
   background: none;
   color: var(--termfg);
   font: 500 12px var(--sans);
-  padding: 3px 9px;
+  padding: 3px 8px 3px 6px;
   min-height: 24px;
   cursor: pointer;
+}
+.demo-btn svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+  flex: none;
+}
+.demo-btn .i-play,
+.demo-btn .i-close,
+.demo[data-paused="1"] .i-pause,
+.demo.is-open .i-expand {
+  display: none;
+}
+.demo[data-paused="1"] .i-play,
+.demo.is-open .i-close {
+  display: block;
+}
+.demo[data-paused="1"] span.i-play,
+.demo.is-open span.i-close {
+  display: inline;
+}
+/* The multiplier is the whole control: a word beside it would say what the
+ * number already says, and this is the one button in the bar whose label
+ * changes, so it also reserves the width of the widest of the four values --
+ * a control that grows as you press it moves the buttons beside it. */
+.demo-btn-speed {
+  justify-content: center;
+  padding: 3px 6px;
+}
+[data-demo-speed-label] {
+  min-width: 2.3em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 .demo-btn:hover {
   border-color: var(--termmute);
@@ -495,6 +534,10 @@ button {
   outline-offset: 1px;
 }
 .demo-screen {
+  /* A Go file arrives with tabs in it, and the frame is narrower than an
+   * editor. Four columns pushes an annotation past the edge for no gain; two
+   * indents it just as clearly. */
+  tab-size: 2;
   /* At rest the session is a transcript: its own height, readable top to
    * bottom, selectable and pasteable. While it plays it becomes a shell --
    * fixed height, scrolled to the end -- so the page does not reflow line by
@@ -510,6 +553,13 @@ button {
    * sentence: the reason is the finding, not decoration on it. */
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+/* One line, one block, so a line too long for the frame wraps under its own
+ * indent instead of restarting at column zero. */
+.demo-screen .l {
+  display: block;
+  padding-inline-start: 2ch;
+  text-indent: -2ch;
 }
 /* One height whether or not it is playing, so the block does not jump when the
  * session starts. Scrollable rather than clipped: a reader who looks up from
@@ -1312,13 +1362,41 @@ html:not(.js) .panel-title {
   color: inherit;
   overflow: visible;
 }
+/* The page dims around the frame rather than snapping to a new one. The frame
+ * itself is animated in JavaScript, which is the only place the two positions
+ * are both known; this is the ground it travels over.
+ *
+ * `allow-discrete` is what lets display and the top layer take part, so the
+ * fade-out runs at all. A browser without it gets the old instant swap. */
 .demo-modal::backdrop {
   /* The page's own ground, not a black wash: the demo is part of this page and
    * should not look like a lightbox borrowed from another one. */
   background: color-mix(in oklab, var(--bg) 94%, transparent);
+  opacity: 0;
+  /* Paced with the frame's flight, so the page finishes dimming as the frame
+   * lands rather than well before it. */
+  transition:
+    opacity 420ms ease,
+    display 420ms allow-discrete,
+    overlay 420ms allow-discrete;
+}
+.demo-modal[open]::backdrop {
+  opacity: 1;
+}
+@starting-style {
+  .demo-modal[open]::backdrop {
+    opacity: 0;
+  }
 }
 .demo-modal .term {
   border-color: var(--line);
+}
+/* In flight the frame is between two places and belongs to neither, so it is
+ * lifted out of the page's stacking order for the trip back. */
+.demo.is-flying {
+  position: relative;
+  z-index: 40;
+  will-change: transform;
 }
 /* Expanded, the frame is its final size from the first line. Sizing it to the
  * session instead made it grow a row at a time under a reader who was trying
