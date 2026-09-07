@@ -441,6 +441,141 @@ button {
   color: var(--termacc);
 }
 
+/* ---------- Hero demo ----------
+ *
+ * The scripted session in the hero. Without the script the transcript below is
+ * the page: every command and every line of output is in the markup, which is
+ * also what a screen reader and a search crawler read. The player hides that
+ * copy from sight only, then replays it into .demo-screen.
+ */
+.demo .term-bar {
+  align-items: center;
+  gap: 12px;
+}
+.demo-where {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.demo-sync {
+  margin-inline-start: auto;
+  padding: 1px 7px;
+  border: 1px solid var(--termline);
+  border-radius: 2px;
+  font-size: 11.5px;
+  color: var(--termmute);
+  white-space: nowrap;
+}
+/* Amber, not red: a pending change is the normal state of a migration tool,
+ * not a fault. It is the same amber the prompt uses. */
+.demo-sync[data-state="pending"] {
+  color: var(--termamber);
+  border-color: color-mix(in oklab, var(--termamber) 40%, transparent);
+}
+.demo-controls {
+  display: flex;
+  gap: 6px;
+}
+.demo-btn {
+  border: 1px solid var(--termline);
+  border-radius: 2px;
+  background: none;
+  color: var(--termfg);
+  font: 500 12px var(--sans);
+  padding: 3px 9px;
+  min-height: 24px;
+  cursor: pointer;
+}
+.demo-btn:hover {
+  border-color: var(--termmute);
+}
+.demo-btn:focus-visible {
+  outline: 2px solid var(--termacc);
+  outline-offset: 1px;
+}
+.demo-screen {
+  /* At rest the session is a transcript: its own height, readable top to
+   * bottom, selectable and pasteable. While it plays it becomes a shell --
+   * fixed height, scrolled to the end -- so the page does not reflow line by
+   * line and the newest output stays where the eye already is.
+   *
+   * The height is the only thing that changes. Laying the lines out with flex
+   * to pin them to the bottom looked equivalent and was not: a flex container
+   * makes every child a row, so the `$` span left its command and stood on a
+   * line of its own. */
+  margin: 0;
+  /* Ptah's diagnostics name the consequence and the safer order, so they are
+   * long. Without wrapping they left the frame and the reader got half a
+   * sentence: the reason is the finding, not decoration on it. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.demo.is-playing .demo-screen {
+  /* Tall enough that the longer session fills it and scrolls, short enough
+   * that the shorter one does not sit in a mostly empty frame. */
+  height: 372px;
+  overflow: hidden;
+}
+.demo-cursor {
+  color: var(--termamber);
+}
+.demo-cursor[data-on="0"] {
+  opacity: 0;
+}
+/* The line the database gained. It arrives with the apply, and the tint is the
+ * only thing on this page that marks a moment rather than a kind of text. */
+.demo-screen .n {
+  color: var(--termacc);
+  background: color-mix(in oklab, var(--termacc) 14%, transparent);
+}
+/* The finding that stops the build. Amber rather than the accent: blue is the
+ * SQL Ptah writes, and this is the line that says it will not write any. */
+.demo-screen .e {
+  color: var(--termamber);
+}
+/* The scenario chooser reads as a caption with a choice in it, not as a tab
+ * strip: this page spends its chrome on the terminal, and two words in the
+ * page's own type are enough to say which session is playing. */
+.demo-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-top: 2px;
+}
+.demo-pick-btn {
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: none;
+  padding: 0 0 2px;
+  font: 500 13px var(--sans);
+  color: var(--mute);
+  cursor: pointer;
+}
+.demo-pick-btn:hover {
+  color: var(--fg2);
+}
+.demo-pick-btn[aria-pressed="true"] {
+  color: var(--fg);
+  border-bottom-color: var(--fg);
+}
+.demo-pick-btn:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 3px;
+}
+
+.demo.is-live .demo-transcript {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 .code {
   padding: 18px 22px;
   border: 1px solid var(--line);
@@ -1103,6 +1238,16 @@ html:not(.js) .panel-title {
   .notfound .wrap {
     padding-top: 56px;
     padding-bottom: 72px;
+  }
+}
+
+@media (max-width: 720px) {
+  .demo.is-playing .demo-screen {
+    height: 320px;
+  }
+  .demo .term-bar {
+    flex-wrap: wrap;
+    row-gap: 6px;
   }
 }
 

@@ -250,4 +250,350 @@
         });
     }
   }
+
+  /* ---------- Hero demo ----------
+   *
+   * A scripted `ptah-quick-start` session. Every command and every line of
+   * output here was captured from a real run of the documented quick start;
+   * the same text sits in the markup as a transcript, which is what a reader
+   * without this script gets. Nothing is invented and nothing is executed:
+   * the player replays bytes.
+   *
+   * The one thing it adds beyond a typewriter is the arc. The line you write
+   * into schema.sql and the line `ptah db read` finds in the database are
+   * marked the same way, so the eye connects them across the apply that put
+   * one there because of the other.
+   */
+  var demo = $("[data-demo]");
+  if (demo) {
+    var screen = $("[data-demo-screen]", demo);
+    var syncPill = $("[data-demo-sync]", demo);
+    var controls = $("[data-demo-controls]", demo);
+    var toggleBtn = $("[data-demo-toggle]", demo);
+    var replayBtn = $("[data-demo-replay]", demo);
+    var where = $(".demo-where", demo);
+    var pick = $("[data-demo-pick]");
+    var pickBtns = $$("[data-demo-scenario]");
+    var caption = $("[data-demo-caption]");
+
+    // Kinds: cmd and cont are typed, everything else arrives whole. `new`
+    // marks the added column, in the file and again in the database.
+    var CHANGE = [
+      ["sync", "no drift"],
+      ["cmd", "cat schema.sql"],
+      ["out", "CREATE TABLE users ("],
+      ["out", "    id         INTEGER PRIMARY KEY,"],
+      ["out", "    email      TEXT NOT NULL"],
+      ["out", ");"],
+      ["blank"],
+      ["cmd", "ptah schema drift --schema-file schema.sql \\"],
+      ["cont", "    --db-url sqlite://app.db"],
+      ["out", "No schema drift detected."],
+      ["wait", 1200],
+      ["blank"],
+      ["cmd", "cat > schema.sql <<'SQL'"],
+      ["out", "CREATE TABLE users ("],
+      ["out", "    id         INTEGER PRIMARY KEY,"],
+      ["out", "    email      TEXT NOT NULL,"],
+      ["new", "    created_at TEXT"],
+      ["out", ");"],
+      ["out", "SQL"],
+      ["sync", "drift"],
+      ["wait", 900],
+      ["blank"],
+      ["cmd", "ptah schema apply --schema-file schema.sql \\"],
+      ["cont", "    --db-url sqlite://app.db --dry-run"],
+      ["mute", "Planned schema changes:"],
+      ["sql", 'ALTER TABLE "users" ADD COLUMN "created_at" TEXT;'],
+      ["wait", 1400],
+      ["blank"],
+      ["cmd", "ptah schema apply --schema-file schema.sql \\"],
+      ["cont", "    --db-url sqlite://app.db --auto-approve"],
+      ["mute", "Planned schema changes:"],
+      ["sql", 'ALTER TABLE "users" ADD COLUMN "created_at" TEXT;'],
+      ["mute", "Auto-approval enabled; applying schema changes."],
+      ["wait", 500],
+      ["out", "Schema apply completed successfully."],
+      ["wait", 900],
+      ["blank"],
+      ["cmd", "ptah db read --db-url sqlite://app.db"],
+      ["sql", 'CREATE TABLE "users" ('],
+      ["sql", '  "id" INTEGER PRIMARY KEY,'],
+      ["sql", '  "email" TEXT NOT NULL,'],
+      ["new", '  "created_at" TEXT'],
+      ["sql", ");"],
+      ["wait", 1200],
+      ["blank"],
+      ["cmd", "ptah schema drift --schema-file schema.sql \\"],
+      ["cont", "    --db-url sqlite://app.db"],
+      ["out", "No schema drift detected."],
+      ["sync", "no drift"]
+    ];
+
+    // The other half of "without surprises": the change that does not run.
+    // Captured from `ptah migrations lint` over a directory whose one file
+    // drops a column, exit code 1. The diagnostic is long because it names the
+    // consequence and the safer order; that length is the point, so it wraps
+    // here rather than being trimmed into a slogan.
+    var GUARD = [
+      ["sync", "review"],
+      ["cmd", "cat migrations/1700000100_drop_email.up.sql"],
+      ["sql", 'ALTER TABLE "users" DROP COLUMN "email";'],
+      ["wait", 900],
+      ["blank"],
+      ["cmd", "ptah migrations lint --dir ./migrations \\"],
+      ["cont", "    --dialect postgres"],
+      ["wait", 400],
+      ["mute", "migrations/1700000100_drop_email.up.sql:1 [warning] BC104: dropping a column retires a name application versions already deployed against the old schema still select and insert, so each of them starts failing the moment this migration commits, whether or not the column held any rows; deploy readers that no longer use the column first, then drop it in a later release (dropped column breaks deployed code)"],
+      ["err", "migrations/1700000100_drop_email.up.sql:1 [error] DS102: DROP COLUMN permanently deletes the column's data; deploy readers that no longer use the column first, then drop it in a later release (column dropped)"],
+      ["blank"],
+      ["out", "2 finding(s)."],
+      ["mute", "warning: DS110P ran without the baseline schema it reads, so this analysis is thinner than the same directory would get against a dev database the run can read"],
+      ["sync", "blocked"],
+      ["wait", 700],
+      ["cmd", "echo $?"],
+      ["out", "1"]
+    ];
+
+    var SCENARIOS = {
+      change: {
+        script: CHANGE,
+        where: "sh · ptah-quick-start",
+        caption:
+          "Know exactly what your migration will do before it touches the " +
+          "database. The plan is the review surface; drift is the proof."
+      },
+      guard: {
+        script: GUARD,
+        where: "sh · ptah-ci",
+        caption:
+          "A migration that would delete data is refused before it runs, with " +
+          "the reason and the safer order. Exit code 1 fails the build."
+      }
+    };
+
+    var SCRIPT = CHANGE;
+
+    var CLASS = { mute: "m", sql: "a", new: "n", err: "e" };
+    var at = 0;
+    var timer = null;
+    var blink = null;
+    var paused = false;
+    var playing = false;
+    var seen = false;
+
+    function esc(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // The screen is rebuilt from a list of finished lines plus the one being
+    // typed, so a replay is a reset of that list rather than a DOM rewind.
+    var lines = [];
+    var typing = null;
+
+    function paint() {
+      var html = lines.join("\n");
+      if (typing !== null) {
+        if (html) html += "\n";
+        html +=
+          (typing.cont ? "" : '<span class="p">$</span> ') +
+          esc(typing.text) +
+          '<span class="demo-cursor" data-on="1">\u258d</span>';
+      }
+      screen.innerHTML = html;
+      // A shell keeps the newest line in view. The frame is fixed while it
+      // plays, so the oldest lines leave the top rather than the newest
+      // leaving the bottom.
+      screen.scrollTop = screen.scrollHeight;
+    }
+
+    function commit(kind, text) {
+      var cls = CLASS[kind];
+      var body = esc(text);
+      if (kind === "cmd") body = '<span class="p">$</span> ' + body;
+      lines.push(cls ? '<span class="' + cls + '">' + body + "</span>" : body);
+      // A shell scrolls; the frame is fixed, so the oldest lines go rather
+      // than the newest, which is the half a reader is looking at.
+      while (lines.length > 200) lines.shift();
+      typing = null;
+      paint();
+    }
+
+    function setSync(state) {
+      syncPill.textContent = state;
+      syncPill.setAttribute("data-state", state === "no drift" ? "clear" : "pending");
+    }
+
+    function after(ms, fn) {
+      timer = setTimeout(fn, ms);
+    }
+
+    function type(kind, text, n) {
+      if (paused) return;
+      if (n > text.length) {
+        return after(320, function () {
+          commit(kind, text);
+          after(140, step);
+        });
+      }
+      typing = { text: text.slice(0, n), cont: kind === "cont" };
+      paint();
+      var ch = text.charAt(n - 1);
+      after(ch === " " ? 34 : 20 + Math.random() * 34, function () {
+        type(kind, text, n + 1);
+      });
+    }
+
+    function step() {
+      if (paused) return;
+      var event = SCRIPT[at];
+      if (!event) {
+        // Loop, but only where it started by itself. A reader who pressed Play
+        // asked for one run.
+        if (!autoplays()) {
+          playing = false;
+          label();
+          return;
+        }
+        return after(4200, start);
+      }
+      at++;
+      var kind = event[0];
+      if (kind === "wait") return after(event[1], step);
+      if (kind === "sync") {
+        setSync(event[1]);
+        return after(120, step);
+      }
+      if (kind === "cmd" || kind === "cont") return type(kind, event[1], 0);
+      if (kind === "blank") {
+        lines.push("");
+        paint();
+        return after(60, step);
+      }
+      commit(kind, event[1]);
+      after(70, step);
+    }
+
+    // A finished session, not a slower one. Where movement is unwanted the
+    // answer is the result, not a longer wait for it.
+    function settle() {
+      clearTimeout(timer);
+      demo.classList.remove("is-playing");
+      lines = [];
+      typing = null;
+      for (var i = 0; i < SCRIPT.length; i++) {
+        var event = SCRIPT[i];
+        if (event[0] === "wait") continue;
+        if (event[0] === "sync") setSync(event[1]);
+        else if (event[0] === "blank") lines.push("");
+        else commit(event[0], event[1]);
+      }
+      paint();
+      playing = false;
+      label();
+    }
+
+    function start() {
+      clearTimeout(timer);
+      at = 0;
+      lines = [];
+      typing = null;
+      playing = true;
+      paused = false;
+      demo.classList.add("is-playing");
+      label();
+      paint();
+      step();
+    }
+
+    function label() {
+      var next = !playing || paused ? "Play" : "Pause";
+      toggleBtn.textContent = next;
+      toggleBtn.setAttribute("aria-label", next + " the demo");
+      // While nothing is playing, Replay would do what Play does. One button
+      // for one action keeps the bar to a single row on a phone.
+      replayBtn.hidden = !playing;
+    }
+
+    // Two reasons to hold still, one behaviour. Reduced motion is a stated
+    // preference. A narrow screen is a judgement: the commands wrap there, so
+    // typing reflows the block line by line, it costs a phone battery for a
+    // 30-second story nobody scrolled down to wait for, and the transcript is
+    // the thing a reader can actually take away and paste.
+    var still = window.matchMedia("(prefers-reduced-motion: reduce)");
+    var narrow = window.matchMedia("(max-width: 720px)");
+
+    function autoplays() {
+      return !still.matches && !narrow.matches;
+    }
+
+    function choose(name) {
+      var scenario = SCENARIOS[name];
+      if (!scenario) return;
+      SCRIPT = scenario.script;
+      where.textContent = scenario.where;
+      caption.textContent = scenario.caption;
+      for (var i = 0; i < pickBtns.length; i++) {
+        pickBtns[i].setAttribute(
+          "aria-pressed",
+          pickBtns[i].getAttribute("data-demo-scenario") === name ? "true" : "false"
+        );
+      }
+      // Switching is a request to watch that one, so it plays where the first
+      // one would have played and settles where it would have settled.
+      if (autoplays()) start();
+      else settle();
+    }
+
+    demo.classList.add("is-live");
+    screen.hidden = false;
+    syncPill.hidden = false;
+    controls.hidden = false;
+    pick.hidden = false;
+
+    for (var b = 0; b < pickBtns.length; b++) {
+      pickBtns[b].addEventListener("click", function () {
+        choose(this.getAttribute("data-demo-scenario"));
+      });
+    }
+
+    replayBtn.addEventListener("click", start);
+    toggleBtn.addEventListener("click", function () {
+      if (!playing) return start();
+      paused = !paused;
+      clearTimeout(timer);
+      label();
+      if (!paused) step();
+    });
+
+    settle();
+
+    if (autoplays()) {
+      if (!("IntersectionObserver" in window)) {
+        start();
+      } else {
+        new IntersectionObserver(function (entries) {
+          var visible = entries[0].isIntersecting;
+          if (visible && !seen) {
+            seen = true;
+            start();
+            return;
+          }
+          // Off screen is not paused: the control still says Pause, and coming
+          // back resumes rather than restarting somewhere the reader never saw.
+          if (!playing || paused) return;
+          // Clear before resuming: one chain of timeouts, always. Calling
+          // step() beside a pending one advances the script twice per tick.
+          clearTimeout(timer);
+          if (visible) step();
+        }, { threshold: 0.25 }).observe(demo);
+      }
+    }
+
+    blink = setInterval(function () {
+      var cursor = $(".demo-cursor", screen);
+      if (cursor) cursor.setAttribute("data-on", cursor.getAttribute("data-on") === "1" ? "0" : "1");
+    }, 530);
+    void blink;
+  }
 })();

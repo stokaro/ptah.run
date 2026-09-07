@@ -92,9 +92,37 @@
       </div>
 
       <div class="hero-demo">
-        <div class="term">
-          <div class="term-bar" aria-hidden="true"><span>sh</span><span>ptah-quick-start</span></div>
-          <pre><span class="p">$</span> ptah schema apply --schema-file schema.sql \
+        <div class="term demo" data-demo>
+          <div class="term-bar">
+            <span class="demo-where">sh · ptah-quick-start</span>
+            <span class="demo-sync" data-demo-sync hidden>no drift</span>
+            <span class="demo-controls" data-demo-controls hidden>
+              <button class="demo-btn" type="button" data-demo-toggle aria-label="Pause the demo">Pause</button>
+              <button class="demo-btn" type="button" data-demo-replay>Replay</button>
+            </span>
+          </div>
+
+          <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
+
+          <pre class="demo-transcript" data-demo-transcript><span class="p">$</span> cat schema.sql
+CREATE TABLE users (
+    id         INTEGER PRIMARY KEY,
+    email      TEXT NOT NULL
+);
+
+<span class="p">$</span> ptah schema drift --schema-file schema.sql \
+    --db-url sqlite://app.db
+No schema drift detected.
+
+<span class="p">$</span> cat &gt; schema.sql &lt;&lt;'SQL'
+CREATE TABLE users (
+    id         INTEGER PRIMARY KEY,
+    email      TEXT NOT NULL,
+    created_at TEXT
+);
+SQL
+
+<span class="p">$</span> ptah schema apply --schema-file schema.sql \
     --db-url sqlite://app.db --dry-run
 <span class="m">Planned schema changes:</span>
 <span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span>
@@ -106,13 +134,24 @@
 <span class="m">Auto-approval enabled; applying schema changes.</span>
 Schema apply completed successfully.
 
+<span class="p">$</span> ptah db read --db-url sqlite://app.db
+<span class="a">CREATE TABLE "users" (
+  "id" INTEGER PRIMARY KEY,
+  "email" TEXT NOT NULL,
+  "created_at" TEXT
+);</span>
+
 <span class="p">$</span> ptah schema drift --schema-file schema.sql \
     --db-url sqlite://app.db
 No schema drift detected.
 <span class="p">$</span> echo $?
 0</pre>
         </div>
-        <p class="caption">Know exactly what your migration will do before it touches the database. The plan is the review surface; drift is the proof.</p>
+        <p class="demo-pick" data-demo-pick hidden>
+          <button class="demo-pick-btn" type="button" data-demo-scenario="change" aria-pressed="true">Change a schema</button>
+          <button class="demo-pick-btn" type="button" data-demo-scenario="guard" aria-pressed="false">Stop an unsafe one</button>
+        </p>
+        <p class="caption" data-demo-caption>Know exactly what your migration will do before it touches the database. The plan is the review surface; drift is the proof.</p>
       </div>
     </div>
   </section>

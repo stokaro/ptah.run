@@ -73,6 +73,18 @@ Every command, output line, database name and claim on these pages comes from
 the `stokaro/ptah` repository and its documentation site. When a command or its
 output changes there, change it here. Do not invent output.
 
+The hero demo is held to that rule twice over, because it moves. Both sessions
+were captured by running Ptah, not written: the schema one is the documented
+direct quick start (`docs/site/src/content/docs/start/quick-start-direct.mdx`)
+executed against a real `app.db`, and the lint one is `ptah migrations lint`
+over a one-file directory that drops a column, exit code 1. Every line in
+`assets/site.js` is that output verbatim, including the trailing note about the
+thinner analysis. Re-capture rather than edit when a diagnostic changes wording.
+
+The whole first session is also in `index.html` as a transcript. That is the
+page without JavaScript, and it is what a crawler and a screen reader read; the
+player hides it from sight and replays it. Keep the two in step.
+
 The release version on the pages has three layers. The HTML in git carries
 the last release known when it was committed (`v0.3.0`). At deploy time the
 workflow asks the GitHub API for the latest `stokaro/ptah` release with the
