@@ -73,6 +73,13 @@ Every command, output line, database name and claim on these pages comes from
 the `stokaro/ptah` repository and its documentation site. When a command or its
 output changes there, change it here. Do not invent output.
 
+Each command in the demo is introduced by a `#` comment saying what is about to
+happen. Those lines are the demo's own narration, not Ptah's output, and the
+shell's comment syntax is what makes the difference legible; they are set dimmer
+than Ptah's muted lines for the same reason. Write them as intent -- what the
+reader is about to see and why -- and never as a claim about what a command
+prints, which is the transcript's job.
+
 The hero demo is held to that rule twice over, because it moves. Both sessions
 were captured by running Ptah, not written: the schema one is the documented
 direct quick start (`docs/site/src/content/docs/start/quick-start-direct.mdx`)

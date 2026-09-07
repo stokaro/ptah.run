@@ -105,16 +105,19 @@
 
           <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
 
-          <pre class="demo-transcript" data-demo-transcript><span class="p">$</span> cat schema.sql
+          <pre class="demo-transcript" data-demo-transcript><span class="c"># Start from a schema the database already matches.</span>
+<span class="p">$</span> cat schema.sql
 CREATE TABLE users (
     id         INTEGER PRIMARY KEY,
     email      TEXT NOT NULL
 );
 
+<span class="c"># Prove it. Drift compares the file with the live database.</span>
 <span class="p">$</span> ptah schema drift --schema-file schema.sql \
     --db-url sqlite://app.db
 No schema drift detected.
 
+<span class="c"># Add a column by describing the result, not the change.</span>
 <span class="p">$</span> cat &gt; schema.sql &lt;&lt;'SQL'
 CREATE TABLE users (
     id         INTEGER PRIMARY KEY,
@@ -123,11 +126,13 @@ CREATE TABLE users (
 );
 SQL
 
+<span class="c"># Ask what it would take to get there. A dry run executes nothing.</span>
 <span class="p">$</span> ptah schema apply --schema-file schema.sql \
     --db-url sqlite://app.db --dry-run
 <span class="m">Planned schema changes:</span>
 <span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span>
 
+<span class="c"># Run the reviewed plan. --auto-approve suits a disposable file.</span>
 <span class="p">$</span> ptah schema apply --schema-file schema.sql \
     --db-url sqlite://app.db --auto-approve
 <span class="m">Planned schema changes:</span>
@@ -135,6 +140,7 @@ SQL
 <span class="m">Auto-approval enabled; applying schema changes.</span>
 Schema apply completed successfully.
 
+<span class="c"># Ask the database what it has now.</span>
 <span class="p">$</span> ptah db read --db-url sqlite://app.db
 <span class="a">CREATE TABLE "users" (
   "id" INTEGER PRIMARY KEY,
@@ -142,6 +148,7 @@ Schema apply completed successfully.
   "created_at" TEXT
 );</span>
 
+<span class="c"># The file and the database agree again.</span>
 <span class="p">$</span> ptah schema drift --schema-file schema.sql \
     --db-url sqlite://app.db
 No schema drift detected.

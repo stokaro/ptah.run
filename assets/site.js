@@ -284,17 +284,19 @@
     // marks the added column, in the file and again in the database.
     var CHANGE = [
       ["sync", "no drift"],
+      ["note", "# Start from a schema the database already matches."],
       ["cmd", "cat schema.sql"],
       ["out", "CREATE TABLE users ("],
       ["out", "    id         INTEGER PRIMARY KEY,"],
       ["out", "    email      TEXT NOT NULL"],
       ["out", ");"],
       ["blank"],
+      ["note", "# Prove it. Drift compares the file with the live database."],
       ["cmd", "ptah schema drift --schema-file schema.sql \\"],
       ["cont", "    --db-url sqlite://app.db"],
       ["out", "No schema drift detected."],
-      ["wait", 1200],
       ["blank"],
+      ["note", "# Add a column by describing the result, not the change."],
       ["cmd", "cat > schema.sql <<'SQL'"],
       ["out", "CREATE TABLE users ("],
       ["out", "    id         INTEGER PRIMARY KEY,"],
@@ -303,31 +305,31 @@
       ["out", ");"],
       ["out", "SQL"],
       ["sync", "drift"],
-      ["wait", 900],
       ["blank"],
+      ["note", "# Ask what it would take to get there. A dry run executes nothing."],
       ["cmd", "ptah schema apply --schema-file schema.sql \\"],
       ["cont", "    --db-url sqlite://app.db --dry-run"],
       ["mute", "Planned schema changes:"],
       ["sql", 'ALTER TABLE "users" ADD COLUMN "created_at" TEXT;'],
-      ["wait", 1400],
       ["blank"],
+      ["note", "# Run the reviewed plan. --auto-approve suits a disposable file."],
       ["cmd", "ptah schema apply --schema-file schema.sql \\"],
       ["cont", "    --db-url sqlite://app.db --auto-approve"],
       ["mute", "Planned schema changes:"],
       ["sql", 'ALTER TABLE "users" ADD COLUMN "created_at" TEXT;'],
       ["mute", "Auto-approval enabled; applying schema changes."],
-      ["wait", 500],
+      ["wait", 400],
       ["out", "Schema apply completed successfully."],
-      ["wait", 900],
       ["blank"],
+      ["note", "# Ask the database what it has now."],
       ["cmd", "ptah db read --db-url sqlite://app.db"],
       ["sql", 'CREATE TABLE "users" ('],
       ["sql", '  "id" INTEGER PRIMARY KEY,'],
       ["sql", '  "email" TEXT NOT NULL,'],
       ["new", '  "created_at" TEXT'],
       ["sql", ");"],
-      ["wait", 1200],
       ["blank"],
+      ["note", "# The file and the database agree again."],
       ["cmd", "ptah schema drift --schema-file schema.sql \\"],
       ["cont", "    --db-url sqlite://app.db"],
       ["out", "No schema drift detected."],
@@ -341,10 +343,11 @@
     // here rather than being trimmed into a slogan.
     var GUARD = [
       ["sync", "review"],
+      ["note", "# A migration somebody opened a pull request with."],
       ["cmd", "cat migrations/1700000100_drop_email.up.sql"],
       ["sql", 'ALTER TABLE "users" DROP COLUMN "email";'],
-      ["wait", 900],
       ["blank"],
+      ["note", "# Check it before it reaches a database."],
       ["cmd", "ptah migrations lint --dir ./migrations \\"],
       ["cont", "    --dialect postgres"],
       ["wait", 400],
@@ -354,7 +357,8 @@
       ["out", "2 finding(s)."],
       ["mute", "warning: DS110P ran without the baseline schema it reads, so this analysis is thinner than the same directory would get against a dev database the run can read"],
       ["sync", "blocked"],
-      ["wait", 700],
+      ["blank"],
+      ["note", "# The exit code is what fails the build."],
       ["cmd", "echo $?"],
       ["out", "1"]
     ];
@@ -378,7 +382,7 @@
 
     var SCRIPT = CHANGE;
 
-    var CLASS = { mute: "m", sql: "a", new: "n", err: "e" };
+    var CLASS = { mute: "m", sql: "a", new: "n", err: "e", note: "c" };
 
     // What each event is expected to cost. The typing jitter makes the real
     // figure vary by a few per cent, which is invisible on a two-pixel rule and
@@ -387,6 +391,10 @@
       var kind = event[0];
       if (kind === "wait") return event[1];
       if (kind === "cmd" || kind === "cont") return 460 + event[1].length * 32;
+      // A note is read, not typed, so its cost is reading time. It also
+      // replaced most of the standalone waits: the pause to take something in
+      // now says what is being taken in.
+      if (kind === "note") return 700 + event[1].length * 22;
       if (kind === "blank") return 60;
       if (kind === "sync") return 120;
       return 70;

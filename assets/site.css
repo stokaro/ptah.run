@@ -536,6 +536,12 @@ button {
   color: var(--termacc);
   background: color-mix(in oklab, var(--termacc) 14%, transparent);
 }
+/* The demo's own narration, in the shell's syntax so nobody mistakes it for
+ * something Ptah printed. Dimmer than Ptah's muted output for the same reason:
+ * one of these is the program talking and the other is not. */
+.term .c {
+  color: color-mix(in oklab, var(--termmute) 72%, transparent);
+}
 /* The finding that stops the build. Amber rather than the accent: blue is the
  * SQL Ptah writes, and this is the line that says it will not write any. */
 .demo-screen .e {
