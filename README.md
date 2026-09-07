@@ -150,6 +150,15 @@ under its own indent rather than restarting at column zero. A Go annotation or
 a lint diagnostic broken the other way reads as a new top-level line, which is
 the one thing the shape of a transcript is supposed to tell you.
 
+Lines whose meaning is their alignment are the exception: they scroll sideways
+instead, because a column header wrapped over three lines is not a narrow table.
+Alignment is judged per block, not per line -- `Artifact type:` is followed by
+one space because it is the widest label in its table, and on its own it looks
+like prose -- so a run of output lines is wide when any line in it is, and a
+note, a command or a blank ends the run. `wideRuns()` says it in both
+`assets/site.js` and `scripts/build-sessions.mjs`; when one changes, change the
+other.
+
 The first session is also in `index.html` as a transcript, between
 `<!--session:transcript-->` markers. That is the page without JavaScript, and it
 is what a crawler and a screen reader read; the player hides it from sight and

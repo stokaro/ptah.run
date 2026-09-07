@@ -566,10 +566,27 @@ button {
  * the same way, by scripts/build-sessions.mjs, so a session reads identically
  * whether it was played or was already there. */
 .demo-screen .l,
-.demo-transcript .l {
+.demo-transcript .l,
+.tile-transcript .l {
   display: block;
   padding-inline-start: 2ch;
   text-indent: -2ch;
+}
+/* Except the ones whose meaning is their alignment. A column header wrapped
+ * over three lines is not a narrow table, it is rubble -- which is what a
+ * phone made of `oci inspect`. These scroll sideways, the way they would in a
+ * terminal that narrow, while the prose around them still wraps. */
+.demo-screen .l-wide,
+.demo-transcript .l-wide,
+.tile-transcript .l-wide {
+  white-space: pre;
+  overflow-wrap: normal;
+}
+.demo-screen,
+.demo-transcript,
+.tile-transcript {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
 }
 .demo-transcript {
   white-space: pre-wrap;

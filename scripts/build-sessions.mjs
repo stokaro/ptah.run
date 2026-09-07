@@ -51,8 +51,49 @@ function transcript(script) {
   }
   // One line, one block, exactly as paint() builds the live screen: a printed
   // session and a played one have to wrap the same way, or the page shows the
-  // same transcript two shapes.
-  return rows.map((inner) => `<span class="l">${inner || " "}</span>`).join("");
+  // same transcript two shapes. That includes which lines refuse to wrap --
+  // wideRuns() below is the same rule, and lives in assets/site.js too.
+  const wide = wideRuns(rows);
+  return rows
+    .map((inner, i) => `<span class="${wide[i] ? "l l-wide" : "l"}">${inner || " "}</span>`)
+    .join("");
+}
+
+const COLUMNS = /[^\s] {2,}\S/;
+const TABLE_RULE = /^[-+=|\s]{8,}$/;
+
+// A line whose meaning is its alignment: runs of spaces holding columns apart,
+// or the rule that underlines them.
+function tabular(html) {
+  const text = html.replace(/<[^>]*>/g, "");
+  return COLUMNS.test(text) || TABLE_RULE.test(text);
+}
+
+// Alignment is a property of a block, not of a line. `Artifact type:` is
+// followed by one space because it is the widest label in its table, so on its
+// own it looks like prose and wrapped away from the column it sets. A run of
+// output lines is therefore wide if any line in it is, and a note, a command
+// or a blank ends the run.
+function wideRuns(rows) {
+  const breaks = (html) =>
+    html === "" || /<span class="c">/.test(html) || /<span class="p">/.test(html);
+  const wide = [];
+  let i = 0;
+  while (i < rows.length) {
+    if (breaks(rows[i])) {
+      wide[i] = false;
+      i++;
+      continue;
+    }
+    let end = i;
+    let any = false;
+    while (end < rows.length && !breaks(rows[end])) {
+      if (tabular(rows[end])) any = true;
+      end++;
+    }
+    for (; i < end; i++) wide[i] = any;
+  }
+  return wide;
 }
 
 const controls = `        <span class="demo-controls" data-demo-controls hidden>

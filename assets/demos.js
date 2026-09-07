@@ -466,13 +466,8 @@
     ["blank"],
     ["mute", "Files:"],
     ["mute", "  NAME        MEDIA TYPE                                  SIZE  DIGEST"],
-    ["out", "  schema.hcl  application/vnd.stokaro.ptah.schema.hcl.v1  483   sha256:11719c36907…"],
-    ["note", "# And what the registry itself can do, since not all can do it."],
-    ["cmd", "ptah oci capabilities oci://registry.example/acme/schema"],
-    ["mute", "Referrers API: false"],
-    ["mute", "Detail:        failed to query referrers API: unsupported"],
-    ["out", "Referrers Ptah publishes here are discoverable through its durable tag."],
-    ["mute", "Another OCI client may not find them."]
+    ["out", "  schema.hcl  application/vnd.stokaro.ptah.schema.hcl.v1  483   sha256:11719c3690781f43aadc70a236e5494dd5435e9418b6197e4048fc3a5fd23366"],
+    ["note", "# 843 bytes of manifest answered that. The payload stayed put."]
   ];
 
   // The other end of a registry: a build that reads its schema from one.
@@ -797,8 +792,8 @@
       label: "Read a remote artifact",
       where: "sh · ptah-oci",
       caption:
-        "What an artifact declares, read from the manifest without pulling " +
-        "the payload -- and what the registry behind it can actually do."
+        "What an artifact is, read out of its manifest: the type, the format " +
+        "it was stored in, and the one file it carries. Nothing is downloaded."
     },
     ociConsume: {
       script: OCI_CONSUME,

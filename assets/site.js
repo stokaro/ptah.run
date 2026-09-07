@@ -431,10 +431,56 @@
     // its own indent instead of restarting at column zero. A Go annotation or
     // a lint diagnostic broken that way reads as a new top-level line, which
     // is the one thing the shape of a transcript is supposed to tell you.
-    function row(inner) {
+    // A line whose meaning is its alignment: runs of spaces holding columns
+    // apart, or the rule that underlines them. Wrapping one turns a table into
+    // rubble, which is what a phone did to `oci inspect`, so these scroll
+    // instead while the prose around them keeps wrapping. The same two tests
+    // are in scripts/build-sessions.mjs; when one changes, change the other.
+    var COLUMNS = /[^\s] {2,}\S/;
+    var TABLE_RULE = /^[-+=|\s]{8,}$/;
+
+    function tabular(html) {
+      var text = html.replace(/<[^>]*>/g, "");
+      return COLUMNS.test(text) || TABLE_RULE.test(text);
+    }
+
+    // Alignment is a property of a block, not of a line. `Artifact type:` is
+    // followed by one space because it is the widest label in its table, so on
+    // its own it looks like prose and wrapped away from the column it sets.
+    // A run of output lines is therefore wide if any line in it is, and a
+    // note, a command or a blank ends the run.
+    function wideRuns(rows) {
+      var wide = [];
+      var i = 0;
+      while (i < rows.length) {
+        var html = rows[i];
+        if (html === "" || /<span class="c">/.test(html) || /<span class="p">/.test(html)) {
+          wide[i] = false;
+          i++;
+          continue;
+        }
+        var end = i;
+        var any = false;
+        while (
+          end < rows.length &&
+          rows[end] !== "" &&
+          !/<span class="c">/.test(rows[end]) &&
+          !/<span class="p">/.test(rows[end])
+        ) {
+          if (tabular(rows[end])) any = true;
+          end++;
+        }
+        for (; i < end; i++) wide[i] = any;
+      }
+      return wide;
+    }
+
+    function row(inner, wide) {
       // A blank separator is still a row, and an empty block is neither a line
       // on screen nor a line in what a reader selects out of the frame.
-      return '<span class="l">' + (inner || " ") + "</span>";
+      return (
+        '<span class="' + (wide ? "l l-wide" : "l") + '">' + (inner || " ") + "</span>"
+      );
     }
 
     function paint() {
@@ -464,7 +510,12 @@
       // moves the bottom. A reader who scrolled up to re-read a finding is not
       // dragged back down by the next line; returning to the bottom re-arms it.
       var following = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 24;
-      screen.innerHTML = rows.map(row).join("");
+      var wide = wideRuns(rows);
+      screen.innerHTML = rows
+        .map(function (inner, i) {
+          return row(inner, wide[i]);
+        })
+        .join("");
       if (following) screen.scrollTop = screen.scrollHeight;
     }
 
