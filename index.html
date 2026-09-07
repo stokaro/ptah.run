@@ -51,6 +51,7 @@
     <a class="brand" href="/"><img src="/assets/logo.svg" alt="" width="22" height="22">Ptah</a>
     <nav class="nav" aria-label="Site">
       <ul class="nav-links" id="nav-links">
+        <li><a href="/in-practice/">In practice</a></li>
         <li><a href="https://docs.ptah.run/">Docs</a></li>
         <li><a href="/install/">Install</a></li>
         <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
@@ -92,27 +93,43 @@
       </div>
 
       <div class="hero-demo">
-        <div class="term">
-          <div class="term-bar" aria-hidden="true"><span>sh</span><span>ptah-quick-start</span></div>
-          <pre><span class="p">$</span> ptah schema apply --schema-file schema.sql \
-    --db-url sqlite://app.db --dry-run
-<span class="m">Planned schema changes:</span>
-<span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span>
+        <div class="term demo" data-demo data-demo-autoplay data-demo-scenario="change">
+          <div class="term-bar">
+            <span class="demo-where">sh · ptah-quick-start</span>
+            <span class="demo-sync" data-demo-sync hidden>no drift</span>
+            <span class="demo-controls" data-demo-controls hidden>
+              <button class="demo-btn demo-btn-speed" type="button" data-demo-speed aria-label="Playback speed, 1×. Press to change." title="Speed"><span data-demo-speed-label>1×</span></button>
+              <button class="demo-btn" type="button" data-demo-toggle aria-label="Pause the demo" title="Pause">
+                <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.25 3.5h1.9v9h-1.9zM8.85 3.5h1.9v9h-1.9z" fill="currentColor"/></svg>
+                <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.5 3.4l7 4.6-7 4.6z" fill="currentColor"/></svg>
+                <span class="i-pause">Pause</span><span class="i-play">Play</span>
+              </button>
+              <button class="demo-btn" type="button" data-demo-replay aria-label="Replay the demo" title="Replay">
+                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13.2 8a5.2 5.2 0 1 1-1.75-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12.4 1.9v2.9H9.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Replay</span>
+              </button>
+              <button class="demo-btn" type="button" data-demo-expand aria-expanded="false" aria-label="Expand the demo" title="Expand">
+                <svg class="i-expand" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6.2 2.6H2.6v3.6M9.8 13.4h3.6V9.8M13.4 6.2V2.6H9.8M2.6 9.8v3.6h3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg class="i-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span class="i-expand">Expand</span><span class="i-close">Close</span>
+              </button>
+            </span>
+          </div>
 
-<span class="p">$</span> ptah schema apply --schema-file schema.sql \
-    --db-url sqlite://app.db --auto-approve
-<span class="m">Planned schema changes:</span>
-<span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span>
-<span class="m">Auto-approval enabled; applying schema changes.</span>
-Schema apply completed successfully.
+          <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
 
-<span class="p">$</span> ptah schema drift --schema-file schema.sql \
-    --db-url sqlite://app.db
-No schema drift detected.
-<span class="p">$</span> echo $?
-0</pre>
+          <pre class="demo-transcript" data-demo-transcript><!--session:transcript--><span class="l"><span class="c"># Write the database's own schema into a file.</span></span><span class="l"><span class="p">$</span> ptah db read --db-url sqlite://app.db | tee schema.sql</span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># Drift compares that file with the database it came from.</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span><span class="l"> </span><span class="l"><span class="c"># Now ask for a column, by rewriting the schema you want.</span></span><span class="l"><span class="p">$</span> cat &gt; schema.sql &lt;&lt;'SQL'</span><span class="l">CREATE TABLE "users" (</span><span class="l">  "id" INTEGER PRIMARY KEY,</span><span class="l">  "email" TEXT NOT NULL,</span><span class="l"><span class="n">  "created_at" TEXT</span></span><span class="l">);</span><span class="l">SQL</span><span class="l"> </span><span class="l"><span class="c"># The same check now has something to report.</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l"><span class="e">Schema drift detected (highest severity: warning).</span></span><span class="l"><span class="m">Failure threshold: all. Failing: true.</span></span><span class="l"><span class="m">Database: sqlite://app.db</span></span><span class="l"> </span><span class="l"><span class="m">Findings:</span></span><span class="l"><span class="n">- columns_added: 1 (warning)</span></span><span class="l"> </span><span class="l"><span class="c"># Ask what it would take to close it. A dry run executes nothing.</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --dry-run</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"> </span><span class="l"><span class="c"># Run the reviewed plan. --auto-approve suits a disposable file.</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --auto-approve</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"><span class="m">Auto-approval enabled; applying schema changes.</span></span><span class="l">Schema apply completed successfully.</span><span class="l"> </span><span class="l"><span class="c"># And the same check, a third time.</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span><!--/session:transcript--></pre>
+
+          <div class="demo-progress" data-demo-progress hidden aria-hidden="true"><span></span></div>
         </div>
-        <p class="caption">Know exactly what your migration will do before it touches the database. The plan is the review surface; drift is the proof.</p>
+        <dialog class="demo-modal" data-demo-modal aria-label="Ptah demo, expanded"></dialog>
+        <p class="demo-pick" data-demo-pick hidden>
+          <button class="demo-pick-btn" type="button" data-demo-scenario="change" aria-pressed="true">Change a schema</button>
+          <button class="demo-pick-btn" type="button" data-demo-slot aria-pressed="false" hidden></button>
+          <button class="demo-pick-btn" type="button" data-demo-slot aria-pressed="false" hidden></button>
+          <button class="demo-pick-btn" type="button" data-demo-scenario="inference" aria-pressed="false">Migrate embeddings</button>
+        </p>
+        <p class="caption" data-demo-caption>Know exactly what your migration will do before it touches the database. The plan is the review surface; drift is the proof.</p>
       </div>
     </div>
   </section>
@@ -228,6 +245,7 @@ ptah inference cutover
 </footer>
 
 <div class="sr-only" role="status" id="copy-status"></div>
+<script src="/assets/runs.js" defer></script>
 <script src="/assets/site.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ptah in practice</title>
+<meta name="description" content="Twenty-four recorded runs of Ptah: schema drift, versioned migrations, embedding cutover, OCI artifacts, format conversion and the Atlas-compatible surface. Read one, or watch it typed.">
+<link rel="canonical" href="https://ptah.run/in-practice/">
+<meta name="go-import" content="ptah.run git https://github.com/stokaro/ptah">
+<meta name="go-source" content="ptah.run https://github.com/stokaro/ptah https://github.com/stokaro/ptah/tree/master{/dir} https://github.com/stokaro/ptah/blob/master{/dir}/{file}#L{line}">
+<meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161311" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ptah">
+<meta property="og:title" content="Ptah in practice">
+<meta property="og:description" content="Twenty-four recorded runs of Ptah. Read one, or watch it typed.">
+<meta property="og:url" content="https://ptah.run/in-practice/">
+<meta property="og:image" content="https://ptah.run/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Ptah ASCII wordmark above the line: Database migrations without surprises.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="/assets/fonts/instrument-sans-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script>(function(){var d=document.documentElement,t=null;try{t=localStorage.getItem("ptah-theme")}catch(e){}if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.setAttribute("data-theme",t);d.classList.add("js")})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/assets/logo.svg" alt="" width="22" height="22">Ptah</a>
+    <nav class="nav" aria-label="Site">
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/in-practice/" aria-current="page">In practice</a></li>
+        <li><a href="https://docs.ptah.run/">Docs</a></li>
+        <li><a href="/install/">Install</a></li>
+        <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
+      </ul>
+      <button class="icon-btn theme-btn" type="button" aria-label="Dark theme" aria-pressed="false">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/></svg>
+      </button>
+      <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">
+        <svg class="icon-menu" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg class="icon-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="page">
+  <div class="wrap">
+
+    <div class="page-head">
+      <h1>Ptah in practice</h1>
+      <p class="lede">24 things Ptah does, recorded as they happened rather than written up afterwards. Every command and every line of output came off a real run; nothing here is staged and nothing is invented. Open one to read it, or press Play to watch it typed.</p>
+      <p class="meta"><span>Two are always on the home page. The rest take turns there, two to a visit.</span></p>
+    </div>
+
+    <ul class="tiles">
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="change">
+            <span class="tile-head">
+              <span class="tile-name">Change a schema</span><span class="tile-tag">Home page</span>
+            </span>
+            <span class="tile-note">You write the schema you want. Ptah says what that will cost before anything runs, and drift says whether the database agrees afterwards.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah db read --db-url sqlite://app.db | tee schema.sql</span>
+            <span class="tile-meta">7 commands · 43 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Change a schema transcript"><span class="l"><span class="c"># Write the database's own schema into a file.</span></span><span class="l"><span class="p">$</span> ptah db read --db-url sqlite://app.db | tee schema.sql</span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># Drift compares that file with the database it came from.</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span><span class="l"> </span><span class="l"><span class="c"># Now ask for a column, by rewriting the schema you want.</span></span><span class="l"><span class="p">$</span> cat &gt; schema.sql &lt;&lt;'SQL'</span><span class="l">CREATE TABLE "users" (</span><span class="l">  "id" INTEGER PRIMARY KEY,</span><span class="l">  "email" TEXT NOT NULL,</span><span class="l"><span class="n">  "created_at" TEXT</span></span><span class="l">);</span><span class="l">SQL</span><span class="l"> </span><span class="l"><span class="c"># The same check now has something to report.</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l"><span class="e">Schema drift detected (highest severity: warning).</span></span><span class="l"><span class="m">Failure threshold: all. Failing: true.</span></span><span class="l"><span class="m">Database: sqlite://app.db</span></span><span class="l"> </span><span class="l"><span class="m">Findings:</span></span><span class="l"><span class="n">- columns_added: 1 (warning)</span></span><span class="l"> </span><span class="l"><span class="c"># Ask what it would take to close it. A dry run executes nothing.</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --dry-run</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"> </span><span class="l"><span class="c"># Run the reviewed plan. --auto-approve suits a disposable file.</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --auto-approve</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"><span class="m">Auto-approval enabled; applying schema changes.</span></span><span class="l">Schema apply completed successfully.</span><span class="l"> </span><span class="l"><span class="c"># And the same check, a third time.</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="inference">
+            <span class="tile-head">
+              <span class="tile-name">Migrate embeddings</span><span class="tile-tag">Home page</span>
+            </span>
+            <span class="tile-note">Build the new embeddings beside the ones being served, check them, then cut over. The cutover will not run without an approval naming that exact plan.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah inference plan</span>
+            <span class="tile-meta">10 commands · 38 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Migrate embeddings transcript"><span class="l"><span class="c"># A new embedding model. Plan first: what would this take?</span></span><span class="l"><span class="p">$</span> ptah inference plan</span><span class="l">source.estimated_rows = 3 (measured)</span><span class="l">target.capability.vector_type = true (measured)</span><span class="l"><span class="a">[backfill] embed 3 in-scope source rows</span></span><span class="l"><span class="m">Consistency mode: outbox</span></span><span class="l"> </span><span class="l"><span class="c"># Build the new generation beside the one being served.</span></span><span class="l"><span class="p">$</span> ptah inference prepare</span><span class="l">prepared run quick-start for generation b7cc9eb5c7d2</span><span class="l"><span class="m">  - snapshot boundary: 753</span></span><span class="l"><span class="p">$</span> ptah inference backfill --batch-rows 10</span><span class="l">backfill finished: 3 scanned, 3 embedded, 0 skipped</span><span class="l"> </span><span class="l"><span class="c"># Rows that changed while it ran are caught up, then indexed.</span></span><span class="l"><span class="p">$</span> ptah inference catchup --batch-rows 10</span><span class="l">caught up to transaction 761: 0 changed rows, 0 tombstoned</span><span class="l"><span class="p">$</span> ptah inference index</span><span class="l">generation b7cc9eb5c7d2 has a valid index</span><span class="l"> </span><span class="l"><span class="c"># Check it before anything reads it.</span></span><span class="l"><span class="p">$</span> ptah inference verify</span><span class="l">3 source rows, 3 target rows</span><span class="l"><span class="n">every deterministic layer passed</span></span><span class="l"> </span><span class="l"><span class="c"># Queries still read the old vectors. Cutover is its own step.</span></span><span class="l"><span class="p">$</span> ptah inference cutover</span><span class="l"><span class="m">plan 5bbecb32c113</span></span><span class="l"><span class="e">cutover refused:</span></span><span class="l"><span class="e">  - this policy requires an approval and none was given</span></span><span class="l"><span class="e">error: cutover refused</span></span><span class="l"> </span><span class="l"><span class="c"># Approve that plan by its digest, and only that one.</span></span><span class="l"><span class="p">$</span> export PTAH_APPROVE=5bbecb32c113</span><span class="l"><span class="p">$</span> ptah inference cutover --approver 'quick-start check'</span><span class="l"><span class="n">queries now read generation b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866 (plan 5bbecb32c113)</span></span><span class="l"><span class="m">  - this is the first generation over this target, so there is no previous one to keep current and nothing to roll back to</span></span><span class="l"> </span><span class="l"><span class="c"># The pointer the queries follow now names it.</span></span><span class="l"><span class="p">$</span> psql -c 'SELECT target_table, active_generation FROM ptah_embedding_pointer;'</span><span class="l l-wide"><span class="m"> target_table |                        active_generation</span></span><span class="l l-wide"><span class="m">--------------+------------------------------------------------------------------</span></span><span class="l l-wide"><span class="n"> docs         | b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866</span></span><span class="l l-wide"><span class="m">(1 row)</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="guard">
+            <span class="tile-head">
+              <span class="tile-name">Stop an unsafe one</span>
+            </span>
+            <span class="tile-note">Someone opened a pull request that drops a column. This is the build failing, with the reason and the order that would have been safe.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> cat migrations/1700000100_drop_email.up.sql</span>
+            <span class="tile-meta">3 commands · 14 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Stop an unsafe one transcript"><span class="l"><span class="c"># A pull request adds this migration.</span></span><span class="l"><span class="p">$</span> cat migrations/1700000100_drop_email.up.sql</span><span class="l"><span class="a">ALTER TABLE "users" DROP COLUMN "email";</span></span><span class="l"> </span><span class="l"><span class="c"># Check it before it reaches a database.</span></span><span class="l"><span class="p">$</span> ptah migrations lint --dir ./migrations \</span><span class="l">    --dialect postgres</span><span class="l"><span class="m">migrations/1700000100_drop_email.up.sql:1 [warning] BC104: dropping a column retires a name application versions already deployed against the old schema still select and insert, so each of them starts failing the moment this migration commits, whether or not the column held any rows; deploy readers that no longer use the column first, then drop it in a later release (dropped column breaks deployed code)</span></span><span class="l"><span class="e">migrations/1700000100_drop_email.up.sql:1 [error] DS102: DROP COLUMN permanently deletes the column's data; deploy readers that no longer use the column first, then drop it in a later release (column dropped)</span></span><span class="l"> </span><span class="l">2 finding(s).</span><span class="l"><span class="m">warning: DS110P ran without the baseline schema it reads, so this analysis is thinner than the same directory would get against a dev database the run can read</span></span><span class="l"> </span><span class="l"><span class="c"># The exit code is what fails the build.</span></span><span class="l"><span class="p">$</span> echo $?</span><span class="l">1</span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="entities">
+            <span class="tile-head">
+              <span class="tile-name">Go structs to SQL</span>
+            </span>
+            <span class="tile-note">One Go struct, two engines. PostgreSQL gets a real enum type; SQLite gets the CHECK constraint that means the same thing.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> cat entities/user.go</span>
+            <span class="tile-meta">3 commands · 34 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Go structs to SQL transcript"><span class="l"><span class="c"># The schema is a Go struct. The annotations are the declaration.</span></span><span class="l"><span class="p">$</span> cat entities/user.go</span><span class="l"><span class="m">package entities</span></span><span class="l"> </span><span class="l"><span class="a">//ptah:schema:table name="users"</span></span><span class="l"><span class="m">type User struct {</span></span><span class="l"><span class="a">	//ptah:schema:field name="id" type="SERIAL" primary="true"</span></span><span class="l"><span class="m">	ID int64</span></span><span class="l"><span class="a">	//ptah:schema:field name="email" type="VARCHAR(255)" not_null="true"</span></span><span class="l"><span class="m">	Email string</span></span><span class="l"><span class="a">	//ptah:schema:field name="plan" type="ENUM" enum="free,team,enterprise"</span></span><span class="l"><span class="m">	Plan string</span></span><span class="l"><span class="m">}</span></span><span class="l"> </span><span class="l"><span class="c"># Render it for PostgreSQL.</span></span><span class="l"><span class="p">$</span> ptah schema render --root-dir . --dialect postgres</span><span class="l"><span class="m">-- Statement 1/2</span></span><span class="l"><span class="n">CREATE TYPE "enum_user_plan" AS ENUM ('free', 'team', 'enterprise');</span></span><span class="l"> </span><span class="l"><span class="m">-- Statement 2/2</span></span><span class="l"><span class="m">-- POSTGRES TABLE: users --</span></span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" SERIAL PRIMARY KEY NOT NULL,</span></span><span class="l"><span class="a">  "email" VARCHAR(255) NOT NULL,</span></span><span class="l"><span class="n">  "plan" enum_user_plan</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># The same file, one flag apart.</span></span><span class="l"><span class="p">$</span> ptah schema render --root-dir . --dialect sqlite</span><span class="l"><span class="m">-- Statement 1/1</span></span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL,</span></span><span class="l"><span class="n">  "plan" TEXT CHECK (plan IN ('free', 'team', 'enterprise'))</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># No enum type in SQLite, so it is a CHECK. Nothing was dropped.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="versioned">
+            <span class="tile-head">
+              <span class="tile-name">Write a migration</span>
+            </span>
+            <span class="tile-note">The other route. Ptah writes the up and the down, runs what is pending, and remembers what it ran.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah migrations generate --root-dir ./entities</span>
+            <span class="tile-meta">3 commands · 25 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Write a migration transcript"><span class="l"><span class="c"># Turn the declaration into a versioned migration.</span></span><span class="l"><span class="p">$</span> ptah migrations generate --root-dir ./entities \</span><span class="l l-wide">    --db-url sqlite://app.db --migrations-dir ./migrations \</span><span class="l l-wide">    --name create_users_and_posts</span><span class="l l-wide">Generated migration files for sqlite://app.db:</span><span class="l l-wide"><span class="m">UP:   /tmp/app/migrations/1788809709_create_users_and_posts.up.sql</span></span><span class="l l-wide"><span class="m">DOWN: /tmp/app/migrations/1788809709_create_users_and_posts.down.sql</span></span><span class="l"> </span><span class="l"><span class="c"># A down file too, written at the same time as the up.</span></span><span class="l"><span class="p">$</span> ptah migrations up --db-url sqlite://app.db \</span><span class="l">    --migrations-dir ./migrations</span><span class="l"><span class="m">=== MIGRATE UP ===</span></span><span class="l"><span class="m">Current version: 0</span></span><span class="l"><span class="m">Total migrations: 1</span></span><span class="l"><span class="m">Pending migrations: 1</span></span><span class="l"> </span><span class="l">✅ Migrations completed successfully!</span><span class="l"><span class="n">Database is now at version: 1788809709</span></span><span class="l"> </span><span class="l"><span class="c"># And the revision table agrees.</span></span><span class="l"><span class="p">$</span> ptah migrations status --db-url sqlite://app.db \</span><span class="l">    --migrations-dir ./migrations</span><span class="l"><span class="m">=== MIGRATION STATUS ===</span></span><span class="l"><span class="m">Database: ***</span></span><span class="l"><span class="m">Current Version: 1788809709</span></span><span class="l"><span class="m">Applied Migrations: 1</span></span><span class="l"><span class="n">Pending Migrations: 0</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="adopt">
+            <span class="tile-head">
+              <span class="tile-name">Adopt a database</span>
+            </span>
+            <span class="tile-note">A database nobody ever declared. Point Ptah at it and the Go comes back, constraint names and referential actions included.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah introspect --db-url sqlite://app.db --out ./models</span>
+            <span class="tile-meta">2 commands · 20 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Adopt a database transcript"><span class="l"><span class="c"># A database nobody ever wrote a schema file for.</span></span><span class="l"><span class="p">$</span> ptah introspect --db-url sqlite://app.db --out ./models</span><span class="l">Generated 2 Go file(s) in /tmp/app/models</span><span class="l"><span class="m">Imported 2 table(s), 5 field(s), 0 enum(s)</span></span><span class="l"> </span><span class="l"><span class="c"># What it wrote is the annotated Go you would have written.</span></span><span class="l"><span class="p">$</span> cat models/posts.go</span><span class="l"><span class="m">// Code generated by ptah introspect; DO NOT EDIT.</span></span><span class="l"> </span><span class="l"><span class="m">package models</span></span><span class="l"> </span><span class="l"><span class="a">//ptah:schema:table name="posts"</span></span><span class="l"><span class="m">type Posts struct {</span></span><span class="l"><span class="a">	//ptah:schema:field name="id" type="INTEGER" primary="true"</span></span><span class="l"><span class="m">	Id *int</span></span><span class="l"><span class="n">	//ptah:schema:field name="user_id" type="INT" not_null="true" foreign="users(id)" foreign_key_name="fk_posts_user_id" on_delete="NO ACTION" on_update="NO ACTION"</span></span><span class="l"><span class="m">	UserId int</span></span><span class="l"><span class="a">	//ptah:schema:field name="title" type="TEXT" not_null="true"</span></span><span class="l"><span class="m">	Title string</span></span><span class="l"><span class="m">}</span></span><span class="l"> </span><span class="l"><span class="c"># The constraint came back with its name and its actions.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="diagram">
+            <span class="tile-head">
+              <span class="tile-name">Draw the schema</span>
+            </span>
+            <span class="tile-note">The same annotations, drawn. The arrows come off the foreign keys, so the picture cannot disagree with the schema.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah viz --root-dir ./entities --format mermaid</span>
+            <span class="tile-meta">1 command · 15 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Draw the schema transcript"><span class="l"><span class="c"># The declaration is also a diagram.</span></span><span class="l"><span class="p">$</span> ptah viz --root-dir ./entities --format mermaid \</span><span class="l">    --include-columns</span><span class="l">erDiagram</span><span class="l">  users {</span><span class="l">    SERIAL id PK</span><span class="l">    VARCHAR_255 email</span><span class="l">  }</span><span class="l">  posts {</span><span class="l">    SERIAL id PK</span><span class="l">    INT user_id FK</span><span class="l">    VARCHAR_200 title</span><span class="l">  }</span><span class="l"><span class="n">  users ||--o{ posts : "fk_posts_user_id"</span></span><span class="l"> </span><span class="l"><span class="c"># The relationship is read off the foreign key, not a second file.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="api">
+            <span class="tile-head">
+              <span class="tile-name">Export a GraphQL API</span>
+            </span>
+            <span class="tile-note">The tables already describe the API. A foreign key arrives as a relation field, and nothing has to be kept in step by hand.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema export --to graphql --root-dir ./entities</span>
+            <span class="tile-meta">2 commands · 20 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Export a GraphQL API transcript"><span class="l"><span class="c"># The tables already describe the API that reads them.</span></span><span class="l"><span class="p">$</span> ptah schema export --to graphql --root-dir ./entities \</span><span class="l">    --out schema.graphql</span><span class="l">Exported GraphQL schema to /tmp/app/schema.graphql</span><span class="l"><span class="m">Found 2 table(s), 5 field(s), 0 enum(s)</span></span><span class="l"><span class="p">$</span> cat schema.graphql</span><span class="l"><span class="m"># Code generated by ptah; DO NOT EDIT.</span></span><span class="l"> </span><span class="l"><span class="a">type User {</span></span><span class="l"><span class="a">  id: ID!</span></span><span class="l"><span class="a">  email: String!</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="a">type Post {</span></span><span class="l"><span class="a">  id: ID!</span></span><span class="l"><span class="a">  user_id: Int!</span></span><span class="l"><span class="a">  title: String!</span></span><span class="l"><span class="n">  user: User!</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="c"># The last field is the foreign key, read as a relation.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="dbml">
+            <span class="tile-head">
+              <span class="tile-name">Export to DBML</span>
+            </span>
+            <span class="tile-note">Your diagramming tool wants DBML. One flag away, and so are HCL, OpenAPI, GraphQL, Protobuf and Markdown.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema export --to dbml --root-dir ./entities</span>
+            <span class="tile-meta">2 commands · 19 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Export to DBML transcript"><span class="l"><span class="c"># A diagramming tool wants DBML instead. Change one flag.</span></span><span class="l"><span class="p">$</span> ptah schema export --to dbml --root-dir ./entities \</span><span class="l">    --out schema.dbml</span><span class="l">Exported DBML schema to /tmp/app/schema.dbml</span><span class="l"><span class="m">Found 2 table(s), 5 field(s), 0 enum(s)</span></span><span class="l"><span class="p">$</span> cat schema.dbml</span><span class="l"><span class="a">Table "posts" {</span></span><span class="l"><span class="a">  "id" SERIAL [pk]</span></span><span class="l"><span class="a">  "user_id" INT [not null]</span></span><span class="l"><span class="a">  "title" VARCHAR(200) [not null]</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="a">Table "users" {</span></span><span class="l"><span class="a">  "id" SERIAL [pk]</span></span><span class="l"><span class="a">  "email" VARCHAR(255) [not null]</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="n">Ref "posts"."user_id" &gt; "users"."id"</span></span><span class="l"> </span><span class="l"><span class="c"># Nothing was described twice to get this.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="capabilities">
+            <span class="tile-head">
+              <span class="tile-name">Ask what it supports</span>
+            </span>
+            <span class="tile-note">Ask what Ptah worked out about the server it is talking to, and where each answer came from. Nothing about a target is guessed.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah db capabilities --db-url sqlite://app.db</span>
+            <span class="tile-meta">1 command · 17 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Ask what it supports transcript"><span class="l"><span class="c"># Ask what Ptah resolved for the server it is talking to.</span></span><span class="l"><span class="p">$</span> ptah db capabilities --db-url sqlite://app.db</span><span class="l l-wide"><span class="m">Dialect:            sqlite</span></span><span class="l l-wide"><span class="m">Server version:     3.53.4</span></span><span class="l l-wide"><span class="m">Capability preset:  SQLite3 (sqlite)</span></span><span class="l l-wide"><span class="m">Preset source:      version-ladder</span></span><span class="l l-wide">Support level:      certified</span><span class="l"> </span><span class="l l-wide"><span class="m">Behavior:</span></span><span class="l l-wide"><span class="m">  identifier_limit       unlimited</span></span><span class="l l-wide"><span class="n">  enum_modeling          unsupported</span></span><span class="l l-wide"><span class="m">  foreign_key_reference  unique</span></span><span class="l"> </span><span class="l l-wide"><span class="m">Capabilities:</span></span><span class="l l-wide"><span class="m">  advisory_locks                          unsupported</span></span><span class="l l-wide"><span class="m">  catalog_partitions                      supported</span></span><span class="l"> </span><span class="l"><span class="c"># enum_modeling is why a declared enum arrives here as a CHECK.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="stats">
+            <span class="tile-head">
+              <span class="tile-name">Feed a dashboard</span>
+            </span>
+            <span class="tile-note">Schema shape as numbers your metrics pipeline already knows how to chart. Counts of objects, never of rows.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema stats --db-url sqlite://app.db</span>
+            <span class="tile-meta">1 command · 12 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Feed a dashboard transcript"><span class="l"><span class="c"># Schema shape, in a format a metrics pipeline already reads.</span></span><span class="l"><span class="p">$</span> ptah schema stats --db-url sqlite://app.db</span><span class="l"><span class="m"># HELP ptah_schema_tables Tables.</span></span><span class="l"><span class="m"># TYPE ptah_schema_tables gauge</span></span><span class="l"><span class="n">ptah_schema_tables{dialect="sqlite"} 2</span></span><span class="l"><span class="m"># HELP ptah_schema_columns Columns across all tables.</span></span><span class="l"><span class="m"># TYPE ptah_schema_columns gauge</span></span><span class="l"><span class="n">ptah_schema_columns{dialect="sqlite"} 5</span></span><span class="l"><span class="m"># HELP ptah_schema_indexes Indexes.</span></span><span class="l"><span class="m"># TYPE ptah_schema_indexes gauge</span></span><span class="l"><span class="m">ptah_schema_indexes{dialect="sqlite"} 0</span></span><span class="l"> </span><span class="l"><span class="c"># Counts of objects, never of rows. Shape, not contents.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="lineage">
+            <span class="tile-head">
+              <span class="tile-name">Trace a column</span>
+            </span>
+            <span class="tile-note">Before you drop a column, find out what reads it. The analysis is static: without a database URL it contacts nothing.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema lineage --schema-file schema.sql</span>
+            <span class="tile-meta">1 command · 7 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Trace a column transcript"><span class="l"><span class="c"># Which view columns depend on which base columns?</span></span><span class="l"><span class="p">$</span> ptah schema lineage --schema-file schema.sql \</span><span class="l l-wide">    --dialect sqlite</span><span class="l l-wide"><span class="m">SOURCE       FEEDS               KIND</span></span><span class="l l-wide"><span class="n">users.email  active_users.email  view</span></span><span class="l l-wide">users.id     active_users.id     view</span><span class="l"> </span><span class="l"><span class="c"># The analysis is static: without --db-url it contacts nothing.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="approve">
+            <span class="tile-head">
+              <span class="tile-name">Sign off a plan</span>
+            </span>
+            <span class="tile-note">Sign the plan with an SSH key. Change one identifier in it afterwards and it stops verifying, which is the case a review gate exists to catch.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema plan --schema-file schema.sql</span>
+            <span class="tile-meta">5 commands · 23 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Sign off a plan transcript"><span class="l"><span class="c"># Save the plan, so what is reviewed is what runs.</span></span><span class="l"><span class="p">$</span> ptah schema plan --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --name add-active-users \</span><span class="l">    --output plan.json</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL,</span></span><span class="l"><span class="a">  "legacy_ref" TEXT</span></span><span class="l"><span class="a">);</span></span><span class="l">Plan saved to file://plan.json</span><span class="l"> </span><span class="l"><span class="c"># Sign it. Ptah never reads the key; ssh-keygen does.</span></span><span class="l"><span class="p">$</span> ptah schema approve --plan plan.json --key ./release_key</span><span class="l">Approved plan.json</span><span class="l"><span class="m">Signature: plan.json.sig</span></span><span class="l"><span class="p">$</span> ptah schema verify-approval --plan plan.json</span><span class="l">Approved by release@example.com</span><span class="l"><span class="m">Plan digest: cb74d5837d3efb8c1a8c93bd930fd0321d12abc5e13fd731ff129c43bf0bfc41</span></span><span class="l"> </span><span class="l"><span class="c"># Now change one identifier in the approved plan.</span></span><span class="l"><span class="p">$</span> sed -i 's/legacy_ref/legacy_id/g' plan.json</span><span class="l"><span class="p">$</span> ptah schema verify-approval --plan plan.json</span><span class="l"><span class="e">error: approval does not verify against .ptah/allowed_signers: either the plan changed after it was approved, or it was signed by a key that file does not list</span></span><span class="l"> </span><span class="l"><span class="c"># Exit 2. An edited plan is a plan nobody approved.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="compat">
+            <span class="tile-head">
+              <span class="tile-name">Run Atlas scripts</span>
+            </span>
+            <span class="tile-note">An Atlas pipeline, untouched. Same flags, same directory, same atlas.sum, and the native surface still underneath.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah-compat migrate diff add_users --dir file://migrations</span>
+            <span class="tile-meta">3 commands · 16 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Run Atlas scripts transcript"><span class="l"><span class="c"># An existing Atlas pipeline, and the same flags.</span></span><span class="l"><span class="p">$</span> ptah-compat migrate diff add_users --dir file://migrations \</span><span class="l">    --to file://schema.sql \</span><span class="l">    --dev-url "sqlite://dev.db?mode=memory"</span><span class="l">Created migration file: /tmp/app/migrations/20260907193826_add_users.sql</span><span class="l"><span class="m">Updated migration checksum: /tmp/app/migrations/atlas.sum</span></span><span class="l"> </span><span class="l"><span class="c"># It wrote an Atlas directory: the timestamped file, and atlas.sum.</span></span><span class="l"><span class="p">$</span> cat migrations/atlas.sum</span><span class="l"><span class="m">h1:9q+8PcnP03kKT2aZzOj4MHlWEilRmbPXaScNvs2FJzI=</span></span><span class="l"><span class="m">20260907193826_add_users.sql h1:eXKVFuXvHFnneZKiWkpyJSHeF5q8KlZCCXJqM7JNymE=</span></span><span class="l"> </span><span class="l"><span class="c"># And apply reads that same directory.</span></span><span class="l"><span class="p">$</span> ptah-compat migrate apply --dir file://migrations \</span><span class="l">    --url sqlite://app.db</span><span class="l"><span class="m">Migrating to version 20260907193826 from 1 pending migrations.</span></span><span class="l">Migration complete. Current version: 20260907193826</span><span class="l"> </span><span class="l"><span class="c"># No script changed. The native surface is still there underneath.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="ociPublish">
+            <span class="tile-head">
+              <span class="tile-name">Publish the schema</span>
+            </span>
+            <span class="tile-note">Push the schema itself. Back comes a digest, the tags you asked for and no others, and a moving tag that resolves to one that cannot move.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema push oci://registry.example/acme/schema:v1</span>
+            <span class="tile-meta">3 commands · 14 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Publish the schema transcript"><span class="l"><span class="c"># Publish the schema itself, as an artifact with a digest.</span></span><span class="l"><span class="p">$</span> ptah schema push oci://registry.example/acme/schema:v1 \</span><span class="l">    --schema-file schema.sql --dialect sqlite --latest</span><span class="l">Pushed schema as oci://registry.example/acme/schema:v1</span><span class="l"><span class="n">Digest: sha256:66fed834333daafa24448c7c6b5fe548c4f429d036977194f5b417c505fb933f</span></span><span class="l"><span class="m">Version: </span></span><span class="l"><span class="m">Tags: [v1 latest]</span></span><span class="l"> </span><span class="l"><span class="c"># Two tags now point at it, and only the two that were asked for.</span></span><span class="l"><span class="p">$</span> ptah oci tags oci://registry.example/acme/schema</span><span class="l">latest</span><span class="l">v1</span><span class="l"> </span><span class="l"><span class="c"># A moving tag resolves to the digest that cannot move.</span></span><span class="l"><span class="p">$</span> ptah oci resolve oci://registry.example/acme/schema:latest</span><span class="l"><span class="n">oci://registry.example/acme/schema@sha256:66fed834333daafa24448c7c6b5fe548c4f429d036977194f5b417c505fb933f</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="ociInspect">
+            <span class="tile-head">
+              <span class="tile-name">Read a remote artifact</span>
+            </span>
+            <span class="tile-note">What is at that reference? The manifest answers in 843 bytes, and the payload stays where it is.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah oci inspect oci://registry.example/acme/schema:v1</span>
+            <span class="tile-meta">1 command · 18 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Read a remote artifact transcript"><span class="l"><span class="c"># What does that artifact declare? Ask without downloading it.</span></span><span class="l"><span class="p">$</span> ptah oci inspect oci://registry.example/acme/schema:v1</span><span class="l l-wide"><span class="m">Reference:     oci://registry.example/acme/schema:v1</span></span><span class="l l-wide"><span class="m">Digest:        sha256:66fed834333daafa24448c7c6b5fe548c4f429d036977194f5b417c505fb933f</span></span><span class="l l-wide"><span class="m">Media type:    application/vnd.oci.image.manifest.v1+json</span></span><span class="l l-wide"><span class="m">Size:          843</span></span><span class="l l-wide"><span class="n">Artifact type: application/vnd.stokaro.ptah.schema.v1</span></span><span class="l l-wide"><span class="m">Discovery:     none</span></span><span class="l"> </span><span class="l l-wide"><span class="m">Annotations:</span></span><span class="l l-wide"><span class="m">  io.stokaro.ptah.kind               application/vnd.stokaro.ptah.schema.v1</span></span><span class="l l-wide"><span class="m">  io.stokaro.ptah.schema-format      hcl</span></span><span class="l l-wide"><span class="m">  org.opencontainers.image.revision  112a72244a81db149899df0ce43afc704a152bc4</span></span><span class="l"> </span><span class="l l-wide"><span class="m">Files:</span></span><span class="l l-wide"><span class="m">  NAME        MEDIA TYPE                                  SIZE  DIGEST</span></span><span class="l l-wide">  schema.hcl  application/vnd.stokaro.ptah.schema.hcl.v1  483   sha256:11719c3690781f43aadc70a236e5494dd5435e9418b6197e4048fc3a5fd23366</span><span class="l"> </span><span class="l"><span class="c"># 843 bytes of manifest answered that. The payload stayed put.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="ociConsume">
+            <span class="tile-head">
+              <span class="tile-name">Build from a registry</span>
+            </span>
+            <span class="tile-note">A registry reference works like a filename. Build straight from it, or pull the artifact down as the HCL it was stored as.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema render</span>
+            <span class="tile-meta">3 commands · 30 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Build from a registry transcript"><span class="l"><span class="c"># A registry reference is a schema source like a file is.</span></span><span class="l"><span class="p">$</span> ptah schema render \</span><span class="l">    --schema-file oci://registry.example/acme/schema:v1 \</span><span class="l">    --dialect postgres</span><span class="l"><span class="m">-- Statement 1/3</span></span><span class="l"><span class="m">-- POSTGRES TABLE: users --</span></span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY NOT NULL,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># Or take the artifact down as the canonical HCL it was stored as.</span></span><span class="l"><span class="p">$</span> ptah schema pull oci://registry.example/acme/schema:v1 \</span><span class="l">    --out pulled.hcl</span><span class="l">Pulled oci://registry.example/acme/schema:v1 to /tmp/app/pulled.hcl</span><span class="l"><span class="m">Digest: sha256:66fed834333daafa24448c7c6b5fe548c4f429d036977194f5b417c505fb933f</span></span><span class="l"><span class="p">$</span> head -12 pulled.hcl</span><span class="l"><span class="m">// Code generated by ptah; DO NOT EDIT.</span></span><span class="l"> </span><span class="l"><span class="a">table "posts" {</span></span><span class="l"><span class="a">  column "id" {</span></span><span class="l"><span class="a">    type = INTEGER</span></span><span class="l"><span class="a">  }</span></span><span class="l"><span class="a">  primary_key {</span></span><span class="l"><span class="a">    columns = [column.id]</span></span><span class="l"><span class="a">  }</span></span><span class="l"><span class="n">  foreign_key "fk_posts_user_id" {</span></span><span class="l"><span class="a">    columns = [column.user_id]</span></span><span class="l"><span class="a">    ref_columns = [table.users.column.id]</span></span><span class="l"><span class="a">  }</span></span><span class="l"><span class="a">}</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="openapi">
+            <span class="tile-head">
+              <span class="tile-name">Export an OpenAPI spec</span>
+            </span>
+            <span class="tile-note">The HTTP payloads come off the tables that carry them. A NOT NULL column arrives as a required property, so the two cannot drift apart.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema export --to openapi-v3 --from sql</span>
+            <span class="tile-meta">2 commands · 23 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Export an OpenAPI spec transcript"><span class="l"><span class="c"># The tables also describe the payloads that carry them.</span></span><span class="l"><span class="p">$</span> ptah schema export --to openapi-v3 --from sql \</span><span class="l">    --schema-file schema.sql --out openapi.yaml</span><span class="l">Exported OpenAPI schema to /tmp/app/openapi.yaml</span><span class="l"><span class="m">Found 2 table(s), 5 field(s), 0 enum(s)</span></span><span class="l"><span class="p">$</span> head -20 openapi.yaml</span><span class="l"><span class="m">openapi: 3.0.3</span></span><span class="l"><span class="m">info:</span></span><span class="l"><span class="m">  title: Ptah Exported Schema</span></span><span class="l"><span class="m">  version: 1.0.0</span></span><span class="l"><span class="m">paths: {}</span></span><span class="l"><span class="a">components:</span></span><span class="l"><span class="a">  schemas:</span></span><span class="l"><span class="a">    users:</span></span><span class="l"><span class="a">      type: object</span></span><span class="l"><span class="n">      required:</span></span><span class="l"><span class="n">        - id</span></span><span class="l"><span class="n">        - email</span></span><span class="l"><span class="a">      properties:</span></span><span class="l"><span class="a">        id:</span></span><span class="l"><span class="a">          type: integer</span></span><span class="l"><span class="a">          format: int32</span></span><span class="l"> </span><span class="l"><span class="c"># NOT NULL became required. The two cannot disagree.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="protobuf">
+            <span class="tile-head">
+              <span class="tile-name">Keep a wire contract</span>
+            </span>
+            <span class="tile-note">Field numbers are a promise. Ptah keeps the history that makes it one: the next export reuses them, or refuses to write.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema export --to protobuf --from sql</span>
+            <span class="tile-meta">2 commands · 25 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Keep a wire contract transcript"><span class="l"><span class="c"># The same schema as a wire contract.</span></span><span class="l"><span class="p">$</span> ptah schema export --to protobuf --from sql \</span><span class="l">    --schema-file schema.sql --out schema.proto \</span><span class="l">    --proto-package acme.app.v1</span><span class="l">Exported Protobuf schema to /tmp/app/schema.proto</span><span class="l"><span class="m">Exported 2 message(s), 5 field(s), 0 enum(s)</span></span><span class="l"><span class="n">bootstrapped new compatibility history</span></span><span class="l"><span class="e">1 export warning(s) reported</span></span><span class="l"> </span><span class="l"><span class="c"># The warning is the point: field numbers are a promise.</span></span><span class="l"><span class="p">$</span> head -14 schema.proto</span><span class="l"><span class="m">edition = "2023";</span></span><span class="l"> </span><span class="l"><span class="m">package acme.app.v1;</span></span><span class="l"> </span><span class="l"><span class="a">message Post {</span></span><span class="l"><span class="n">  int32 id = 1;</span></span><span class="l"><span class="n">  int32 user_id = 2;</span></span><span class="l"><span class="n">  string title = 3;</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="a">message User {</span></span><span class="l"><span class="a">  int32 id = 1;</span></span><span class="l"><span class="a">  string email = 2;</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="c"># A later export reuses these numbers, or refuses to write.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="docs">
+            <span class="tile-head">
+              <span class="tile-name">Write the reference</span>
+            </span>
+            <span class="tile-note">The schema reference nobody keeps up to date by hand, foreign keys included. Markdown here, HTML with one flag changed.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema export --to markdown --from sql</span>
+            <span class="tile-meta">2 commands · 19 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Write the reference transcript"><span class="l"><span class="c"># The reference page nobody keeps up to date by hand.</span></span><span class="l"><span class="p">$</span> ptah schema export --to markdown --from sql \</span><span class="l">    --schema-file schema.sql --out SCHEMA.md</span><span class="l">Exported schema documentation to /tmp/app/SCHEMA.md</span><span class="l"><span class="m">Found 2 table(s), 5 field(s), 0 enum(s)</span></span><span class="l"><span class="p">$</span> head -13 SCHEMA.md</span><span class="l"><span class="m"># Schema reference</span></span><span class="l"> </span><span class="l"><span class="m">- [posts](#posts)</span></span><span class="l"><span class="m">- [users](#users)</span></span><span class="l"> </span><span class="l"><span class="a">## posts</span></span><span class="l"> </span><span class="l l-wide"><span class="m">| Column | Type | Null | Default | Key | Comment |</span></span><span class="l l-wide"><span class="m">| --- | --- | --- | --- | --- | --- |</span></span><span class="l l-wide"><span class="a">| id | INTEGER | yes | — | PK | — |</span></span><span class="l l-wide"><span class="n">| user_id | INTEGER | no | — | FK → users(id) | — |</span></span><span class="l l-wide"><span class="a">| title | TEXT | no | — | — | — |</span></span><span class="l"> </span><span class="l"><span class="c"># HTML is the same command with a different --to.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="diff">
+            <span class="tile-head">
+              <span class="tile-name">Diff two schemas</span>
+            </span>
+            <span class="tile-note">Two files, and the SQL between them. Neither one has to be a live database.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema diff --from file://schema.sql</span>
+            <span class="tile-meta">1 command · 7 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Diff two schemas transcript"><span class="l"><span class="c"># What is the SQL between these two files?</span></span><span class="l"><span class="p">$</span> ptah schema diff --from file://schema.sql \</span><span class="l">    --to file://schema-next.sql \</span><span class="l">    --dev-url "sqlite://dev.db?mode=memory"</span><span class="l"><span class="n">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"><span class="n">CREATE INDEX IF NOT EXISTS "idx_users_email" ON "users" ("email");</span></span><span class="l"> </span><span class="l"><span class="c"># Two arbitrary states, neither of them a live database.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="inspect">
+            <span class="tile-head">
+              <span class="tile-name">Read a database back</span>
+            </span>
+            <span class="tile-note">Read the live schema back in whatever shape the next tool wants it: DBML, JSON, HCL or SQL.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema inspect --db-url sqlite://app.db --format dbml</span>
+            <span class="tile-meta">2 commands · 10 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Read a database back transcript"><span class="l"><span class="c"># Read the database back in a shape another tool reads.</span></span><span class="l"><span class="p">$</span> ptah schema inspect --db-url sqlite://app.db --format dbml</span><span class="l"><span class="a">Table "users" {</span></span><span class="l"><span class="a">  "id" INTEGER [pk]</span></span><span class="l"><span class="a">  "email" TEXT [not null]</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="c"># Or as JSON, for something that is not a person.</span></span><span class="l"><span class="p">$</span> ptah schema inspect --db-url sqlite://app.db --format json</span><span class="l"><span class="n">{"schemas":[{"name":"main","tables":[{"name":"users","columns":[{"name":"id","type":"INTEGER","null":true},{"name":"email","type":"TEXT"}],"primary_key":{"parts":[{"column":"id"}]}}]}]}</span></span><span class="l"> </span><span class="l"><span class="c"># hcl and sql are the other two, and --out-dir writes files.</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="seed">
+            <span class="tile-head">
+              <span class="tile-name">Seed an environment</span>
+            </span>
+            <span class="tile-note">Dev data that only lands in dev. Run it twice and the second run does nothing; ask for prod and it says no.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ls seeds</span>
+            <span class="tile-meta">4 commands · 20 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Seed an environment transcript"><span class="l"><span class="c"># Seed files carry the environment in the name.</span></span><span class="l"><span class="p">$</span> ls seeds</span><span class="l">001_demo_accounts.dev.sql</span><span class="l">002_reference_data.prod.sql</span><span class="l"><span class="p">$</span> ptah seed --db-url sqlite://app.db --seeds-dir ./seeds --env dev</span><span class="l"><span class="m">=== SEED ===</span></span><span class="l"><span class="m">Environment: dev</span></span><span class="l"> </span><span class="l"><span class="m">Matching seeds: 1</span></span><span class="l"><span class="n">Applied seeds: 1</span></span><span class="l">Seeds completed successfully.</span><span class="l"> </span><span class="l"><span class="c"># Run it again. Applied seeds are recorded, so this is a no-op.</span></span><span class="l"><span class="p">$</span> ptah seed --db-url sqlite://app.db --seeds-dir ./seeds --env dev</span><span class="l"><span class="m">Matching seeds: 1</span></span><span class="l"><span class="m">Applied seeds: 0</span></span><span class="l"><span class="n">Skipped seeds: 1</span></span><span class="l">Database seed data is already up to date.</span><span class="l"> </span><span class="l"><span class="c"># And prod is not an environment you reach by typing it.</span></span><span class="l"><span class="p">$</span> ptah seed --db-url sqlite://app.db --seeds-dir ./seeds --env prod</span><span class="l"><span class="e">error: refusing to seed protected environment "prod" without --allow-prod</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="rollback">
+            <span class="tile-head">
+              <span class="tile-name">Roll one back</span>
+            </span>
+            <span class="tile-note">Every migration came with a down file. This is what rolling back would undo, printed before anything undoes it.</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ls migrations</span>
+            <span class="tile-meta">2 commands · 19 lines</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Roll one back transcript"><span class="l"><span class="c"># Every generated migration came with a down file.</span></span><span class="l"><span class="p">$</span> ls migrations</span><span class="l">1788810699_create_users.down.sql</span><span class="l">1788810699_create_users.up.sql</span><span class="l"> </span><span class="l"><span class="c"># Ask what rolling back would do. Nothing runs.</span></span><span class="l"><span class="p">$</span> ptah migrations down --db-url sqlite://app.db \</span><span class="l">    --migrations-dir ./migrations --dry-run</span><span class="l"><span class="m">=== DRY RUN MODE ===</span></span><span class="l"><span class="m">No actual changes will be made to the database</span></span><span class="l"> </span><span class="l"><span class="m">=== MIGRATE DOWN ===</span></span><span class="l"><span class="m">Target version: 0</span></span><span class="l"><span class="m">Current version: 1788810699</span></span><span class="l"><span class="m">Migrations to roll back: 1</span></span><span class="l"> </span><span class="l">✅ Dry run completed successfully!</span><span class="l"><span class="n">Would have rolled back to version: 0</span></span><span class="l"><span class="m">Would have rolled back these migrations: [1788810699]</span></span><span class="l"> </span><span class="l"><span class="c"># The plan first, the rollback second. Same rule as forward.</span></span></pre>
+        </li>
+    </ul>
+
+    <div class="actions">
+      <a class="btn" href="https://docs.ptah.run/edge/start/quick-start/">Next: Quick start →</a>
+      <a class="btn btn-ghost" href="/install/">Install Ptah</a>
+    </div>
+
+  </div>
+</main>
+
+<div class="term demo" data-demo data-demo-scenario="change" hidden>
+  <div class="term-bar">
+    <span class="demo-where">sh · ptah-quick-start</span>
+    <span class="demo-sync" data-demo-sync hidden></span>
+        <span class="demo-controls" data-demo-controls hidden>
+          <button class="demo-btn demo-btn-speed" type="button" data-demo-speed aria-label="Playback speed, 1×. Press to change." title="Speed"><span data-demo-speed-label>1×</span></button>
+          <button class="demo-btn" type="button" data-demo-toggle aria-label="Play the demo" title="Play">
+            <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.25 3.5h1.9v9h-1.9zM8.85 3.5h1.9v9h-1.9z" fill="currentColor"/></svg>
+            <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.5 3.4l7 4.6-7 4.6z" fill="currentColor"/></svg>
+            <span class="i-pause">Pause</span><span class="i-play">Play</span>
+          </button>
+          <button class="demo-btn" type="button" data-demo-replay aria-label="Replay the demo" title="Replay" hidden>
+            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13.2 8a5.2 5.2 0 1 1-1.75-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12.4 1.9v2.9H9.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Replay</span>
+          </button>
+          <button class="demo-btn" type="button" data-demo-expand aria-expanded="false" aria-label="Expand the demo" title="Expand">
+            <svg class="i-expand" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6.2 2.6H2.6v3.6M9.8 13.4h3.6V9.8M13.4 6.2V2.6H9.8M2.6 9.8v3.6h3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg class="i-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span class="i-expand">Expand</span><span class="i-close">Close</span>
+          </button>
+        </span>
+  </div>
+  <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
+  <pre class="demo-transcript" data-demo-transcript></pre>
+  <div class="demo-progress" data-demo-progress hidden aria-hidden="true"><span></span></div>
+</div>
+
+<dialog class="demo-modal" data-demo-modal aria-labelledby="run-title">
+  <div class="demo-modal-head">
+    <h2 id="run-title" data-demo-title></h2>
+    <p data-demo-caption></p>
+  </div>
+</dialog>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-brand"><img src="/assets/logo.svg" alt="" width="18" height="18"><span>ptah.run · <span class="v" data-version>v0.4.0</span> · pre-GA · MIT</span></div>
+    <ul class="foot-links">
+      <li><a href="https://github.com/stokaro/ptah">GitHub</a></li>
+      <li><a href="https://github.com/stokaro/ptah/issues">Issues</a></li>
+      <li><a href="https://github.com/stokaro/ptah/releases">Changelog</a></li>
+      <li><a href="https://github.com/stokaro/ptah/blob/master/LICENSE">License</a></li>
+    </ul>
+  </div>
+</footer>
+
+<div class="sr-only" role="status" id="copy-status"></div>
+<script src="/assets/runs.js" defer></script>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

@@ -12,7 +12,7 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 
-const PAGES = ["index.html", "install/index.html", "404.html"];
+const PAGES = ["index.html", "install/index.html", "404.html", "in-practice/index.html"];
 const TAG_RE = /^v\d+\.\d+\.\d+$/;
 
 const args = process.argv.slice(2);
