@@ -99,6 +99,7 @@
             <span class="demo-controls" data-demo-controls hidden>
               <button class="demo-btn" type="button" data-demo-toggle aria-label="Pause the demo">Pause</button>
               <button class="demo-btn" type="button" data-demo-replay>Replay</button>
+              <button class="demo-btn" type="button" data-demo-expand aria-expanded="false">Expand</button>
             </span>
           </div>
 
@@ -147,6 +148,7 @@ No schema drift detected.
 <span class="p">$</span> echo $?
 0</pre>
         </div>
+        <dialog class="demo-modal" data-demo-modal aria-label="Ptah demo, expanded"></dialog>
         <p class="demo-pick" data-demo-pick hidden>
           <button class="demo-pick-btn" type="button" data-demo-scenario="change" aria-pressed="true">Change a schema</button>
           <button class="demo-pick-btn" type="button" data-demo-scenario="guard" aria-pressed="false">Stop an unsafe one</button>

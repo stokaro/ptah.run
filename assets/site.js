@@ -271,6 +271,8 @@
     var controls = $("[data-demo-controls]", demo);
     var toggleBtn = $("[data-demo-toggle]", demo);
     var replayBtn = $("[data-demo-replay]", demo);
+    var expandBtn = $("[data-demo-expand]", demo);
+    var modal = $("[data-demo-modal]");
     var where = $(".demo-where", demo);
     var pick = $("[data-demo-pick]");
     var pickBtns = $$("[data-demo-scenario]");
@@ -400,11 +402,12 @@
           esc(typing.text) +
           '<span class="demo-cursor" data-on="1">\u258d</span>';
       }
+      // Whether to follow is decided before the write, because writing is what
+      // moves the bottom. A reader who scrolled up to re-read a finding is not
+      // dragged back down by the next line; returning to the bottom re-arms it.
+      var following = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 24;
       screen.innerHTML = html;
-      // A shell keeps the newest line in view. The frame is fixed while it
-      // plays, so the oldest lines leave the top rather than the newest
-      // leaving the bottom.
-      screen.scrollTop = screen.scrollHeight;
+      if (following) screen.scrollTop = screen.scrollHeight;
     }
 
     function commit(kind, text) {
@@ -556,6 +559,39 @@
         choose(this.getAttribute("data-demo-scenario"));
       });
     }
+
+    // Expanding moves the terminal rather than copying it: one node, one
+    // running session, so the script does not restart and the two copies
+    // cannot disagree about where it is.
+    var home = demo.nextSibling;
+    var homeParent = demo.parentNode;
+
+    function setOpen(open) {
+      expandBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      expandBtn.textContent = open ? "Close" : "Expand";
+      demo.classList.toggle("is-open", open);
+      if (open) {
+        modal.appendChild(demo);
+        modal.showModal();
+      } else {
+        homeParent.insertBefore(demo, home);
+        if (modal.open) modal.close();
+      }
+      // The height changed under a stream that may be mid-scroll.
+      screen.scrollTop = screen.scrollHeight;
+    }
+
+    expandBtn.addEventListener("click", function () {
+      setOpen(expandBtn.getAttribute("aria-expanded") !== "true");
+    });
+    // Escape and the backdrop both close it, and both arrive here as `close`,
+    // so the button label and the moved node are put back in one place.
+    modal.addEventListener("close", function () {
+      if (demo.parentNode === modal) setOpen(false);
+    });
+    modal.addEventListener("click", function (event) {
+      if (event.target === modal) modal.close();
+    });
 
     replayBtn.addEventListener("click", start);
     toggleBtn.addEventListener("click", function () {

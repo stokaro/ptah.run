@@ -511,11 +511,18 @@ button {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.demo.is-playing .demo-screen {
-  /* Tall enough that the longer session fills it and scrolls, short enough
-   * that the shorter one does not sit in a mostly empty frame. */
-  height: 372px;
-  overflow: hidden;
+/* One height whether or not it is playing, so the block does not jump when the
+ * session starts. Scrollable rather than clipped: a reader who looks up from
+ * the page mid-session should be able to go back and read what they missed
+ * instead of waiting for the loop. */
+@media (min-width: 721px) {
+  .demo-screen {
+    height: 372px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--termline) transparent;
+  }
 }
 .demo-cursor {
   color: var(--termamber);
@@ -1242,8 +1249,12 @@ html:not(.js) .panel-title {
 }
 
 @media (max-width: 720px) {
+  /* At rest on a phone the session is a block of text in the page flow. It
+   * only becomes a window when the reader presses Play. */
   .demo.is-playing .demo-screen {
     height: 320px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .demo .term-bar {
     flex-wrap: wrap;
@@ -1254,5 +1265,55 @@ html:not(.js) .panel-title {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+}
+
+/* ---------- Hero demo, expanded ----------
+ *
+ * The hero column is half a page wide, and Ptah's diagnostics are sentences.
+ * Expanding moves the same terminal -- the same node, still playing -- into a
+ * dialog where the lines have room to be read rather than wrapped four times.
+ *
+ * <dialog> rather than a div: focus containment, Escape and inertness behind
+ * it are the browser's job, and each one hand-rolled is a way to trap a
+ * keyboard user in a page they cannot leave.
+ */
+.demo-modal {
+  width: min(1100px, calc(100vw - 48px));
+  max-width: none;
+  /* Anchored near the top rather than centred, because the session grows as it
+   * plays: centring would move the whole frame under the reader's eye on every
+   * line. */
+  margin: 7vh auto auto;
+  max-height: 86vh;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  overflow: visible;
+}
+.demo-modal::backdrop {
+  /* The page's own ground, not a black wash: the demo is part of this page and
+   * should not look like a lightbox borrowed from another one. */
+  background: color-mix(in oklab, var(--bg) 94%, transparent);
+}
+.demo-modal .term {
+  border-color: var(--line);
+}
+/* Expanded, the frame takes the height of its session up to a cap. A short one
+ * does not sit in a half-empty window, and a long one scrolls. */
+.demo.is-open .demo-screen {
+  height: auto;
+  min-height: 260px;
+  max-height: min(72vh, 640px);
+  overflow-y: auto;
+}
+@media (max-width: 720px) {
+  .demo-modal {
+    width: calc(100vw - 24px);
+  }
+  .demo.is-open .demo-screen {
+    min-height: 200px;
+    max-height: min(66vh, 480px);
   }
 }

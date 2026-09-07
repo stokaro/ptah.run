@@ -81,6 +81,12 @@ over a one-file directory that drops a column, exit code 1. Every line in
 `assets/site.js` is that output verbatim, including the trailing note about the
 thinner analysis. Re-capture rather than edit when a diagnostic changes wording.
 
+The terminal scrolls and expands. Scrolling follows the newest line only while
+the reader is already at the bottom, so scrolling back to re-read a finding is
+not undone by the next one. Expanding moves the same node into a `<dialog>` --
+the same session, still playing -- because the hero column is half a page wide
+and Ptah's diagnostics are sentences.
+
 The whole first session is also in `index.html` as a transcript. That is the
 page without JavaScript, and it is what a crawler and a screen reader read; the
 player hides it from sight and replays it. Keep the two in step.
