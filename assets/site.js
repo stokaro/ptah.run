@@ -284,7 +284,7 @@
     // marks the added column, in the file and again in the database.
     var CHANGE = [
       ["sync", "no drift"],
-      ["note", "# Ask the database what it has. This is Ptah reading, not a file."],
+      ["note", "# Ask the database what it has."],
       ["cmd", "ptah db read --db-url sqlite://app.db"],
       ["sql", 'CREATE TABLE "users" ('],
       ["sql", '  "id" INTEGER PRIMARY KEY,'],
