@@ -387,14 +387,21 @@
     // What each event is expected to cost. The typing jitter makes the real
     // figure vary by a few per cent, which is invisible on a two-pixel rule and
     // much cheaper than measuring a duration nobody knows before it runs.
+    // How long to sit on a finished command before announcing the next one,
+    // and how long to leave a note standing once it is typed.
+    var DWELL = 1100;
+    var READ = 850;
+    // Typing speed, as a factor on the per-character delays. The estimates in
+    // cost() carry it too, so the progress rule keeps up with the keyboard.
+    var TYPE_SCALE = 1.2;
+
     function cost(event) {
       var kind = event[0];
       if (kind === "wait") return event[1];
-      if (kind === "cmd" || kind === "cont") return 460 + event[1].length * 32;
-      // A note is read, not typed, so its cost is reading time. It also
-      // replaced most of the standalone waits: the pause to take something in
-      // now says what is being taken in.
-      if (kind === "note") return 700 + event[1].length * 22;
+      if (kind === "cmd" || kind === "cont") return 460 + event[1].length * 32 * TYPE_SCALE;
+      // A note is the dwell that follows the last output plus the time it
+      // takes to type itself.
+      if (kind === "note") return DWELL + 380 + event[1].length * 26 * TYPE_SCALE + READ;
       if (kind === "blank") return 60;
       if (kind === "sync") return 120;
       return 70;
@@ -438,6 +445,7 @@
 
     // The screen is rebuilt from a list of finished lines plus the one being
     // typed, so a replay is a reset of that list rather than a DOM rewind.
+    var CURSOR = '<span class="demo-cursor" data-on="1">\u258d</span>';
     var lines = [];
     var typing = null;
 
@@ -445,10 +453,15 @@
       var html = lines.join("\n");
       if (typing !== null) {
         if (html) html += "\n";
-        html +=
-          (typing.cont ? "" : '<span class="p">$</span> ') +
-          esc(typing.text) +
-          '<span class="demo-cursor" data-on="1">\u258d</span>';
+        var cls = CLASS[typing.kind];
+        var head = typing.kind === "cmd" ? '<span class="p">$</span> ' : "";
+        var body = esc(typing.text) + CURSOR;
+        html += head + (cls ? '<span class="' + cls + '">' + body + "</span>" : body);
+      } else if (paused) {
+        // Paused between events there is nothing being typed, so without this
+        // the caret is simply absent and the frame reads as finished rather
+        // than held. It sits at the end of the last line: where it stopped.
+        html += CURSOR;
       }
       // Whether to follow is decided before the write, because writing is what
       // moves the bottom. A reader who scrolled up to re-read a finding is not
@@ -482,15 +495,22 @@
     function type(kind, text, n) {
       if (paused) return;
       if (n > text.length) {
-        return after(320, function () {
+        return after(kind === "note" ? 240 : 320, function () {
           commit(kind, text);
-          after(140, step);
+          // A note is finished being typed but not finished being read: the
+          // last words land at the same moment the command would start, and
+          // the eye cannot be in two places.
+          after(kind === "note" ? READ : 140, step);
         });
       }
-      typing = { text: text.slice(0, n), cont: kind === "cont" };
+      typing = { text: text.slice(0, n), kind: kind };
       paint();
       var ch = text.charAt(n - 1);
-      after(ch === " " ? 34 : 20 + Math.random() * 34, function () {
+      // Prose is read as it lands, so it runs a little quicker than a command,
+      // which is scanned character by character for a flag.
+      var base = kind === "note" ? 14 : 20;
+      var delay = ch === " " ? base + 14 : base + Math.random() * 30;
+      after(delay * TYPE_SCALE, function () {
         type(kind, text, n + 1);
       });
     }
@@ -513,6 +533,14 @@
       var kind = event[0];
       advance(cost(event));
       if (kind === "wait") return after(event[1], step);
+      // A note introduces the next step, so the beat before it is the beat
+      // after the last one finished: time to read what just happened before
+      // being told what happens next.
+      if (kind === "note") {
+        return after(DWELL, function () {
+          type(kind, event[1], 0);
+        });
+      }
       if (kind === "sync") {
         setSync(event[1]);
         return after(120, step);
@@ -666,6 +694,7 @@
       paused = !paused;
       clearTimeout(timer);
       if (paused) freezeProgress();
+      paint();
       label();
       if (!paused) step();
     });

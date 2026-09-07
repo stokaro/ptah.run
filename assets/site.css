@@ -1320,12 +1320,12 @@ html:not(.js) .panel-title {
 .demo-modal .term {
   border-color: var(--line);
 }
-/* Expanded, the frame takes the height of its session up to a cap. A short one
- * does not sit in a half-empty window, and a long one scrolls. */
+/* Expanded, the frame is its final size from the first line. Sizing it to the
+ * session instead made it grow a row at a time under a reader who was trying
+ * to read it, and a frame that moves while you read it is worse than a frame
+ * with room to spare at the bottom. */
 .demo.is-open .demo-screen {
-  height: auto;
-  min-height: 260px;
-  max-height: min(72vh, 640px);
+  height: min(72vh, 640px);
   overflow-y: auto;
 }
 @media (max-width: 720px) {
@@ -1333,7 +1333,6 @@ html:not(.js) .panel-title {
     width: calc(100vw - 24px);
   }
   .demo.is-open .demo-screen {
-    min-height: 200px;
-    max-height: min(66vh, 480px);
+    height: min(66vh, 480px);
   }
 }
