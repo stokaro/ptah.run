@@ -143,8 +143,13 @@ not undone by the next one. Expanding moves the same node into a `<dialog>` --
 the same session, still playing -- because the hero column is half a page wide
 and Ptah's diagnostics are sentences. The frame travels between the two places
 rather than one panel vanishing and another appearing: the move is measured
-before and after and played back as a transform, which is the only reason the
-node move has to happen before `close()` rather than after. Expanded it runs
+before and after and played back as a transform. Leaving is not entering in
+reverse -- arriving is a reveal and can take its time, dismissing should get out
+of the way -- so the dim and the overlay's head go in about a sixth of a second
+while the frame is still travelling. `[open]` is still on the dialog through all
+of that, and outranks a bare `.is-leaving`, which is why the leaving rule has to
+carry it too. The page underneath is locked while the overlay is up; the
+terminal inside it keeps its own scroll. Expanded it runs
 once and stops on its last frame, because opening it is a choice to watch; in
 the hero it comes round again, because a reader arriving mid-session should not
 have to guess what the first half said.
