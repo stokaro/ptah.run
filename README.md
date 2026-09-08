@@ -146,7 +146,9 @@ rather than one panel vanishing and another appearing: the move is measured
 before and after and played back as a transform. Leaving is not entering in
 reverse -- arriving is a reveal and can take its time, dismissing should get out
 of the way -- so the dim and the overlay's head go in about a sixth of a second
-while the frame is still travelling. `[open]` is still on the dialog through all
+while the frame is still travelling. They arrive together too: the head fades up
+with the dim rather than landing on the page at full strength, a beat behind the
+frame that is already moving. `[open]` is still on the dialog through all
 of that, and outranks a bare `.is-leaving`, which is why the leaving rule has to
 carry it too. The page underneath is locked while the overlay is up; the
 terminal inside it keeps its own scroll. Expanded it runs
