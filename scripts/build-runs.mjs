@@ -202,8 +202,7 @@ const page = `<!doctype html>
 
     <div class="page-head">
       <h1>Ptah in practice</h1>
-      <p class="lede">${RUNS.order.length} things Ptah does, recorded as they happened rather than written up afterwards. Every command and every line of output came off a real run; nothing here is staged and nothing is invented. Open one to read it, or press Play to watch it typed.</p>
-      <p class="meta"><span>Two are always on the home page. The rest take turns there, two to a visit.</span></p>
+      <p class="lede">${RUNS.order.length} runs of Ptah, recorded at the terminal. Nothing here was written for the page. Open one to read it; Play types it out.</p>
     </div>
 
     <ul class="tiles">
