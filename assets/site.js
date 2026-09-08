@@ -856,6 +856,10 @@
     // the move: measure where it was, let it land, then play the difference.
     var flight = null;
 
+    // Arriving takes its time; leaving gets out of the way.
+    var ARRIVE = 420;
+    var LEAVE = 300;
+
     function fly(from, to, done) {
       // Drop the handlers before cancelling: `cancel` is delivered later, and a
       // late `land` would clear the flight that replaced it. An interrupted
@@ -904,7 +908,7 @@
         // Long enough to read as one movement, and eased at both ends: a curve
         // that spends most of its distance in the first third arrives before
         // the eye has followed it, which reads as a jump with a tail.
-        { duration: 420, easing: "cubic-bezier(0.4, 0.02, 0.2, 1)" }
+        { duration: done ? LEAVE : ARRIVE, easing: "cubic-bezier(0.4, 0.02, 0.2, 1)" }
       );
       var land = function () {
         demo.classList.remove("is-flying");
@@ -933,11 +937,13 @@
         var origin = from || demo.getBoundingClientRect();
         modal.appendChild(demo);
         modal.showModal();
+        root.classList.add("is-modal-open");
         screen.scrollTop = screen.scrollHeight;
         return fly(origin, demo.getBoundingClientRect());
       }
 
       var goHome = function () {
+        root.classList.remove("is-modal-open");
         modal.classList.remove("is-leaving");
         homeParent.insertBefore(demo, home);
         demo.hidden = hiddenAtHome;
