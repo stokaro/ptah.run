@@ -185,6 +185,7 @@ const page = `<!doctype html>
         <li><a href="/install/">Install</a></li>
         <li><a href="/in-practice/" aria-current="page">In practice</a></li>
         <li><a href="https://play.ptah.run/">Playground</a></li>
+        <li><a href="https://operator.ptah.run/">Operator</a></li>
         <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
       </ul>
       <button class="icon-btn theme-btn" type="button" aria-label="Dark theme" aria-pressed="false">
