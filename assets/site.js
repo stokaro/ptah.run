@@ -583,7 +583,12 @@
 
     // Resuming finishes that beat if there was one, and otherwise starts the
     // next event. A reader who paused between events is owed no remainder.
+    // It stops the chain itself rather than being called after suspend(), which
+    // would recompute the remainder: suspend() measures from the moment it ran,
+    // so running it again on the way out subtracts the whole pause from the
+    // beat it is holding, and a pause longer than the beat leaves nothing of it.
     function resume() {
+      clearTimeout(timer);
       var beat = pending;
       pending = null;
       if (beat) return after(beat.ms, beat.fn);
@@ -1036,8 +1041,10 @@
       enliven();
       if (!playing) return start();
       paused = !paused;
-      suspend();
-      if (paused) freezeProgress();
+      if (paused) {
+        suspend();
+        freezeProgress();
+      }
       paint();
       label();
       if (!paused) resume();
@@ -1058,10 +1065,12 @@
           // Off screen is not paused: the control still says Pause, and coming
           // back resumes rather than restarting somewhere the reader never saw.
           if (!playing || paused) return;
-          // Clear before resuming: one chain of timeouts, always. Calling
-          // step() beside a pending one advances the script twice per tick.
-          suspend();
-          if (!visible) return freezeProgress();
+          if (!visible) {
+            suspend();
+            return freezeProgress();
+          }
+          // resume() stops the chain itself, so the beat it holds keeps the
+          // time it had when the player went off screen.
           resume();
         }, { threshold: 0.25 }).observe(demo);
       }
