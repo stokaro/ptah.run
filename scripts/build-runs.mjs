@@ -243,6 +243,7 @@ ${controls}
     <ul class="foot-links">
       <li><a href="https://github.com/stokaro/ptah">GitHub</a></li>
       <li><a href="https://github.com/stokaro/ptah/issues">Issues</a></li>
+      <li><a href="/community/">Community</a></li>
       <li><a href="https://github.com/stokaro/ptah/releases">Changelog</a></li>
       <li><a href="https://github.com/stokaro/ptah/blob/master/LICENSE">License</a></li>
     </ul>
