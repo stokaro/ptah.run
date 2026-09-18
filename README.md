@@ -6,7 +6,7 @@ The website for [Ptah](https://github.com/stokaro/ptah), served at
 The site is static HTML, CSS and a small script with no build step. The
 documentation is a separate site, <https://docs.ptah.run>, built from
 `docs/site` in the `stokaro/ptah` repository; this repository only holds the
-homepage, the install page and the 404 page.
+pages served at `ptah.run` itself.
 
 ## Layout
 
@@ -14,6 +14,7 @@ homepage, the install page and the 404 page.
 | --- | --- |
 | `index.html` | Homepage |
 | `install/index.html` | Install page with platform-detecting tabs |
+| `community/index.html` | Community page: where to ask, report a bug or a vulnerability, and contribute |
 | `404.html` | Not-found page (GitHub Pages serves it for unknown paths) |
 | `assets/site.css` | The one stylesheet: tokens, layout, light and dark themes |
 | `assets/site.js` | Theme toggle, mobile menu, copy buttons, install tabs, release-version refresh |
@@ -22,7 +23,7 @@ homepage, the install page and the 404 page.
 | `og.png`, `apple-touch-icon.png`, `favicon.ico` | Generated from the mark and the ASCII wordmark |
 | `install.sh`, `install.ps1` | Not in git: the deploy fetches them from `docs/site/public/` on the master branch of `stokaro/ptah` (see "Installers") |
 | `CNAME` | The custom domain, as a record (see "Deployment settings") |
-| `robots.txt`, `sitemap.xml` | Crawl policy and the two indexable URLs; add a row to the sitemap when a page is added |
+| `robots.txt`, `sitemap.xml` | Crawl policy and the indexable URLs; add a row to the sitemap when a page is added |
 | `.nojekyll` | Tells GitHub Pages not to run Jekyll over the files |
 | `LICENSE` | MIT, for the site's own code |
 | `scripts/stamp-version.mjs` | Writes a release tag into the pages; run by the deploy workflow |
@@ -39,7 +40,9 @@ python3 -m http.server 8000
 ```
 
 Every push to `main` deploys. The workflow first checks that every local
-`href`/`src` on the three pages points at a file that exists.
+`href`/`src` on the pages points at a file that exists. The pages are listed
+by name in `.github/workflows/deploy.yml` and in `scripts/stamp-version.mjs`,
+so a new page joins both lists and gets a row in `sitemap.xml`.
 
 ## Deployment settings
 

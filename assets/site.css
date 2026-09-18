@@ -1286,6 +1286,20 @@ html:not(.js) .panel-title {
   padding-top: 12px;
 }
 
+/* ---------- Community page ---------- */
+
+/* Prose here is mostly links out, so they carry the accent the way the facts
+ * row on the home page does; a link the color of the text around it reads as
+ * emphasis. */
+.community .meta a,
+.community .block p a,
+.community .flags a {
+  color: var(--acc);
+}
+.community .flags {
+  max-width: none;
+}
+
 /* ---------- 404 ---------- */
 
 .notfound .wrap {
