@@ -12,7 +12,22 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 
-const PAGES = ["index.html", "install/index.html", "404.html", "in-practice/index.html", "community/index.html"];
+// Both language trees. The list is written out because this script has to run
+// on a plain copy of the pages -- the deploy's self-test does exactly that, in
+// a directory that is not a git checkout, so it cannot discover anything.
+// scripts/check-locales.mjs holds the list to the tree instead: it fails when a
+// page carrying a version is missing here, and when a page here does not exist.
+const PAGES = [
+  "index.html",
+  "install/index.html",
+  "404.html",
+  "in-practice/index.html",
+  "community/index.html",
+  "ja/index.html",
+  "ja/install/index.html",
+  "ja/in-practice/index.html",
+  "ja/community/index.html"
+];
 const TAG_RE = /^v\d+\.\d+\.\d+$/;
 
 const args = process.argv.slice(2);

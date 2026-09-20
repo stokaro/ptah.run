@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ptah — 驚きのないデータベースマイグレーション</title>
+<meta name="description" content="オープンソースのデータベース変更管理ツール。Ptah は、望むスキーマと実際のデータベースを比較し、バージョン付きマイグレーションを書くか、承認済みの計画を適用する。PostgreSQL、MySQL、MariaDB、SQLite ほか。">
+<link rel="canonical" href="https://ptah.run/ja/">
+<link rel="alternate" hreflang="en" href="https://ptah.run/">
+<link rel="alternate" hreflang="ja" href="https://ptah.run/ja/">
+<link rel="alternate" hreflang="x-default" href="https://ptah.run/">
+<meta name="go-import" content="ptah.run git https://github.com/stokaro/ptah">
+<meta name="go-source" content="ptah.run https://github.com/stokaro/ptah https://github.com/stokaro/ptah/tree/master{/dir} https://github.com/stokaro/ptah/blob/master{/dir}/{file}#L{line}">
+<meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161311" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ptah">
+<meta property="og:title" content="Ptah — 驚きのないデータベースマイグレーション">
+<meta property="og:description" content="オープンソースのデータベース変更管理ツール。Ptah は、望むスキーマと実際のデータベースを比較し、バージョン付きマイグレーションを書くか、承認済みの計画を適用する。">
+<meta property="og:url" content="https://ptah.run/ja/">
+<meta property="og:image" content="https://ptah.run/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Ptah ASCII wordmark above the line: Database migrations without surprises.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="/assets/fonts/instrument-sans-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script>(function(){var d=document.documentElement,t=null;try{t=localStorage.getItem("ptah-theme")}catch(e){}if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.setAttribute("data-theme",t);d.classList.add("js")})();</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Ptah",
+  "url": "https://ptah.run/ja/",
+  "inLanguage": "ja",
+  "description": "スキーマと永続的な推論状態のための、オープンソースのデータベース変更管理ツール。",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows",
+  "license": "https://github.com/stokaro/ptah/blob/master/LICENSE",
+  "downloadUrl": "https://github.com/stokaro/ptah/releases",
+  "sameAs": ["https://github.com/stokaro/ptah", "https://docs.ptah.run/"],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">本文へスキップ</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/ja/"><img src="/assets/logo.svg" alt="" width="22" height="22">Ptah</a>
+    <nav class="nav" aria-label="サイト">
+      <ul class="nav-links" id="nav-links">
+        <li><a href="https://docs.ptah.run/">ドキュメント</a></li>
+        <li><a href="/ja/install/">インストール</a></li>
+        <li><a href="/ja/in-practice/">実践例</a></li>
+        <li><a href="https://play.ptah.run/">プレイグラウンド</a></li>
+        <li><a href="https://operator.ptah.run/">オペレーター</a></li>
+        <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
+      </ul>
+      <a class="icon-btn lang-btn" href="/" hreflang="en" lang="en">English</a>
+      <button class="icon-btn theme-btn" type="button" aria-label="ダークテーマ" aria-pressed="false">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/></svg>
+      </button>
+      <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="メニュー">
+        <svg class="icon-menu" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg class="icon-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap">
+      <div class="hero-copy">
+        <pre class="banner" role="img" aria-label="Ptah"> _____  _          _
+|  __ \| |_   __ _| |__
+| |__) | __| / _` | '_ \
+|  ___/| |_ | (_| | | | |
+|_|     \__| \__,_|_| |_|</pre>
+        <h1 id="hero-title">驚きのないデータベースマイグレーション。</h1>
+        <p class="lede">Ptah（プタハ）は、望むスキーマと実際のデータベースを比較し、バージョン付きマイグレーションを書くか、承認済みの計画を適用する。pgvector テーブルの再埋め込みのような、永続的な推論状態の移行も扱う。PostgreSQL、MySQL、MariaDB、SQLite ほか。オープンソース、MIT ライセンス、導入すべきツールチェーンはない。</p>
+        <div class="install">
+          <div class="cmd">
+            <pre id="install-cmd" data-copy-text="curl -fsSL https://ptah.run/install.sh | sh"><span class="p">$</span> curl -fsSL https://ptah.run/install.sh | sh</pre>
+            <button class="copy" type="button" data-copy="install-cmd" data-copy-name="インストールコマンド"><span class="copy-text">コピー</span><span class="sr-only">（インストールコマンド）</span></button>
+          </div>
+          <p class="meta"><span><span class="v" data-version>v0.3.0</span> · pre-GA · MIT</span><span>Windows: <code>irm https://ptah.run/install.ps1 | iex</code></span></p>
+        </div>
+        <div class="actions">
+          <a class="btn" href="https://docs.ptah.run/edge/start/quick-start/">はじめる（英語）</a>
+          <a class="btn btn-ghost" href="https://play.ptah.run/">プレイグラウンド</a>
+          <a class="btn btn-ghost" href="https://github.com/stokaro/ptah">GitHub で見る</a>
+        </div>
+      </div>
+
+      <div class="hero-demo">
+        <div class="term demo" data-demo data-demo-autoplay data-demo-scenario="change">
+          <div class="term-bar">
+            <span class="demo-where">sh · ptah-quick-start</span>
+            <span class="demo-sync" data-demo-sync hidden>ドリフトなし</span>
+            <span class="demo-controls" data-demo-controls hidden>
+              <button class="demo-btn demo-btn-speed" type="button" data-demo-speed aria-label="再生速度 1×。押すと変わります。" title="速度"><span data-demo-speed-label>1×</span></button>
+              <button class="demo-btn" type="button" data-demo-toggle aria-label="デモを一時停止" title="一時停止">
+                <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.25 3.5h1.9v9h-1.9zM8.85 3.5h1.9v9h-1.9z" fill="currentColor"/></svg>
+                <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.5 3.4l7 4.6-7 4.6z" fill="currentColor"/></svg>
+                <span class="i-pause">一時停止</span><span class="i-play">再生</span>
+              </button>
+              <button class="demo-btn" type="button" data-demo-replay aria-label="デモを最初から再生" title="最初から">
+                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13.2 8a5.2 5.2 0 1 1-1.75-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12.4 1.9v2.9H9.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>最初から</span>
+              </button>
+              <button class="demo-btn" type="button" data-demo-expand aria-expanded="false" aria-label="デモを拡大" title="拡大">
+                <svg class="i-expand" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6.2 2.6H2.6v3.6M9.8 13.4h3.6V9.8M13.4 6.2V2.6H9.8M2.6 9.8v3.6h3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg class="i-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span class="i-expand">拡大</span><span class="i-close">閉じる</span>
+              </button>
+            </span>
+          </div>
+
+          <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
+
+          <pre class="demo-transcript" data-demo-transcript><!--session:transcript--><span class="l"><span class="c"># データベース自身のスキーマをファイルに書き出す。</span></span><span class="l"><span class="p">$</span> ptah db read --db-url sqlite://app.db | tee schema.sql</span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># ドリフト検査は、そのファイルと取得元のデータベースを比べる。</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span><span class="l"> </span><span class="l"><span class="c"># 欲しいスキーマを書き換えて、列を 1 つ要求する。</span></span><span class="l"><span class="p">$</span> cat &gt; schema.sql &lt;&lt;'SQL'</span><span class="l">CREATE TABLE "users" (</span><span class="l">  "id" INTEGER PRIMARY KEY,</span><span class="l">  "email" TEXT NOT NULL,</span><span class="l"><span class="n">  "created_at" TEXT</span></span><span class="l">);</span><span class="l">SQL</span><span class="l"> </span><span class="l"><span class="c"># 同じ検査が、今度は報告すべきものを持っている。</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l"><span class="e">Schema drift detected (highest severity: warning).</span></span><span class="l"><span class="m">Failure threshold: all. Failing: true.</span></span><span class="l"><span class="m">Database: sqlite://app.db</span></span><span class="l"> </span><span class="l"><span class="m">Findings:</span></span><span class="l"><span class="n">- columns_added: 1 (warning)</span></span><span class="l"> </span><span class="l"><span class="c"># 差を埋めるのに何が要るかを尋ねる。ドライランは何も実行しない。</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --dry-run</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"> </span><span class="l"><span class="c"># レビュー済みの計画を実行する。使い捨てのファイルなら --auto-approve でよい。</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --auto-approve</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"><span class="m">Auto-approval enabled; applying schema changes.</span></span><span class="l">Schema apply completed successfully.</span><span class="l"> </span><span class="l"><span class="c"># そして同じ検査を、3 度目に。</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span><!--/session:transcript--></pre>
+
+          <div class="demo-progress" data-demo-progress hidden aria-hidden="true"><span></span></div>
+        </div>
+        <dialog class="demo-modal" data-demo-modal aria-label="Ptah のデモ、拡大表示"></dialog>
+        <p class="demo-pick" data-demo-pick hidden>
+          <button class="demo-pick-btn" type="button" data-demo-scenario="change" aria-pressed="true">スキーマを変更する</button>
+          <button class="demo-pick-btn" type="button" data-demo-slot aria-pressed="false" hidden></button>
+          <button class="demo-pick-btn" type="button" data-demo-slot aria-pressed="false" hidden></button>
+          <button class="demo-pick-btn" type="button" data-demo-scenario="inference" aria-pressed="false">埋め込みを移行する</button>
+        </p>
+        <p class="caption" data-demo-caption>マイグレーションがデータベースに触れる前に、何をするのかを正確に知る。レビューの対象は計画であり、ドリフト検査がその結果を裏づける。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section week" aria-labelledby="week-title">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="week-title">ふつうの一週間にやること、3 つ。</h2>
+        <p>実際のコマンドと、実際の出力。終了コードはどれでも同じ意味を持つ。0 は成功、1 は検査結果が否定的だったこと、2 は使い方か接続の失敗。</p>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <div class="card-head">
+            <div class="label">01 · プルリクエストを止める</div>
+            <h3>スキーマがずれたとき、マイグレーションが危険なときに CI を落とす。</h3>
+          </div>
+          <div class="term"><pre><span class="p">$</span> ptah migrations lint --dir ./migrations \
+    --dialect postgres
+No lint findings.
+<span class="p">$</span> ptah schema drift \
+    --schema-file schema.sql \
+    --db-url "$PTAH_DATABASE_URL"
+No schema drift detected.</pre></div>
+          <p>あるいは <a href="https://github.com/stokaro/ptah-action"><code>uses: stokaro/ptah-action@v1</code></a>。計画をプルリクエストに投稿し、破壊的変更のチェック結果を書き込む。</p>
+        </article>
+        <article class="card">
+          <div class="card-head">
+            <div class="label">02 · マイグレーションディレクトリを封じる</div>
+            <h3>レビュー後にバイト列が変わったマイグレーションファイルを拒否する。</h3>
+          </div>
+          <div class="term"><pre><span class="p">$</span> ptah migrations hash --dir ./migrations
+Wrote ./migrations/ptah.sum
+2 migration file(s) hashed
+<span class="p">$</span> ptah migrations status \
+    --db-url sqlite://app.db \
+    --migrations-dir ./migrations
+Current Version: 1700000000
+Total Migrations: 1
+Applied Migrations: 1
+Pending Migrations: 0</pre></div>
+          <p><code>ptah.sum</code> はファイルごとにチェックサムを記録する。以降のコマンドは、何かを実行する前にそれを検証する。</p>
+        </article>
+        <article class="card">
+          <div class="card-head">
+            <div class="label">03 · 埋め込みモデルを変える</div>
+            <h3>pgvector テーブルを再埋め込みし、検証が済むまで古いベクトルを残す。</h3>
+          </div>
+          <div class="term"><pre>ptah inference plan
+ptah inference prepare
+ptah inference backfill
+ptah inference catchup
+ptah inference index
+ptah inference verify
+ptah inference cutover
+<span class="m">ptah inference rollback · retire</span></pre></div>
+          <p>Ptah は、稼働中の世代の隣に新しい世代を作り、OpenAI 互換の埋め込みエンドポイントを呼び、検証し、指示があった時点でクエリを切り替える。ベクトルそのものを Ptah が作ることはない。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section sources" aria-labelledby="sources-title">
+    <div class="wrap">
+      <div class="sources-copy">
+        <h2 id="sources-title">いま持っているスキーマがそのまま使える。</h2>
+        <p>どの入力元も、計画を立てる前に同じ内部スキーマへ解析される。<code>--schema-file</code> と <code>--root-dir</code> は何度でも指定でき、混ぜてもよい。統合した結果が目標のスキーマになる。独自形式は必要ない。</p>
+        <dl class="flags">
+          <dt>--schema-file</dt><dd>SQL、YAML、HCL、DBML</dd>
+          <dt>--root-dir</dt><dd>アノテーション付きの Go 構造体</dd>
+          <dt>--schema-cmd</dt><dd>SQL、HCL、YAML を出力する任意のプログラム — ORM のエクスポーターなど</dd>
+          <dt>--db-url</dt><dd>実際のデータベース。<code>ptah introspect</code> で Go のモデルとして読み戻せる</dd>
+        </dl>
+      </div>
+      <pre class="diagram" role="img" aria-label="スキーマファイル、Go のモデル、実際のデータベースが ptah に入り、ptah が検証、計画、lint、適用を行い、データベースに対するドリフトを検査する。">schema.sql · models/*.go · live db
+        │
+        ↓
+      <b>ptah</b>  validate → plan → lint → apply → drift
+        │
+        ↓
+     database</pre>
+    </div>
+  </section>
+
+  <section class="section facts" aria-label="データベース、ツール、Atlas 互換">
+    <div class="wrap">
+      <div class="fact">
+        <div class="label">データベース</div>
+        <p>PostgreSQL、MySQL、MariaDB、SQLite、SQL Server、CockroachDB、YugabyteDB、ClickHouse、Oracle、Spanner。対応範囲はエンジンごとに異なる。<a href="https://docs.ptah.run/edge/databases/support-matrix/">対応表（英語）→</a></p>
+      </div>
+      <div class="fact">
+        <div class="label">ツール</div>
+        <p>製品は <code class="product">ptah</code>。<code>ptah-ls</code> は Go のアノテーションにエディタ支援を提供する。<a href="https://github.com/stokaro/ptah-action">GitHub Action</a>、Go パッケージは <a href="https://pkg.go.dev/ptah.run"><code>ptah.run</code></a>。</p>
+      </div>
+      <div class="fact">
+        <div class="label">Atlas からの移行</div>
+        <p><code>ptah-compat</code> は Atlas と同じ形のコマンドを保ちながら、Ptah の挙動で実行する。Ariga とは無関係の、独立したクリーンルーム実装。<a href="https://docs.ptah.run/edge/atlas/overview/">Atlas 互換（英語）→</a></p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-brand"><img src="/assets/logo.svg" alt="" width="18" height="18"><span>ptah.run · <span class="v" data-version>v0.3.0</span> · pre-GA · MIT</span></div>
+    <ul class="foot-links">
+      <li><a href="https://github.com/stokaro/ptah">GitHub</a></li>
+      <li><a href="https://github.com/stokaro/ptah/issues">課題</a></li>
+      <li><a href="/ja/community/">コミュニティ</a></li>
+      <li><a href="https://github.com/stokaro/ptah/releases">変更履歴</a></li>
+      <li><a href="https://github.com/stokaro/ptah/blob/master/LICENSE">ライセンス</a></li>
+    </ul>
+  </div>
+</footer>
+
+<div class="sr-only" role="status" id="copy-status"></div>
+<script src="/assets/runs.js" defer></script>
+<script src="/assets/runs.ja.js" defer></script>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>
