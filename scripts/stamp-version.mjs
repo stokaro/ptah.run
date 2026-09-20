@@ -26,7 +26,15 @@ const PAGES = [
   "ja/index.html",
   "ja/install/index.html",
   "ja/in-practice/index.html",
-  "ja/community/index.html"
+  "ja/community/index.html",
+  "de/index.html",
+  "de/install/index.html",
+  "de/in-practice/index.html",
+  "de/community/index.html",
+  "fr/index.html",
+  "fr/install/index.html",
+  "fr/in-practice/index.html",
+  "fr/community/index.html"
 ];
 const TAG_RE = /^v\d+\.\d+\.\d+$/;
 

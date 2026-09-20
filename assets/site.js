@@ -5,11 +5,11 @@
  * on /install/, and a best-effort refresh of the release version from the
  * GitHub API (the HTML carries the last known release as a fallback).
  *
- * One file serves both language trees. Nothing here decides which language a
+ * One file serves every language tree. Nothing here decides which language a
  * reader gets: the page already says so in its `lang` attribute, and every
  * string this file writes follows that. The run narration works the same way
- * -- assets/runs.js holds the sessions, and the Japanese pages load
- * assets/runs.ja.js beside it.
+ * -- assets/runs.js holds the sessions, and translated pages load
+ * assets/runs.<lang>.js beside it.
  */
 (function () {
   "use strict";
@@ -27,13 +27,14 @@
   /* ---------- Language ----------
    *
    * Only the strings this file writes at run time live here; everything a
-   * reader sees before it runs is in the markup. An unknown `lang` falls back
-   * to English rather than to an empty interface.
+   * reader sees before it runs is in the markup. Missing translations are errors;
+   * the static localized content remains readable without this enhancement.
    */
 
-  var LANG = root.lang === "ja" ? "ja" : "en";
+  var LANG = root.lang;
   var TEXT = {
     en: {
+      command: "command",
       copied: "Copied",
       copiedStatus: function (name) {
         return "Copied the " + name + " to the clipboard.";
@@ -54,6 +55,7 @@
       closeAria: "Close the demo"
     },
     ja: {
+      command: "コマンド",
       copied: "コピーしました",
       copiedStatus: function (name) {
         return name + "をクリップボードにコピーしました。";
@@ -72,9 +74,31 @@
       close: "閉じる",
       expandAria: "デモを拡大",
       closeAria: "デモを閉じる"
+    },
+    de: {
+      command: "Befehl", copied: "Kopiert",
+      copiedStatus: function (name) { return name + " wurde in die Zwischenablage kopiert."; },
+      detected: function (name) { return "erkannt: " + name; },
+      speed: function (rate) { return "Wiedergabegeschwindigkeit: " + rate + "×. Zum Ändern drücken."; },
+      play: "Abspielen", pause: "Pause", playAria: "Demo abspielen", pauseAria: "Demo pausieren",
+      expand: "Vergrößern", close: "Schließen", expandAria: "Demo vergrößern", closeAria: "Demo schließen"
+    },
+    fr: {
+      command: "commande", copied: "Copié",
+      copiedStatus: function (name) { return "Copie dans le presse-papiers : " + name + "."; },
+      detected: function (name) { return "détecté : " + name; },
+      speed: function (rate) { return "Vitesse de lecture : " + rate + "×. Appuyez pour changer."; },
+      play: "Lire", pause: "Pause", playAria: "Lire la démonstration", pauseAria: "Mettre la démonstration en pause",
+      expand: "Agrandir", close: "Fermer", expandAria: "Agrandir la démonstration", closeAria: "Fermer la démonstration"
     }
   };
   var T = TEXT[LANG];
+  if (!T) throw new Error("Unsupported page language: " + LANG);
+  Object.keys(TEXT.en).forEach(function (key) {
+    if (typeof T[key] !== typeof TEXT.en[key] || (typeof T[key] === "string" && !T[key].trim())) {
+      throw new Error("Missing " + LANG + " interface translation: " + key);
+    }
+  });
 
   /* ---------- Theme ---------- */
 
@@ -139,6 +163,19 @@
     });
   }
 
+  var languagePicker = $(".lang-picker");
+  if (languagePicker) {
+    doc.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && languagePicker.open) {
+        languagePicker.open = false;
+        $("summary", languagePicker).focus();
+      }
+    });
+    doc.addEventListener("click", function (event) {
+      if (!languagePicker.contains(event.target)) languagePicker.open = false;
+    });
+  }
+
   /* ---------- Copy buttons ---------- */
 
   var copyStatus = $("#copy-status");
@@ -147,7 +184,7 @@
     if (!target) return;
     var label = $(".copy-text", btn) || btn;
     var idle = label.textContent;
-    var name = btn.getAttribute("data-copy-name") || "command";
+    var name = btn.getAttribute("data-copy-name") || T.command;
     var timer = null;
     btn.addEventListener("click", function () {
       var text = target.getAttribute("data-copy-text") || target.textContent.replace(/^\$\s+/, "");
@@ -323,21 +360,20 @@
    * one there because of the other.
    */
   var RUNS = window.PTAH_RUNS;
-  // Loaded by the Japanese pages only. What it carries is narration: the name
+  // Loaded by translated pages only. What it carries is narration: the name
   // a session goes by, the sentence under it, the state pill, and the `#`
   // comments the demo types. A command, a flag, SQL and a line Ptah printed
-  // are what the program did, so they are the same bytes in both trees.
-  var NARRATION = LANG === "ja" ? window.PTAH_RUNS_JA : null;
+  // are what the program did, so they are the same bytes in every language.
+  var NARRATION = LANG === "en" ? null : window["PTAH_RUNS_" + LANG.toUpperCase()];
   // A page may list many sessions; only one of them plays. Two typewriters in
   // one column is two things to read, and neither gets read.
   var stopOthers = null;
 
   // What a session is called and what is said about it, in this page's
-  // language. A run with no translation would have failed the build, so the
-  // fallback here is for a stale cached runs.ja.js rather than for normal use.
+  // language. Missing narration leaves the static transcript available and
+  // raises an error instead of replaying English on a translated page.
   function about(key) {
-    var ja = NARRATION && NARRATION.scenarios[key];
-    return ja || RUNS.scenarios[key];
+    return LANG === "en" ? RUNS.scenarios[key] : NARRATION.scenarios[key];
   }
 
   // The same session with its narration replaced. Done once, where the script
@@ -347,10 +383,27 @@
     if (!NARRATION) return script;
     return script.map(function (event) {
       if (event[0] !== "note") return event;
-      return ["note", NARRATION.notes[event[1]] || event[1]];
+      return ["note", NARRATION.notes[event[1]]];
     });
   }
 
+  if (RUNS && LANG !== "en") {
+    if (!NARRATION) throw new Error("Missing " + LANG + " run narration");
+    Object.keys(RUNS.scenarios).forEach(function (key) {
+      var translated = NARRATION.scenarios[key];
+      ["tag", "label", "caption"].forEach(function (field) {
+        if (!translated || typeof translated[field] !== "string" || !translated[field].trim()) {
+          throw new Error("Missing " + LANG + " scenario translation: " + key + "." + field);
+        }
+      });
+      RUNS.scenarios[key].script.forEach(function (event) {
+        var group = event[0] === "note" ? "notes" : event[0] === "sync" ? "sync" : null;
+        if (group && (typeof NARRATION[group][event[1]] !== "string" || !NARRATION[group][event[1]].trim())) {
+          throw new Error("Missing " + LANG + " narration: " + event[1]);
+        }
+      });
+    });
+  }
   if (RUNS) $$("[data-demo]").forEach(setupDemo);
 
   function setupDemo(demo) {
@@ -631,7 +684,7 @@
     // The pill reads in the page's language; which colour it takes is decided
     // on the state assets/runs.js names, so a translation cannot change it.
     function setSync(state) {
-      syncPill.textContent = (NARRATION && NARRATION.sync[state]) || state;
+      syncPill.textContent = LANG === "en" ? state : NARRATION.sync[state];
       syncPill.setAttribute("data-state", state === "no drift" ? "clear" : "pending");
     }
 

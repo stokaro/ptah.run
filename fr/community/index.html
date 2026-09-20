@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Communauté Ptah</title>
+<meta name="description" content="Où poser une question sur Ptah, signaler un bug ou une vulnérabilité et contribuer à Ptah et aux dépôts associés.">
+<link rel="canonical" href="https://ptah.run/fr/community/">
+<link rel="alternate" hreflang="en" href="https://ptah.run/community/">
+<link rel="alternate" hreflang="ja" href="https://ptah.run/ja/community/">
+<link rel="alternate" hreflang="de" href="https://ptah.run/de/community/">
+<link rel="alternate" hreflang="fr" href="https://ptah.run/fr/community/">
+<link rel="alternate" hreflang="x-default" href="https://ptah.run/community/">
+<meta name="go-import" content="ptah.run git https://github.com/stokaro/ptah">
+<meta name="go-source" content="ptah.run https://github.com/stokaro/ptah https://github.com/stokaro/ptah/tree/master{/dir} https://github.com/stokaro/ptah/blob/master{/dir}/{file}#L{line}">
+<meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161311" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ptah">
+<meta property="og:title" content="Communauté Ptah">
+<meta property="og:description" content="Où poser une question sur Ptah, signaler un bug ou une vulnérabilité et contribuer à Ptah et aux dépôts associés.">
+<meta property="og:url" content="https://ptah.run/fr/community/">
+<meta property="og:image" content="https://ptah.run/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Le nom Ptah en ASCII avec une accroche en anglais sur les migrations de bases de données.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="/assets/fonts/instrument-sans-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script>(function(){var d=document.documentElement,t=null;try{t=localStorage.getItem("ptah-theme")}catch(e){}if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.setAttribute("data-theme",t);d.classList.add("js")})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Aller au contenu</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/fr/"><img src="/assets/logo.svg" alt="" width="22" height="22">Ptah</a>
+    <nav class="nav" aria-label="Navigation du site">
+      <ul class="nav-links" id="nav-links">
+        <li><a href="https://docs.ptah.run/">Documentation</a></li>
+        <li><a href="/fr/install/">Installation</a></li>
+        <li><a href="/fr/in-practice/">En pratique</a></li>
+        <li><a href="https://play.ptah.run/">Bac à sable</a></li>
+        <li><a href="https://operator.ptah.run/">Operator</a></li>
+        <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
+      </ul>
+      <details class="lang-picker">
+        <summary class="icon-btn lang-btn" aria-label="Langue">Français</summary>
+        <ul class="language-links">
+          <li><a href="/community/" hreflang="en" lang="en">English</a></li>
+          <li><a href="/ja/community/" hreflang="ja" lang="ja">日本語</a></li>
+          <li><a href="/de/community/" hreflang="de" lang="de">Deutsch</a></li>
+          <li><a href="/fr/community/" hreflang="fr" lang="fr" aria-current="page">Français</a></li>
+        </ul>
+      </details>
+      <button class="icon-btn theme-btn" type="button" aria-label="Thème sombre" aria-pressed="false">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/></svg>
+      </button>
+      <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">
+        <svg class="icon-menu" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg class="icon-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="page community">
+  <div class="wrap">
+
+    <div class="page-head">
+      <h1>Communauté</h1>
+      <p class="lede">Ptah est développé ouvertement sur GitHub. Questions, idées, rapports de bugs et contributions sont les bienvenus, quelle que soit votre expérience des bases de données ou de Go.</p>
+      <p class="meta"><span>La participation est encadrée par le <a href="https://github.com/stokaro/ptah/blob/master/CODE_OF_CONDUCT.md">code de conduite</a>.</span></p>
+    </div>
+
+    <section class="block" aria-labelledby="discussions-title">
+      <h2 class="label" id="discussions-title">Poser une question</h2>
+      <p><a href="https://github.com/stokaro/ptah/discussions">GitHub Discussions</a> accueille les questions sur <code>ptah</code>, <code>ptah-compat</code> ou la bibliothèque Go, les idées qui ne sont pas encore des demandes de fonctionnalités précises et les projets réalisés avec Ptah. La lecture est publique ; la publication exige un compte GitHub.</p>
+      <p>La <a href="https://docs.ptah.run/edge/faq/">FAQ</a> et la <a href="https://docs.ptah.run/edge/operate/troubleshooting/">page de dépannage</a> répondent aux questions fréquentes. Cherchez d’abord dans la <a href="https://docs.ptah.run/">documentation</a>. Si une réponse résout votre problème, marquez-la comme solution pour les lecteurs suivants.</p>
+      <div class="actions">
+        <a class="btn" href="https://github.com/stokaro/ptah/discussions/categories/q-a">Poser une question dans Q&amp;A →</a>
+        <a class="btn btn-ghost" href="https://github.com/stokaro/ptah/discussions">Parcourir les discussions</a>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="issues-title">
+      <h2 class="label" id="issues-title">Signaler un bug</h2>
+      <p>Les bugs et demandes de fonctionnalités vont dans le <a href="https://github.com/stokaro/ptah/issues">suivi des issues</a>, avec une étiquette et une personne responsable. Les formulaires demandent la commande exacte, la sortie de <code>ptah version</code>, le moteur et sa version, ainsi que l’entrée minimale reproduisant le problème. Précisez le binaire utilisé : <code>ptah</code> et <code>ptah-compat</code> exposent volontairement des commandes différentes.</p>
+      <p>Les problèmes de l’opérateur Kubernetes relèvent de <a href="https://github.com/stokaro/ptah-operator/issues">stokaro/ptah-operator</a>, et ceux de ce site de <a href="https://github.com/stokaro/ptah.run/issues">stokaro/ptah.run</a>.</p>
+      <div class="actions">
+        <a class="btn" href="https://github.com/stokaro/ptah/issues/new/choose">Ouvrir une issue →</a>
+        <a class="btn btn-ghost" href="https://github.com/stokaro/ptah/issues">Rechercher parmi les issues</a>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="security-title">
+      <h2 class="label" id="security-title">Signaler une vulnérabilité</h2>
+      <p>Signalez les problèmes de sécurité en privé via le <a href="https://github.com/stokaro/ptah/security/advisories/new">formulaire d’avis de sécurité GitHub</a>, plutôt que dans une issue ou une discussion. Seuls vous et les responsables du projet voyez le rapport jusqu’à la publication d’un avis.</p>
+    </section>
+
+    <section class="block" aria-labelledby="contribute-title">
+      <h2 class="label" id="contribute-title">Contribuer</h2>
+      <p>Le code est une façon de contribuer. Un cas de reproduction minimal, une mesure sur un véritable serveur, une correction de documentation ou une réponse dans Discussions sont aussi utiles. <a href="https://github.com/stokaro/ptah/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a> décrit les propositions de modification et les vérifications requises. <a href="https://github.com/stokaro/ptah/blob/master/AGENTS.md">AGENTS.md</a> contient les règles de travail appliquées par la CI. Les deux documents sont en anglais.</p>
+      <p>Ouvrez une issue avant de modifier un comportement afin de convenir de la conception avant l’implémentation.</p>
+    </section>
+
+    <section class="block" aria-labelledby="repos-title">
+      <h2 class="label" id="repos-title">Dépôts</h2>
+      <p>Ptah comprend plusieurs dépôts de l’organisation <a href="https://github.com/stokaro">stokaro</a>. Chacun reçoit ses propres issues et pull requests.</p>
+      <dl class="flags">
+        <dt><a href="https://github.com/stokaro/ptah">stokaro/ptah</a></dt>
+        <dd>Les binaires <code>ptah</code>, <code>ptah-compat</code> et <code>ptah-ls</code>, la bibliothèque Go et la documentation en anglais sur <a href="https://docs.ptah.run/">docs.ptah.run</a>.</dd>
+        <dt><a href="https://github.com/stokaro/ptah-operator">stokaro/ptah-operator</a></dt>
+        <dd>L’opérateur Kubernetes. Son guide en anglais est sur <a href="https://operator.ptah.run/">operator.ptah.run</a>.</dd>
+        <dt><a href="https://github.com/stokaro/ptah-action">stokaro/ptah-action</a></dt>
+        <dd>La GitHub Action : planification des migrations, analyse statique, commentaires de pull request et contrôles des modifications destructives.</dd>
+        <dt><a href="https://github.com/stokaro/ptah-testkit">stokaro/ptah-testkit</a></dt>
+        <dd>Des outils de test pour les projets qui intègrent Ptah, importés via <code>ptah.run/testkit</code>.</dd>
+        <dt><a href="https://github.com/stokaro/ptah-sandbox">stokaro/ptah-sandbox</a></dt>
+        <dd>Le <a href="https://play.ptah.run/">bac à sable</a> : la CLI compilée en WebAssembly, exécutée avec une véritable base SQLite dans le navigateur.</dd>
+        <dt><a href="https://github.com/stokaro/homebrew-ptah">stokaro/homebrew-ptah</a></dt>
+        <dd>Le tap Homebrew utilisé par <code>brew install stokaro/ptah/ptah</code>.</dd>
+        <dt><a href="https://github.com/stokaro/ptah.run">stokaro/ptah.run</a></dt>
+        <dd>Ce site web.</dd>
+      </dl>
+    </section>
+
+    <section class="block" aria-labelledby="commercial-title">
+      <h2 class="label" id="commercial-title">Assistance commerciale</h2>
+      <p>Pour les demandes commerciales, écrivez à l’adresse indiquée dans la <a href="https://docs.ptah.run/edge/faq/#commercial-support">FAQ</a>. Conservez les rapports de bugs et les demandes de fonctionnalités dans le suivi public des issues.</p>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-brand"><img src="/assets/logo.svg" alt="" width="18" height="18"><span>ptah.run · <span class="v" data-version>v0.3.0</span> · pre-GA · MIT</span></div>
+    <ul class="foot-links">
+      <li><a href="https://github.com/stokaro/ptah">GitHub</a></li>
+      <li><a href="https://github.com/stokaro/ptah/issues">Signalements</a></li>
+      <li><a href="/fr/community/" aria-current="page">Communauté</a></li>
+      <li><a href="https://github.com/stokaro/ptah/releases">Historique des versions</a></li>
+      <li><a href="https://github.com/stokaro/ptah/blob/master/LICENSE">Licence</a></li>
+    </ul>
+  </div>
+</footer>
+
+<div class="sr-only" role="status" id="copy-status"></div>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

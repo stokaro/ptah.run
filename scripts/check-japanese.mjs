@@ -192,7 +192,7 @@ for (const [path, text] of corpus) {
   const seen = text.split(MARKER).length - 1;
   if (seen) {
     problems.push(
-      `${path}: writes ${MARKER} ${seen} time(s); the footer says once that everything outside the Japanese pages is in English, so a per-link marker only says less`
+      `${path}: writes ${MARKER} ${seen} time(s); the footer says once that the linked documentation, playground and repositories are in English, so a per-link marker only says less`
     );
   }
 

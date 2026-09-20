@@ -425,8 +425,48 @@ button {
 }
 /* Sitting inside the nav's 28px gap, the pair would read as two unrelated
  * controls. Pulling the theme button in makes them one. */
-.lang-btn + .theme-btn {
+.lang-picker + .theme-btn {
   margin-left: -18px;
+}
+.lang-picker {
+  position: relative;
+  flex-shrink: 0;
+}
+.lang-picker summary {
+  cursor: pointer;
+  list-style: none;
+}
+.lang-picker summary::-webkit-details-marker {
+  display: none;
+}
+.lang-picker summary::after {
+  content: " ▾";
+  margin-left: 4px;
+}
+.lang-picker .lang-btn {
+  display: flex;
+  align-items: center;
+}
+.language-links {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 30;
+  min-width: 148px;
+  padding: 4px;
+  margin: 4px 0 0;
+  list-style: none;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+.language-links a {
+  display: block;
+  padding: 10px 12px;
+  text-decoration: none;
+}
+.language-links a[aria-current="page"] {
+  color: var(--acc);
 }
 .menu-btn {
   display: none;
@@ -1214,9 +1254,9 @@ h2 {
   text-decoration: none;
 }
 /* Only the Japanese footer carries this line, and it says once what a marker
- * on each English link could not: everything outside the Japanese pages is in
- * English. It takes a row of its own so the brand and the links keep the
- * shape they have in both trees. */
+ * on each English link could not: the linked documentation, playground and
+ * repositories are in English. It takes a row of its own so the brand and the
+ * links keep their shape. */
 .foot-note {
   flex-basis: 100%;
   order: 1;
@@ -1444,11 +1484,8 @@ html:not(.js) .panel-title {
   }
 }
 
-@media (max-width: 720px) {
-  .wrap {
-    padding-inline: 20px;
-  }
-
+/* Localized navigation needs the menu before the content needs a phone layout. */
+@media (max-width: 1199px) {
   .site-header .wrap {
     height: 52px;
   }
@@ -1477,7 +1514,7 @@ html:not(.js) .panel-title {
     width: auto;
     padding-inline: 12px;
   }
-  .lang-btn + .theme-btn {
+  .lang-picker + .theme-btn {
     margin-left: 0;
   }
   html.js .menu-btn {
@@ -1514,6 +1551,40 @@ html:not(.js) .panel-title {
     display: flex;
     align-items: center;
     min-height: 44px;
+  }
+
+}
+
+/* No script hides the navigation: wrap its real links within the header. */
+@media (max-width: 1199px) {
+  html:not(.js) .site-header .wrap {
+    height: auto;
+    padding-block: 12px;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  html:not(.js) .nav {
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-right: 0;
+  }
+  html:not(.js) .nav-links {
+    width: 100%;
+    order: 3;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin: 0;
+  }
+  html:not(.js) .nav-links a {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 720px) {
+  .wrap {
+    padding-inline: 20px;
   }
 
   .hero .wrap {
@@ -1740,3 +1811,9 @@ html:not(.js) .panel-title {
     height: min(66vh, 480px);
   }
 }
+
+/* A translated heading or button must not impose its longest word on a grid. */
+.hero-copy { min-width: 0; }
+h1, h2, h3 { overflow-wrap: anywhere; hyphens: auto; }
+.btn { white-space: normal; overflow-wrap: anywhere; }
+.meta > span { min-width: 0; overflow-wrap: anywhere; }

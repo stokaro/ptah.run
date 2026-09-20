@@ -1,6 +1,7 @@
 # Translating ptah.run
 
-The site is written in English and translated into Japanese under `/ja/`.
+The site is written in English and translated into Japanese under `/ja/`,
+German under `/de/` and French under `/fr/`.
 `README.md` covers what is translated, what is not, and the checks that stop a
 Japanese page going stale against its English counterpart. This file covers the
 one thing those checks cannot see: whether two Japanese pages, written months
@@ -9,7 +10,7 @@ apart, use the same word for the same thing.
 ## Recorded output is not translated
 
 Commands, flags, SQL, file names and anything Ptah printed stay byte-identical
-in both trees. Only the narration around them becomes Japanese. `README.md` has
+in every language. Only the narration around them is translated. `README.md` has
 the full rule; it is repeated here because it is the one a translator is most
 likely to break.
 
@@ -47,9 +48,10 @@ in English. The reader should meet the same word on both sides of the click.
 
 ## Links out of the Japanese pages
 
-Everything outside `/ja/` is in English: the documentation, the playground, the
-operator's site, and every repository. The Japanese footer says so once, in
-`foot-note`. Do not mark individual links -- the community page alone links to
+The documentation, playground, operator's site and repositories are in English.
+The Japanese footer explains that once, in `foot-note`. Other landing-page
+languages are available through the language picker.
+Do not mark individual links -- the community page alone links to
 more than thirty English destinations, and a marker on some of them tells the
 reader nothing about the rest. `scripts/check-japanese.mjs` refuses the marker
 `（英語）` for that reason.

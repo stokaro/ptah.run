@@ -3,7 +3,7 @@
 The website for [Ptah](https://github.com/stokaro/ptah), served at
 <https://ptah.run> from GitHub Pages.
 
-The site is static HTML, CSS and a small script with no build step. The
+The site is static HTML, CSS and a small script with no application build step. The
 documentation is a separate site, <https://docs.ptah.run>, built from
 `docs/site` in the `stokaro/ptah` repository; this repository only holds the
 pages served at `ptah.run` itself.
@@ -16,12 +16,12 @@ pages served at `ptah.run` itself.
 | `install/index.html` | Install page with platform-detecting tabs |
 | `in-practice/index.html` | The recorded runs as a grid; generated (see "Recorded runs") |
 | `community/index.html` | Community page: where to ask, report a bug or a vulnerability, and contribute |
-| `ja/**` | The Japanese tree, one page per English page (see "Languages") |
-| `404.html` | Not-found page (GitHub Pages serves it for unknown paths), in both languages |
+| `ja/**`, `de/**`, `fr/**` | Japanese, German and French; one page per English page (see "Languages") |
+| `404.html` | Not-found page (GitHub Pages serves it for unknown paths), in English and Japanese |
 | `assets/site.css` | The one stylesheet: tokens, layout, light and dark themes |
 | `assets/site.js` | Theme toggle, mobile menu, copy buttons, install tabs, release-version refresh |
 | `assets/runs.js` | Every recorded session: the commands, the output and the demo's narration |
-| `assets/runs.ja.js` | The Japanese narration for those sessions, keyed by the English it replaces |
+| `assets/runs.{ja,de,fr}.js` | Localized narration, keyed by the English it replaces |
 | `assets/fonts/` | Self-hosted font subsets and their licenses |
 | `assets/logo.svg`, `favicon.svg` | The Ptah mark, copied from `stokaro/ptah` (`docs/site/src/assets/logo.svg`) |
 | `og.png`, `apple-touch-icon.png`, `favicon.ico` | Generated from the mark and the ASCII wordmark |
@@ -31,10 +31,12 @@ pages served at `ptah.run` itself.
 | `.nojekyll` | Tells GitHub Pages not to run Jekyll over the files |
 | `LICENSE` | MIT, for the site's own code |
 | `scripts/stamp-version.mjs` | Writes a release tag into the pages; run by the deploy workflow |
-| `scripts/build-runs.mjs` | Writes both in-practice pages and both home transcripts from `assets/runs.js` |
-| `scripts/check-locales.mjs` | Holds the two language trees to the same shape |
-| `scripts/check-japanese.mjs` | Holds the Japanese to the glossary and the typography rules in `TRANSLATING.md` |
-| `TRANSLATING.md` | What a translator works to; its glossary table is the one the check above reads |
+| `scripts/build-runs.mjs` | Writes all in-practice pages and home transcripts from `assets/runs.js` |
+| `scripts/check-locales.mjs` | Checks locale coverage, links, metadata and indexability |
+| `scripts/locales.mjs` | Language names, paths, alternate links and the shared language picker |
+| `scripts/check-japanese.mjs` | Checks the glossary and Japanese typography in `TRANSLATING.md` |
+| `TRANSLATING.md` | Translation rules and the glossary read by the Japanese check |
+| `scripts/check-browser.mjs` | Responsive and interaction checks; saves screenshots and layout readings |
 | `.github/workflows/deploy.yml` | Checks local references, stamps the latest release, deploys to GitHub Pages |
 
 ## Working on it
@@ -50,40 +52,42 @@ python3 -m http.server 8000
 Every push to `main` deploys. The workflow first checks that every local
 `href`/`src` on the pages points at a file that exists. It finds the pages with
 `git ls-files`, so adding one needs no edit there; what a new page does need is
-a counterpart in the other language, a row in `sitemap.xml` and an entry in
+counterparts in every language, a row in `sitemap.xml` and an entry in
 `PAGES` in `scripts/stamp-version.mjs`, which cannot discover anything because
 it has to run on a bare copy of the pages. `scripts/check-locales.mjs` fails
 until all three are done.
 
 ## Languages
 
-The site is served in English at the root and in Japanese under `/ja/`. English
-keeps the root because every inbound link, the `go-import` paths and the
-installer addresses already point there, and moving it would break all three to
-gain nothing.
+The site is served in English at `/`, Japanese at `/ja/`, German at `/de/`
+and French at `/fr/`. Each tree has a homepage, installation page, recorded
+examples and community page. The existing English and Japanese URLs stay fixed.
+The English pages are the content source for every translation.
 
-Every page is in a pair: `/install/` and `/ja/install/`, and so on. Two pages
-stand alone, and `scripts/check-locales.mjs` names each with its reason.
-`404.html` is one document for the whole domain -- GitHub Pages has no
-per-directory 404, so a copy under `/ja/` would never be served to anybody, and
-the page carries both languages instead. `testkit/index.html` is the other: a
-`go-import` page the `go` tool reads and redirects past, with no prose in it.
+Each page carries its own absolute canonical URL and alternate links for all
+four languages, including itself. `x-default` names the equivalent English
+page. The sitemap lists each canonical URL once; alternates live in HTML.
+The language picker uses native `details` and ordinary links to the equivalent
+page, so it works without JavaScript. No browser language or location redirects
+select a language for the reader.
 
-Each page names its counterpart with `<link rel="alternate" hreflang="...">` in
-both directions, plus `x-default` pointing at the English page, and the language
-switch in the header goes to **the same page** in the other language rather than
-to the other language's home. It is a link, not a toggle, so it works without
-JavaScript and the keyboard reaches it beside the theme button.
+Two pages stand alone, with reasons in `scripts/check-locales.mjs`: `404.html`
+is the domain-wide English/Japanese error page, and `testkit/index.html` is a
+Go vanity import endpoint. Neither is a localized landing page.
+
+Documentation, quick starts and the playground stay in English. Translated
+links use concise labels without parenthetical language notices and keep the
+existing destination URLs. No localized documentation routes are created here.
 
 **Recorded output is not translated.** Commands, flags, SQL, file names and
 anything Ptah printed are what the program did; a transcript that changed them
-would be a different recording. What turns into Japanese is the narration: the
+would be a different recording. What is translated is the narration: the
 page's own prose, the name a session goes by and the sentence under it, the
 state pill in the terminal bar, and the `#` comments the demo types to say what
 is about to happen. Those comments were always the demo speaking rather than
 Ptah, which is why they translate and the lines around them do not.
 
-**The product's name is written `Ptah（プタハ）` once**, at the first mention in
+**In Japanese, the product's name is written `Ptah（プタハ）` once**, at the first mention in
 a page's own prose, and `Ptah` everywhere after it. Not the kana again, and not
 a mix. `scripts/check-locales.mjs` holds the count and the position: a page that
 gives the reading twice, spells it some other way, or never gives it at all
@@ -113,64 +117,48 @@ Japanese face is megabytes, and every platform this site is read on ships one.
 of the stack, so a sentence with a command in it still sets the command in the
 same face and only the kana and kanji fall through to the system.
 
-### What stops the Japanese pages going stale
+### Keeping translations complete
 
-A hand-edited copy of a page is the thing that rots: nothing about it says the
-page it was copied from has changed. So the parts that must not differ are
-either generated from one source or compared.
+`scripts/build-runs.mjs` generates every in-practice page and homepage
+transcript from the same commands and output in `assets/runs.js`. Narration
+lives in `assets/runs.{ja,de,fr}.js`; missing, empty or orphaned entries fail
+generation. The browser also refuses incomplete dictionaries instead of
+substituting English. The static localized transcript remains readable.
 
-Generated. `/ja/in-practice/` and the transcript in `/ja/index.html` come out of
-`scripts/build-runs.mjs`, the same generator and the same `assets/runs.js` as
-their English counterparts. Re-recording a session, adding one, or editing an
-output line updates both trees in one run; `--check` fails in CI when it has not
-been run. The narration lives in `assets/runs.ja.js`, keyed by the English it
-replaces, and the generator refuses to write anything while a key is missing or
-orphaned -- so an English line edited in `assets/runs.js` takes its old key with
-it and fails the build, which is how the edit reaches the translation instead of
-quietly leaving a Japanese page behind.
+`scripts/check-locales.mjs` compares commands, link destinations, controls,
+anchors and version stamps across languages. Written commands in `code` and
+`pre` elements are compared as well as copy-button payloads; generated
+transcripts are checked separately, and translated flow diagrams are excluded.
+Internal links must lead to the equivalent page in the selected language.
+Canonical links, language alternatives and the picker are checked separately
+by exact value.
+Extraction floors keep an empty comparison from passing. The gate checks
+complete switches, self canonicals, reciprocal alternatives, metadata,
+translated descriptions, accessibility labels, sitemap coverage and indexability. Its refusal tests
+remove required content and break links to show that the gate catches them.
+`scripts/stamp-version.mjs` stamps every language, including the shared 404.
 
-Stamped. `scripts/stamp-version.mjs` lists the Japanese pages beside the English
-ones, so the deploy-time release stamp lands in all nine. The deploy's self-test
-now copies the whole tracked tree rather than a list of directories.
+Run the source checks after staging new pages, since discovery uses tracked
+files. Browser checks require Node.js and the pinned development dependency;
+they do not change the site's static deployment:
 
-Fetched, and therefore shared. `https://ptah.run/install.sh` and `/install.ps1`
-are fetched from `stokaro/ptah` at deploy time and are not in git at all; both
-trees advertise the same two addresses, and `check-locales.mjs` compares every
-command on a pair: the exact `data-copy-text` a button hands over, and the lines
-written into a `<code>` or a `<pre>` for a reader to retype. The second kind is
-most of what a page carries: the install pair offers three commands for copying
-and writes forty-odd more lines that a reader only reads, among them the ones
-somebody has to update by hand when `install.sh` changes upstream. A command,
-flag, path or environment variable that changes in English and not in Japanese
-is a failing check, not a quiet difference. A line starting `#` is the
-exception: that is the demo's own narration, which is prose and is translated.
+```sh
+npm ci
+npx playwright install chromium
+npm run check
+node scripts/check-japanese.mjs
+npm run check:browser
+```
 
-Compared. `scripts/check-locales.mjs` runs in the Check job and holds a pair to
-the same commands, the same install tabs, the same recorded runs, the same
-element ids and the same number of version stamps. It also checks that the
-`lang` attribute matches the tree, that the `hreflang` and canonical links
-resolve to pages that exist, that the switch is on every page and goes to the
-counterpart, that a Japanese page loading the sessions also loads the
-narration, that `PAGES` in `stamp-version.mjs` is exactly the set of pages
-carrying a version, and that the sitemap lists every indexable page and nothing
-else.
+The browser check measures all four page types at mobile, tablet and desktop
+widths, in both themes, with and without JavaScript. It follows all language
+switches and exercises mobile navigation, installation tabs, copy status and
+the transcript player. Screenshots of the German and French homepages and
+layout readings go to `artifacts/locales/`, or `SCREENSHOT_DIR`. CI uploads
+them as `localization-browser-checks`.
 
-Link destinations are compared inside each tree, not across them. The English
-page's `/install/` has to be the Japanese page's `/ja/install/`, so a Japanese
-page that links past `/ja/` into English is a failing check rather than a
-match, and a reader who clicks インストール stays in the tree they were reading.
-The canonical, the `hreflang` alternates and the language switch sit outside
-that comparison: crossing the trees is what those links are for, and each is
-asserted by value on its own.
-
-How much the comparison read is held to a floor. An extraction that stopped
-matching would find no differences in no content, which reads exactly like a
-clean run, so the check fails when it has looked at fewer code blocks or fewer
-written lines than the pages carry.
-
-Prose is the one thing no check can compare, and it is where a translation can
-still fall behind. A page rewritten in English needs its Japanese counterpart
-rewritten in the same change.
+These checks detect missing content and structural drift. Translation meaning
+still needs review against the current English page when that page changes.
 
 ## Deployment settings
 
@@ -227,11 +215,11 @@ Trimming a long block to its telling lines is what a transcript does and is
 allowed; reordering it, or writing a line Ptah did not print, is not.
 Re-capture rather than edit when a diagnostic changes wording.
 
-Every run lives in `assets/runs.js`, which both pages load and
+Every run lives in `assets/runs.js`, which all homepage and in-practice variants load and
 `scripts/build-runs.mjs` reads. Adding one is an entry in `SCENARIOS` plus
-its key in `ROTATING` and in `order`, its narration in `assets/runs.ja.js`,
-then a run of that script. The generator refuses to write while the Japanese
-side has a hole in it, so the order those edits happen in does not matter.
+its key in `ROTATING` and in `order`, its narration in every `assets/runs.{ja,de,fr}.js` dictionary,
+then a run of that script. The generator refuses to write while a translation
+has a hole in it, so the order those edits happen in does not matter.
 
 Each run carries one tag, and `order` groups the grid by it. The vocabulary is
 eight words -- Schema change, Inference, Safety, Go annotations, Inspection,
@@ -260,14 +248,14 @@ JavaScript, where the tiles do nothing and are hidden. With it they are
 `display: none`, because twenty-four transcripts in the tab order would be
 twenty-four detours around the thing the tile is for.
 
-Both in-practice pages and both home transcripts are generated:
+All in-practice pages and home transcripts are generated:
 
     node scripts/build-runs.mjs           write them
     node scripts/build-runs.mjs --check   fail when they are out of date
 
 The deploy workflow runs `--check`, so a run edited in `assets/runs.js`
 without regenerating fails before it can ship a page that disagrees with the
-player, in either language. `transcript()` in that script mirrors `settle()` in `assets/site.js`
+player, in any language. `transcript()` in that script mirrors `settle()` in `assets/site.js`
 line for line; when one changes, change the other.
 
 The terminal scrolls and expands. Scrolling follows the newest line only while
@@ -310,7 +298,7 @@ note, a command or a blank ends the run. `wideRuns()` says it in both
 `assets/site.js` and `scripts/build-runs.mjs`; when one changes, change the
 other.
 
-The first session is also in `index.html` and `ja/index.html` as a transcript,
+The first session is also in each language’s `index.html` as a transcript,
 between `<!--session:transcript-->` markers. That is the page without
 JavaScript, and it is what a crawler and a screen reader read; the player hides
 it from sight and replays it. The generator owns those bytes, so the two cannot
