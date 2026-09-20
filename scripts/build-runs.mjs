@@ -243,7 +243,9 @@ const LANGS = {
     ogDescription: "端末で記録した Ptah の実行 24 件。読んでもよいし、打ち込まれる様子を見てもよい。",
     // The one place プタハ appears on this page. Everywhere after it, Ptah.
     h1: "Ptah（プタハ）の実践例",
-    lede: `端末で記録した Ptah の実行 ${RUNS.order.length} 件。ページのために書かれたものは一つもない。開けば読めるし、Play を押せば打ち込まれていく。`,
+    // 再生 is what the button in the player says; naming it Play here would
+    // send the reader looking for a control that is not on the page.
+    lede: `端末で記録した Ptah の実行 ${RUNS.order.length} 件。ページのために書かれたものは一つもない。開けば読めるし、再生を押せば打ち込まれていく。`,
     quickStart: "次はクイックスタート（英語）→",
     installPtah: "Ptah をインストール",
     speedLabel: "再生速度 1×。押すと変わります。",

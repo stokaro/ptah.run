@@ -560,6 +560,10 @@ button {
   padding: 3px 8px 3px 6px;
   min-height: 24px;
   cursor: pointer;
+  /* 一時停止 is four characters where Pause is one word, and a control that
+   * breaks over two lines makes the bar twice as tall. The session name beside
+   * them already truncates; let it give up the room instead. */
+  white-space: nowrap;
 }
 .demo-btn svg {
   width: 12px;

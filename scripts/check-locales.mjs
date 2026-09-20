@@ -50,8 +50,22 @@ const PREFIX = "ja/";
 const problems = [];
 const fail = (page, message) => problems.push(`${page}: ${message}`);
 
-const pages = trackedPages();
-const source = new Map(pages.map((p) => [p, readFileSync(join(root, p), "utf8")]));
+// A page git knows about but the working tree does not is a half-finished
+// delete. Report it rather than dying on the read: the message that says which
+// file is gone is the whole value of running this.
+const source = new Map();
+const missing = [];
+for (const page of trackedPages()) {
+  try {
+    source.set(page, readFileSync(join(root, page), "utf8"));
+  } catch {
+    missing.push(page);
+  }
+}
+for (const page of missing) {
+  problems.push(`${page}: git tracks this page but it is not in the working tree`);
+}
+const pages = [...source.keys()];
 
 const has = (p) => source.has(p);
 const isJapanese = (p) => p.startsWith(PREFIX);
@@ -95,14 +109,15 @@ const tabs = (html) => new Set(all(html, /data-tab="([^"]+)"/g));
 const scenarios = (html) => new Set(all(html, /data-demo-scenario="([^"]+)"/g));
 const anchors = (html) => new Set(all(html, /\sid="([^"]+)"/g));
 
-function differ(what, a, b) {
+function differ(what, a, b, sides) {
+  const [inA, inB] = sides || ["only in the English page", "only in the Japanese page"];
   const onlyA = [...a].filter((x) => !b.has(x));
   const onlyB = [...b].filter((x) => !a.has(x));
   if (!onlyA.length && !onlyB.length) return null;
   const parts = [];
-  if (onlyA.length) parts.push(`only in the English page: ${onlyA.join(", ")}`);
-  if (onlyB.length) parts.push(`only in the Japanese page: ${onlyB.join(", ")}`);
-  return `${what} differ between the pair -- ${parts.join("; ")}`;
+  if (onlyA.length) parts.push(`${inA}: ${onlyA.join(", ")}`);
+  if (onlyB.length) parts.push(`${inB}: ${onlyB.join(", ")}`);
+  return `${what} -- ${parts.join("; ")}`;
 }
 
 /* ---------- Every page is in a pair, or says why not ---------- */
@@ -196,11 +211,15 @@ for (const page of pages) {
   const en = source.get(page);
   const ja = source.get(other);
   const seen = [
-    differ("the commands offered for copying", copyable(en), copyable(ja)),
-    differ("the destinations linked to", destinations(en), destinations(ja)),
-    differ("the install tabs", tabs(en), tabs(ja)),
-    differ("the recorded runs on the page", scenarios(en), scenarios(ja)),
-    differ("the element ids the stylesheet and the script address", anchors(en), anchors(ja))
+    differ("the commands offered for copying differ", copyable(en), copyable(ja)),
+    differ("the destinations linked to differ", destinations(en), destinations(ja)),
+    differ("the install tabs differ", tabs(en), tabs(ja)),
+    differ("the recorded runs on the page differ", scenarios(en), scenarios(ja)),
+    differ(
+      "the element ids the stylesheet and the script address differ",
+      anchors(en),
+      anchors(ja)
+    )
   ].filter(Boolean);
   for (const message of seen) fail(`${page} / ${other}`, message);
 
@@ -263,12 +282,11 @@ const indexable = new Set(
     .filter((p) => !/<meta name="robots" content="noindex">/.test(source.get(p)))
     .map((p) => `https://ptah.run${urlPath(p)}`)
 );
-const sitemapDiff = differ("the sitemap and the indexable pages", indexable, listed);
-if (sitemapDiff) {
-  problems.push(
-    `sitemap.xml: ${sitemapDiff.replace("only in the English page", "not listed").replace("only in the Japanese page", "listed but not a page")}`
-  );
-}
+const sitemapDiff = differ("does not match the pages that exist", indexable, listed, [
+  "a page nothing lists",
+  "a listing with no page"
+]);
+if (sitemapDiff) problems.push(`sitemap.xml: ${sitemapDiff}`);
 
 /* ---------- The reading is given once ---------- */
 
