@@ -8,6 +8,8 @@
 <link rel="canonical" href="https://ptah.run/ja/in-practice/">
 <link rel="alternate" hreflang="en" href="https://ptah.run/in-practice/">
 <link rel="alternate" hreflang="ja" href="https://ptah.run/ja/in-practice/">
+<link rel="alternate" hreflang="de" href="https://ptah.run/de/in-practice/">
+<link rel="alternate" hreflang="fr" href="https://ptah.run/fr/in-practice/">
 <link rel="alternate" hreflang="x-default" href="https://ptah.run/in-practice/">
 <meta name="go-import" content="ptah.run git https://github.com/stokaro/ptah">
 <meta name="go-source" content="ptah.run https://github.com/stokaro/ptah https://github.com/stokaro/ptah/tree/master{/dir} https://github.com/stokaro/ptah/blob/master{/dir}/{file}#L{line}">
@@ -24,7 +26,7 @@
 <meta property="og:image" content="https://ptah.run/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The Ptah ASCII wordmark above the line: Database migrations without surprises.">
+<meta property="og:image:alt" content="Ptah の ASCII ロゴと、データベースのマイグレーションについての英語の見出し。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/fonts/instrument-sans-var-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -39,14 +41,22 @@
     <a class="brand" href="/ja/"><img src="/assets/logo.svg" alt="" width="22" height="22">Ptah</a>
     <nav class="nav" aria-label="サイト">
       <ul class="nav-links" id="nav-links">
-        <li><a href="https://docs.ptah.run/">ドキュメント</a></li>
+        <li><a href="https://docs.ptah.run/">ドキュメント（英語）</a></li>
         <li><a href="/ja/install/">インストール</a></li>
         <li><a href="/ja/in-practice/" aria-current="page">実践例</a></li>
         <li><a href="https://play.ptah.run/">プレイグラウンド</a></li>
         <li><a href="https://operator.ptah.run/">オペレーター</a></li>
         <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
       </ul>
-      <a class="icon-btn lang-btn" href="/in-practice/" hreflang="en" lang="en">English</a>
+      <details class="lang-picker">
+        <summary class="icon-btn lang-btn" aria-label="言語">日本語</summary>
+        <ul class="language-links">
+          <li><a href="/in-practice/" hreflang="en" lang="en">English</a></li>
+          <li><a href="/ja/in-practice/" hreflang="ja" lang="ja" aria-current="page">日本語</a></li>
+          <li><a href="/de/in-practice/" hreflang="de" lang="de">Deutsch</a></li>
+          <li><a href="/fr/in-practice/" hreflang="fr" lang="fr">Français</a></li>
+        </ul>
+      </details>
       <button class="icon-btn theme-btn" type="button" aria-label="ダークテーマ" aria-pressed="false">
         <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/></svg>
       </button>
