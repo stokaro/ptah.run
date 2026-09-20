@@ -556,18 +556,30 @@ button {
  * also what a screen reader and a search crawler read. The player hides that
  * copy from sight only, then replays it into .demo-screen.
  */
+/* The bar carries three parts, and Japanese makes all three wider: the state
+ * pill reads 「ドリフトなし」 against `no drift`, and each control label is four
+ * full-width characters. Together they ran 11px over the row at every desktop
+ * width, and the session name was what paid for it: a Japanese reader met
+ * `sh · ptah-quick-st…` on the first screen where an English reader read the
+ * whole name. The row gives up the space instead: a tighter gap and a tighter
+ * inset, both of which the strip can spare. When even that is not enough the
+ * controls take a line of their own, so a narrow column costs a row of height
+ * rather than the name of the session. */
 .demo .term-bar {
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-inline: 12px;
 }
 .demo-where {
   min-width: 0;
+  margin-inline-end: auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .demo-sync {
-  margin-inline-start: auto;
   padding: 1px 7px;
   border: 1px solid var(--termline);
   border-radius: 2px;

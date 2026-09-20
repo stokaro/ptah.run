@@ -87,8 +87,18 @@ Ptah, which is why they translate and the lines around them do not.
 
 **In Japanese, the product's name is written `Ptah（プタハ）` once**, at the first mention in
 a page's own prose, and `Ptah` everywhere after it. Not the kana again, and not
-a mix. `scripts/check-locales.mjs` counts it: a Japanese page that gives the
-reading twice, spells it some other way, or never gives it at all, fails.
+a mix. `scripts/check-locales.mjs` holds the count and the position: a page that
+gives the reading twice, spells it some other way, or never gives it at all
+fails, and so does one that writes a bare `Ptah` in prose above the gloss, which
+hands the reader the reading after they needed it. The `<head>`, the header
+wordmark, code and attribute values are read past, because none of them is a
+sentence somebody reads in order. The `<h1>` is one, and is where two of these
+pages correctly place the gloss.
+
+That rule is not this repository's. It is section 17 of `docs/STYLE_GUIDE.md` in
+`stokaro/ptah`, where `check-translations.mjs` holds `README.ja.md` to the same
+thing. The two repositories share no module, so the rule is copied rather than
+imported: change the style guide first, then both readers.
 
 Japanese is not subset and self-hosted the way the Latin faces are -- a usable
 Japanese face is megabytes, and every platform this site is read on ships one.
@@ -105,8 +115,16 @@ generation. The browser also refuses incomplete dictionaries instead of
 substituting English. The static localized transcript remains readable.
 
 `scripts/check-locales.mjs` compares commands, link destinations, controls,
-anchors and version stamps across languages. It checks complete switches,
-self canonicals, reciprocal alternatives, metadata, translated descriptions,
+anchors and version stamps across languages. Written commands in `code` and
+`pre` elements are compared with occurrence counts, as well as copy-button
+payloads; generated transcripts are checked separately, and translated flow
+diagrams are excluded.
+Internal links must lead to the equivalent page in the selected language.
+Canonical links, language alternatives and the picker are checked separately
+by exact value.
+Fixture tests exercise command extraction, including repeated literals, without
+pinning the amount of page content. The gate checks complete switches, self
+canonicals, reciprocal alternatives, metadata, translated descriptions,
 accessibility labels, sitemap coverage and indexability. Its refusal tests
 remove required content and break links to show that the gate catches them.
 `scripts/stamp-version.mjs` stamps every language, including the shared 404.

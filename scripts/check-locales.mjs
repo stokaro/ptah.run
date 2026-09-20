@@ -61,13 +61,13 @@ function links(html) {
 // between the trees that is meant to be there.
 const narration = (lang) => `/assets/runs.${lang}.js`;
 
-// The same set, with each translated tree's prefix taken off, so its
-// links can be compared as the one set of destinations they should be.
+// Cross-language metadata and the picker have their own exact checks. Other
+// links must stay in the selected language whenever an equivalent page exists.
+const CROSSING = /<link rel="(?:canonical|alternate)"[^>]*>|<details class="lang-picker">[\s\S]*?<\/details>/g;
 function destinations(html) {
   return new Set(
-    [...links(html)]
+    [...links(html.replace(CROSSING, ""))]
       .filter((href) => !Object.keys(LOCALES).some((lang) => href === narration(lang)))
-      .map((href) => href.replace(/^\/(ja|de|fr)\//, "/"))
   );
 }
 
@@ -75,6 +75,61 @@ const copyable = (html) => new Set(all(html, /data-copy-text="([^"]*)"/g));
 const tabs = (html) => new Set(all(html, /data-tab="([^"]+)"/g));
 const scenarios = (html) => new Set(all(html, /data-demo-scenario="([^"]+)"/g));
 const anchors = (html) => new Set(all(html, /\sid="([^"]+)"/g));
+
+const CODE_BLOCK = /<(code|pre)\b([^>]*)>([\s\S]*?)<\/\1>/g;
+
+// Written by scripts/build-runs.mjs out of assets/runs.js and
+// the narration dictionaries. All language trees come out of one run and `build-runs.mjs
+// --check` fails when it has not been made, so the generator owns these and a
+// second comparison here would only report its translated narration.
+const GENERATED = /\bdata-demo-transcript\b|\bdata-demo-screen\b|\btile-transcript\b/;
+
+// Element text, tags dropped and the entities a page actually writes decoded.
+// &amp; goes last: decoding it first would turn &amp;lt; into a `<`.
+const textOf = (markup) =>
+  markup
+    .replace(/<[^>]+>/g, "")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&amp;/g, "&");
+
+// Every command, flag, path, file name and environment variable a page writes
+// in a <code> or a <pre>, one entry per line.
+//
+// data-copy-text is the handful a button hands over -- the install page
+// offers three that way and writes forty more that a reader retypes. Those
+// forty are the prose that has to be updated by hand when install.sh changes
+// upstream, which makes them the ones most likely to be updated in one tree
+// only.
+//
+// A line whose first character is `#` is dropped. On these pages a shell
+// comment is the demo's own narration rather than anything Ptah reads, so it
+// is prose and is translated; a comment after a command stays, and takes its
+// command with it. Occurrence counts catch a missing repeated literal without
+// requiring translations to keep the English sentence order.
+function literals(html) {
+  const lines = new Map();
+  for (const block of html.matchAll(CODE_BLOCK)) {
+    if (GENERATED.test(block[2])) continue;
+    // The flow diagram contains translated prose, not executable examples.
+    // Its accessibility label is checked below.
+    if (/\bclass="diagram"/.test(block[2]) && /\brole="img"/.test(block[2])) continue;
+    for (const raw of textOf(block[3]).split("\n")) {
+      const line = raw.trim();
+      if (line && !line.startsWith("#")) lines.set(line, (lines.get(line) || 0) + 1);
+    }
+  }
+  return lines;
+}
+
+function literalDifference(a, b) {
+  const changes = [...new Set([...a.keys(), ...b.keys()])]
+    .filter((line) => (a.get(line) || 0) !== (b.get(line) || 0))
+    .map((line) => `${JSON.stringify(line)}: English ${a.get(line) || 0}, translation ${b.get(line) || 0}`);
+  return changes.length ? `the commands, flags and paths written on the page differ -- ${changes.join('; ')}` : null;
+}
 
 function differ(what, a, b, sides) {
   const [inA, inB] = sides || ["only in the English page", "only in the translation"];
@@ -86,6 +141,64 @@ function differ(what, a, b, sides) {
   if (onlyB.length) parts.push(`${inB}: ${onlyB.join(", ")}`);
   return `${what} -- ${parts.join("; ")}`;
 }
+
+const LATIN = "Ptah";
+
+/* The rule below is not this repository's to change. It is section 17 of
+ * docs/STYLE_GUIDE.md in stokaro/ptah, where check-translations.mjs holds
+ * README.ja.md to it: one gloss, at the first place the name stands on its
+ * own in prose. The two repositories share no module, so the rule is copied
+ * rather than imported -- amend the style guide first, then both readers.
+ *
+ * What differs is the document. A README gives its title as `# Ptah`, which
+ * that reader masks; a page here gives it as <a class="brand">Ptah</a> in the
+ * header, and its <h1> is a sentence -- 「Ptah（プタハ）のインストール」 -- which
+ * is where two of these pages correctly place the gloss. So the wordmark is
+ * read past and the heading is not: the same rule about the same kind of
+ * region, applied to the markup that carries it here.
+ */
+
+// The page with everything that is not prose replaced by spaces of its own
+// length. Offsets survive, so a position found here is a position in the page
+// and lineOf can name the line somebody edits.
+//
+// Four regions are read past, each for its own reason. <head> is metadata a
+// reader is shown elsewhere -- a <title>, a <meta content>, the JSON-LD name
+// -- never a sentence read in order. The header wordmark names the product
+// instead of saying anything about it, and stands above the prose on every
+// page. <code> and <pre> hold a command, not the name. An attribute value
+// describes a control and an HTML comment addresses the next maintainer;
+// neither is read as the page.
+function proseOnly(html) {
+  const blank = (text) => text.replace(/[^\n]/g, " ");
+  const mask = (text, re) => text.replace(re, blank);
+  let text = html;
+  text = mask(text, /<head\b[\s\S]*?<\/head>/i);
+  text = mask(text, /<!--[\s\S]*?-->/g);
+  text = mask(text, /<(code|pre)\b[^>]*>[\s\S]*?<\/\1>/gi);
+  text = mask(text, /<a class="brand"[^>]*>[\s\S]*?<\/a>/gi);
+  return text.replace(/<[^>]*>/g, (tag) =>
+    tag.replace(/[A-Za-z-]+\s*=\s*("[^"]*"|'[^']*')/g, blank)
+  );
+}
+
+// Where `name` first stands on its own in `text`, or -1. A match with a
+// letter or a digit against it belongs to a longer word.
+function standaloneMention(text, name) {
+  const wordCharacter = /[0-9A-Za-z]/;
+  let at = text.indexOf(name);
+  while (at !== -1) {
+    const before = at === 0 ? "" : text[at - 1];
+    const after = text[at + name.length] ?? "";
+    if (!wordCharacter.test(before) && !wordCharacter.test(after)) return at;
+    at = text.indexOf(name, at + name.length);
+  }
+  return -1;
+}
+
+/** The 1-based line an offset falls on. */
+const lineOf = (text, at) => text.slice(0, at).split("\n").length;
+
 
 export function audit({ source, stamper, sitemap, robots }) {
   const problems = [];
@@ -159,6 +272,10 @@ export function audit({ source, stamper, sitemap, robots }) {
       fail(page, "has no language switch in the header");
       continue;
     }
+    const label = /<summary[^>]*\saria-label="([^"]*)"/.exec(switchHTML)?.[1];
+    if (label !== LOCALES[language(page)].switchLabel) {
+      fail(page, "language switch must have an accessible label in the page language");
+    }
     for (const [lang, locale] of Object.entries(LOCALES)) {
       const path = UNPAIRED[page] ? "/" : urlPath(englishPage(page));
       const wanted = localizedPath(lang, path);
@@ -171,16 +288,24 @@ export function audit({ source, stamper, sitemap, robots }) {
 
   /* ---------- Translations preserve source commands, destinations and controls ---------- */
 
+  const localized = new Set(pages.filter((p) => language(p) === "en" && !UNPAIRED[p]).map(urlPath));
+
   for (const page of pages) {
     if (language(page) !== "en" || UNPAIRED[page]) continue;
+    const en = source.get(page);
+    const written = literals(en);
     for (const lang of Object.keys(LOCALES).filter((lang) => lang !== "en")) {
       const other = inLocale(page, lang);
       if (!has(other)) continue;
-      const en = source.get(page);
       const translated = source.get(other);
       const seen = [
         differ("the commands offered for copying differ", copyable(en), copyable(translated)),
-        differ("the destinations linked to differ", destinations(en), destinations(translated)),
+        literalDifference(written, literals(translated)),
+        differ(
+          "the destinations linked to differ",
+          new Set([...destinations(en)].map((href) => localized.has(href) ? localizedPath(lang, href) : href)),
+          destinations(translated)
+        ),
         differ("the install tabs differ", tabs(en), tabs(translated)),
         differ("the recorded runs on the page differ", scenarios(en), scenarios(translated)),
         differ(
@@ -268,14 +393,32 @@ export function audit({ source, stamper, sitemap, robots }) {
     if (!japanese) continue;
     if (occurrences === 0) {
       fail(page, `never gives the reading: write ${READING} at the first mention`);
-    } else if (occurrences > 1) {
+      continue;
+    }
+    if (occurrences > 1) {
       fail(
         page,
         `gives the reading ${occurrences} times: ${READING} belongs at the first mention only, and every mention after it is the Latin Ptah`
       );
-    } else if (!html.includes(READING)) {
-      fail(page, `spells the reading some other way; it is written ${READING}`);
+      continue;
     }
+    if (!html.includes(READING)) {
+      fail(page, `spells the reading some other way; it is written ${READING}`);
+      continue;
+    }
+
+    // Counting is not ordering. A page that writes Ptah and only later
+    // Ptah（プタハ）satisfies the count above while handing the reader the
+    // reading after they needed it, so where the gloss sits is compared too.
+    const glossAt = html.indexOf(READING);
+    const mentionAt = standaloneMention(proseOnly(html), LATIN);
+    if (mentionAt === glossAt) continue;
+    fail(
+      page,
+      mentionAt !== -1 && mentionAt < glossAt
+        ? `writes ${LATIN} on line ${lineOf(html, mentionAt)} before ${READING} on line ${lineOf(html, glossAt)}; the reading is given at the first mention, so the gloss comes first and the Latin spelling follows it`
+        : `writes ${READING} on line ${lineOf(html, glossAt)}, where a reader does not meet it: the head, the header wordmark, a code block and an attribute value are not the first mention, so the gloss belongs in the first sentence that names the product`
+    );
   }
 
   /* ---------- Static metadata and indexability ---------- */
@@ -377,6 +520,7 @@ if (process.argv.includes('--selftest')) {
     assert(audit(test).some((problem) => problem.includes(expected)), label);
     assertions++;
   };
+  refuse('empty page discovery', (test) => test.source.clear(), 'a listing with no page');
   for (const lang of ['de', 'fr']) {
     const page = `${lang}/index.html`;
     const change = (test, before, after) => test.source.set(page, test.source.get(page).replace(before, after));
@@ -396,6 +540,49 @@ if (process.argv.includes('--selftest')) {
     refuse('missing sitemap entry', (test) => { test.sitemap = test.sitemap.replace(`<url><loc>https://ptah.run/${lang}/</loc></url>`, ''); }, 'a page nothing lists');
     refuse('invented docs URL', (test) => change(test, 'https://docs.ptah.run/edge/start/quick-start/', `https://docs.ptah.run/${lang}/edge/start/quick-start/`), 'invented localized documentation URL');
   }
+  for (const lang of ['ja', 'de', 'fr']) {
+    const home = `${lang}/index.html`;
+    const install = `${lang}/install/index.html`;
+    refuse(`${lang}: written command drift`, (test) => {
+      test.source.set(install, test.source.get(install).replace('<code>ptah-compat</code>', '<code>ptah-kompat</code>'));
+    }, 'the commands, flags and paths written on the page differ');
+    const community = `${lang}/community/index.html`;
+    for (const [label, replacement] of [['missing', ''], ['extra', '<code>ptah</code><code>ptah</code>']]) {
+      refuse(`${lang}: ${label} occurrence of a repeated literal`, (test) => {
+        test.source.set(community, test.source.get(community).replace('<code>ptah</code>', replacement));
+      }, 'the commands, flags and paths written on the page differ');
+    }
+    refuse(`${lang}: navigation enters English tree`, (test) => {
+      test.source.set(home, test.source.get(home).replace(`href="/${lang}/install/"`, 'href="/install/"'));
+    }, 'the destinations linked to differ');
+    refuse(`${lang}: language picker loses its accessible label`, (test) => {
+      test.source.set(home, test.source.get(home).replace(/(<summary[^>]*?) aria-label="[^"]*"/, '$1'));
+    }, 'language switch must have an accessible label');
+    refuse(`${lang}: language picker uses an English label`, (test) => {
+      test.source.set(home, test.source.get(home).replace(/(<summary[^>]*?) aria-label="[^"]*"/, '$1 aria-label="Language"'));
+    }, 'language switch must have an accessible label');
+  }
+  refuse('Japanese gloss follows a bare mention', (test) => {
+    const page = 'ja/index.html';
+    test.source.set(page, test.source.get(page).replace(/(<main\b[^>]*>)/, '$1<p>Ptah を試す</p>'));
+  }, 'the reading is given at the first mention');
+  refuse('Japanese gloss hidden in metadata', (test) => {
+    const page = 'ja/index.html';
+    test.source.set(page, test.source.get(page).replace('Ptah（プタハ）', 'Ptah')
+      .replace('</head>', '<meta name="test" content="Ptah（プタハ）"></head>'));
+  }, 'where a reader does not meet it');
+  // Fixtures exercise the extractor itself, independently of today's page size.
+  const fixture = `<code>ptah</code><code>ptah</code>
+    <pre><code># translated narration\nptah schema apply --url &quot;db&quot;\nptah # retained</code></pre>
+    <pre class="diagram" role="img">translated diagram</pre>
+    <pre data-demo-transcript>generated</pre><pre data-demo-screen>generated</pre>
+    <pre class="tile-transcript">generated</pre><code>&lt;x&gt; &amp; &#65;</code>`;
+  const expected = new Map([['ptah', 2], ['ptah schema apply --url "db"', 1], ['ptah # retained', 1], ['<x> & A', 1]]);
+  assert.deepEqual(literals(fixture), expected, 'extract nested blocks, decode entities, keep counts, exclude narration');
+  assert.deepEqual(literals('<p>No commands on this page.</p>'), new Map(), 'empty prose is valid');
+  assert.equal(literalDifference(expected, new Map([...expected].reverse())), null, 'sentence order may differ');
+  assert.match(literalDifference(expected, new Map([['ptah', 1]])), /English 2, translation 1/);
+  console.log('check-locales: command extraction fixtures passed');
   refuse('robots exclusion', (test) => { test.robots += '\nDisallow: /de/\n'; }, 'blocks crawling');
   console.log(`check-locales: ${assertions} refusal checks passed`);
 } else if (problems.length) {

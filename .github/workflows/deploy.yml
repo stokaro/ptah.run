@@ -36,19 +36,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # The pages are discovered with `git ls-files`, never written out here and
-      # never walked off the filesystem. A written list is a second place a new
-      # page has to be added, and it was one language tree ago that the list and
-      # the tree last disagreed. The floor is what keeps discovery honest: a
-      # pattern that stopped matching would find nothing and read as success.
+      # Discover tracked pages. The locale check below compares this inventory
+      # with the sitemap and version-stamp list, including missing pages.
       - name: Every page references files that exist
         run: |
           set -euo pipefail
-          found="$(git ls-files '*.html' | wc -l)"
-          if [ "$found" -lt 18 ]; then
-            echo "::error::found only $found HTML pages; the discovery is broken"
-            exit 1
-          fi
           status=0
           while IFS= read -r page; do
             while IFS= read -r path; do

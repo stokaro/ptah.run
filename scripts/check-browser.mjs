@@ -48,7 +48,7 @@ try {
             assert.equal(response.status(), 200, route);
             await page.evaluate(() => document.fonts.ready);
             const reading = await page.evaluate(() => {
-              const clipped = [...document.querySelectorAll("h1, h2, h3, .btn, .nav-links a, .demo-btn")]
+              const clipped = [...document.querySelectorAll("h1, h2, h3, .btn, .nav-links a, .demo-btn, .demo-where")]
                 .filter((element) => element.getClientRects().length)
                 .filter((element) => element.scrollWidth > element.clientWidth + 2 || element.scrollHeight > element.clientHeight + 2)
                 .map((element) => element.textContent.trim());
