@@ -46,7 +46,7 @@
         <li><a href="https://operator.ptah.run/">オペレーター</a></li>
         <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
       </ul>
-      <a class="icon-btn lang-btn" href="/community/" hreflang="en" lang="en">English</a>
+      <a class="icon-btn lang-btn" href="/community/" hreflang="en" aria-label="このページを英語で表示"><span lang="en">English</span></a>
       <button class="icon-btn theme-btn" type="button" aria-label="ダークテーマ" aria-pressed="false">
         <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/></svg>
       </button>
@@ -64,13 +64,13 @@
     <div class="page-head">
       <h1>コミュニティ</h1>
       <p class="lede">Ptah（プタハ）は GitHub 上で公開して開発している。質問、アイデア、バグ報告、貢献は誰からでも歓迎する。データベースや Go の経験は問わない。</p>
-      <p class="meta"><span>参加は <a href="https://github.com/stokaro/ptah/blob/master/CODE_OF_CONDUCT.md">行動規範</a>（英語）に従う。</span><span>やりとりは英語で行われている。日本語での投稿も読まれるが、返事は英語になることが多い。</span></p>
+      <p class="meta"><span>参加は <a href="https://github.com/stokaro/ptah/blob/master/CODE_OF_CONDUCT.md">行動規範</a>に従う。</span><span>やりとりは英語で行われている。日本語での投稿も読まれるが、返事は英語になることが多い。</span></p>
     </div>
 
     <section class="block" aria-labelledby="discussions-title">
       <h2 class="label" id="discussions-title">質問する</h2>
       <p><code>ptah</code>、<code>ptah-compat</code>、Go ライブラリで何かをする方法を尋ねる場所、まだ具体的な機能要望になっていないアイデアを出す場所、Ptah で作ったものを見せる場所が <a href="https://github.com/stokaro/ptah/discussions">GitHub Discussions</a> である。読むのは誰でもでき、投稿には GitHub アカウントが要る。</p>
-      <p>よく出る質問には <a href="https://docs.ptah.run/edge/faq/">FAQ</a> と <a href="https://docs.ptah.run/edge/operate/troubleshooting/">トラブルシューティング</a> が答えているので、まず <a href="https://docs.ptah.run/">ドキュメント</a>（英語）を検索してほしい。返信で解決したら、それを回答として選んでおくと次の読者が見つけやすい。</p>
+      <p>よく出る質問には <a href="https://docs.ptah.run/edge/faq/">FAQ</a> と <a href="https://docs.ptah.run/edge/operate/troubleshooting/">トラブルシューティング</a> が答えているので、まず <a href="https://docs.ptah.run/">ドキュメント</a>を検索してほしい。返信で解決したら、それを回答として選んでおくと次の読者が見つけやすい。</p>
       <div class="actions">
         <a class="btn" href="https://github.com/stokaro/ptah/discussions/categories/q-a">Q&amp;A で質問する →</a>
         <a class="btn btn-ghost" href="https://github.com/stokaro/ptah/discussions">Discussions を見る</a>
@@ -79,28 +79,28 @@
 
     <section class="block" aria-labelledby="issues-title">
       <h2 class="label" id="issues-title">バグを報告する</h2>
-      <p>バグと機能要望は <a href="https://github.com/stokaro/ptah/issues">課題トラッカー</a>へ。そこで一つずつラベルと担当者が付く。フォームが尋ねるのは、報告を扱えるものにする情報である。実行したコマンド、<code>ptah version</code> の出力、エンジンとサーバーのバージョン、そして問題を再現する最小の入力。どちらのバイナリを実行したかも書いてほしい。<code>ptah</code> と <code>ptah-compat</code> は意図的に異なるコマンド体系を提供している。</p>
+      <p>バグと機能要望は <a href="https://github.com/stokaro/ptah/issues">Issue トラッカー</a>へ。そこで一つずつラベルと担当者が付く。フォームが尋ねるのは、報告を扱えるものにする情報である。実行したコマンド、<code>ptah version</code> の出力、エンジンとサーバーのバージョン、そして問題を再現する最小の入力。どちらのバイナリを実行したかも書いてほしい。<code>ptah</code> と <code>ptah-compat</code> は意図的に異なるコマンド体系を提供している。</p>
       <p>Kubernetes オペレーターの問題は <a href="https://github.com/stokaro/ptah-operator/issues">stokaro/ptah-operator</a> へ、このウェブサイトの問題は <a href="https://github.com/stokaro/ptah.run/issues">stokaro/ptah.run</a> へ。</p>
       <div class="actions">
-        <a class="btn" href="https://github.com/stokaro/ptah/issues/new/choose">課題を作成する →</a>
-        <a class="btn btn-ghost" href="https://github.com/stokaro/ptah/issues">既存の課題を検索する</a>
+        <a class="btn" href="https://github.com/stokaro/ptah/issues/new/choose">Issue を作成する →</a>
+        <a class="btn btn-ghost" href="https://github.com/stokaro/ptah/issues">既存の Issue を検索する</a>
       </div>
     </section>
 
     <section class="block" aria-labelledby="security-title">
       <h2 class="label" id="security-title">脆弱性を報告する</h2>
-      <p>セキュリティ上の問題は、課題や Discussions ではなく <a href="https://github.com/stokaro/ptah/security/advisories/new">GitHub のアドバイザリーフォーム</a>から非公開で報告してほしい。メンテナーがアドバイザリーを公開するまで、報告を見るのは報告者とメンテナーだけである。</p>
+      <p>セキュリティ上の問題は、Issue や Discussions ではなく <a href="https://github.com/stokaro/ptah/security/advisories/new">GitHub のアドバイザリーフォーム</a>から非公開で報告してほしい。メンテナーがアドバイザリーを公開するまで、報告を見るのは報告者とメンテナーだけである。</p>
     </section>
 
     <section class="block" aria-labelledby="contribute-title">
       <h2 class="label" id="contribute-title">貢献する</h2>
-      <p>コードは助け方の一つにすぎない。縮小した再現手順、実サーバーに対する測定、間違ったページの訂正、Discussions での回答も同じだけ助けになる。変更の提案と、それが通すべき検査については <a href="https://github.com/stokaro/ptah/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a>（英語）に、CI のゲートが強制する作業規則については <a href="https://github.com/stokaro/ptah/blob/master/AGENTS.md">AGENTS.md</a>（英語）に書かれている。</p>
-      <p>挙動を変える変更は、先に課題を立ててほしい。差分ができる前に設計を決めるためである。</p>
+      <p>コードは助け方の一つにすぎない。縮小した再現手順、実サーバーに対する測定、間違ったページの訂正、Discussions での回答も同じだけ助けになる。変更の提案と、それが通すべき検査については <a href="https://github.com/stokaro/ptah/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a> に、CI のゲートが強制する作業規則については <a href="https://github.com/stokaro/ptah/blob/master/AGENTS.md">AGENTS.md</a> に書かれている。</p>
+      <p>挙動を変える変更は、先に Issue を立ててほしい。差分ができる前に設計を決めるためである。</p>
     </section>
 
     <section class="block" aria-labelledby="repos-title">
       <h2 class="label" id="repos-title">リポジトリ</h2>
-      <p>Ptah は <a href="https://github.com/stokaro">stokaro</a> organization 配下の複数のリポジトリからなる。それぞれが自分の課題とプルリクエストを受け付ける。</p>
+      <p>Ptah は <a href="https://github.com/stokaro">stokaro</a> organization 配下の複数のリポジトリからなる。それぞれが自分の Issue とプルリクエストを受け付ける。</p>
       <dl class="flags">
         <dt><a href="https://github.com/stokaro/ptah">stokaro/ptah</a></dt>
         <dd><code>ptah</code>、<code>ptah-compat</code>、<code>ptah-ls</code> のバイナリ、Go ライブラリ、そして <a href="https://docs.ptah.run/">docs.ptah.run</a> のドキュメント。</dd>
@@ -121,7 +121,7 @@
 
     <section class="block" aria-labelledby="commercial-title">
       <h2 class="label" id="commercial-title">商用サポート</h2>
-      <p>商用の問い合わせはメールで受け付けている。アドレスは <a href="https://docs.ptah.run/edge/faq/#commercial-support">FAQ</a>（英語）にある。バグ報告と機能要望は、公開されたままになる課題トラッカーに置いてほしい。</p>
+      <p>商用の問い合わせはメールで受け付けている。アドレスは <a href="https://docs.ptah.run/edge/faq/#commercial-support">FAQ</a> にある。バグ報告と機能要望は、公開されたままになる Issue トラッカーに置いてほしい。</p>
     </section>
 
   </div>
@@ -132,11 +132,12 @@
     <div class="foot-brand"><img src="/assets/logo.svg" alt="" width="18" height="18"><span>ptah.run · <span class="v" data-version>v0.3.0</span> · pre-GA · MIT</span></div>
     <ul class="foot-links">
       <li><a href="https://github.com/stokaro/ptah">GitHub</a></li>
-      <li><a href="https://github.com/stokaro/ptah/issues">課題</a></li>
+      <li><a href="https://github.com/stokaro/ptah/issues">Issue</a></li>
       <li><a href="/ja/community/" aria-current="page">コミュニティ</a></li>
       <li><a href="https://github.com/stokaro/ptah/releases">変更履歴</a></li>
       <li><a href="https://github.com/stokaro/ptah/blob/master/LICENSE">ライセンス</a></li>
     </ul>
+    <p class="foot-note">日本語で読めるのは、この日本語のページだけである。ドキュメント、プレイグラウンド、リポジトリへのリンクは、どれも英語のページに続く。</p>
   </div>
 </footer>
 

@@ -33,6 +33,8 @@ pages served at `ptah.run` itself.
 | `scripts/stamp-version.mjs` | Writes a release tag into the pages; run by the deploy workflow |
 | `scripts/build-runs.mjs` | Writes both in-practice pages and both home transcripts from `assets/runs.js` |
 | `scripts/check-locales.mjs` | Holds the two language trees to the same shape |
+| `scripts/check-japanese.mjs` | Holds the Japanese to the glossary and the typography rules in `TRANSLATING.md` |
+| `TRANSLATING.md` | What a translator works to; its glossary table is the one the check above reads |
 | `.github/workflows/deploy.yml` | Checks local references, stamps the latest release, deploys to GitHub Pages |
 
 ## Working on it
@@ -83,8 +85,27 @@ Ptah, which is why they translate and the lines around them do not.
 
 **The product's name is written `Ptah（プタハ）` once**, at the first mention in
 a page's own prose, and `Ptah` everywhere after it. Not the kana again, and not
-a mix. `scripts/check-locales.mjs` counts it: a Japanese page that gives the
-reading twice, spells it some other way, or never gives it at all, fails.
+a mix. `scripts/check-locales.mjs` holds the count and the position: a page that
+gives the reading twice, spells it some other way, or never gives it at all
+fails, and so does one that writes a bare `Ptah` in prose above the gloss, which
+hands the reader the reading after they needed it. The `<head>`, the header
+wordmark, code and attribute values are read past, because none of them is a
+sentence somebody reads in order. The `<h1>` is one, and is where two of these
+pages correctly place the gloss.
+
+That rule is not this repository's. It is section 17 of `docs/STYLE_GUIDE.md` in
+`stokaro/ptah`, where `check-translations.mjs` holds `README.ja.md` to the same
+thing. The two repositories share no module, so the rule is copied rather than
+imported: change the style guide first, then both readers.
+
+**One rendering per term.** Everything above compares a Japanese page with its
+English counterpart, which cannot see two Japanese pages calling the same thing
+by two names: both halves of that split are correct against their own English.
+`TRANSLATING.md` carries the glossary, and `scripts/check-japanese.mjs` reads
+that table -- the document, not a copy of it -- and refuses a rejected
+rendering anywhere this repository writes Japanese. The same check holds the
+two typography rules that get broken by carrying English punctuation across: no
+`。` closing a heading, and a space between Japanese and Latin script.
 
 Japanese is not subset and self-hosted the way the Latin faces are -- a usable
 Japanese face is megabytes, and every platform this site is read on ships one.
@@ -114,19 +135,38 @@ now copies the whole tracked tree rather than a list of directories.
 
 Fetched, and therefore shared. `https://ptah.run/install.sh` and `/install.ps1`
 are fetched from `stokaro/ptah` at deploy time and are not in git at all; both
-trees advertise the same two addresses, and `check-locales.mjs` compares the
-exact `data-copy-text` of every command on a pair. A command that changes in
-English and not in Japanese is a failing check, not a quiet difference.
+trees advertise the same two addresses, and `check-locales.mjs` compares every
+command on a pair: the exact `data-copy-text` a button hands over, and the lines
+written into a `<code>` or a `<pre>` for a reader to retype. The second kind is
+most of what a page carries: the install pair offers three commands for copying
+and writes forty-odd more lines that a reader only reads, among them the ones
+somebody has to update by hand when `install.sh` changes upstream. A command,
+flag, path or environment variable that changes in English and not in Japanese
+is a failing check, not a quiet difference. A line starting `#` is the
+exception: that is the demo's own narration, which is prose and is translated.
 
 Compared. `scripts/check-locales.mjs` runs in the Check job and holds a pair to
-the same commands, the same link destinations, the same install tabs, the same
-recorded runs, the same element ids and the same number of version stamps. It
-also checks that the `lang` attribute matches the tree, that the `hreflang` and
-canonical links resolve to pages that exist, that the switch is on every page
-and goes to the counterpart, that a Japanese page loading the sessions also
-loads the narration, that `PAGES` in `stamp-version.mjs` is exactly the set of
-pages carrying a version, and that the sitemap lists every indexable page and
-nothing else.
+the same commands, the same install tabs, the same recorded runs, the same
+element ids and the same number of version stamps. It also checks that the
+`lang` attribute matches the tree, that the `hreflang` and canonical links
+resolve to pages that exist, that the switch is on every page and goes to the
+counterpart, that a Japanese page loading the sessions also loads the
+narration, that `PAGES` in `stamp-version.mjs` is exactly the set of pages
+carrying a version, and that the sitemap lists every indexable page and nothing
+else.
+
+Link destinations are compared inside each tree, not across them. The English
+page's `/install/` has to be the Japanese page's `/ja/install/`, so a Japanese
+page that links past `/ja/` into English is a failing check rather than a
+match, and a reader who clicks インストール stays in the tree they were reading.
+The canonical, the `hreflang` alternates and the language switch sit outside
+that comparison: crossing the trees is what those links are for, and each is
+asserted by value on its own.
+
+How much the comparison read is held to a floor. An extraction that stopped
+matching would find no differences in no content, which reads exactly like a
+clean run, so the check fails when it has looked at fewer code blocks or fewer
+written lines than the pages carry.
 
 Prose is the one thing no check can compare, and it is where a translation can
 still fall behind. A page rewritten in English needs its Japanese counterpart

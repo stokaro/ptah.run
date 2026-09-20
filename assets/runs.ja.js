@@ -73,7 +73,7 @@
         tag: "スキーマ変更",
         label: "スキーマを変更する",
         caption:
-          "欲しいスキーマを書く。実行前に何が起きるかを Ptah が示し、実行後はドリフト検査がデータベースとの一致を確かめる。"
+          "目標スキーマを書く。実行前に何が起きるかを Ptah が示し、実行後はドリフト検査がデータベースとの一致を確かめる。"
       },
       versioned: {
         tag: "スキーマ変更",
@@ -167,7 +167,7 @@
         tag: "エクスポート",
         label: "ワイヤ契約を保つ",
         caption:
-          "フィールド番号は約束である。Ptah はそれを約束にする履歴を保持し、次回のエクスポートは同じ番号を再利用するか、書き込みを拒否する。"
+          "フィールド番号は約束である。Ptah はその約束を守るための履歴を保持し、次回のエクスポートは同じ番号を再利用するか、書き込みを拒否する。"
       },
       dbml: {
         tag: "エクスポート",
@@ -195,7 +195,7 @@
       },
       ociInspect: {
         tag: "レジストリ",
-        label: "リモートの成果物を読む",
+        label: "リモートのアーティファクトを読む",
         caption: "その参照先に何があるか。マニフェスト 843 バイトが答え、ペイロードは置かれたまま動かない。"
       },
       ociConsume: {
@@ -208,7 +208,7 @@
         tag: "Atlas",
         label: "Atlas のスクリプトを動かす",
         caption:
-          "Atlas のパイプラインをそのまま。同じフラグ、同じディレクトリ、同じ atlas.sum で、下にはネイティブの表面がある。"
+          "Atlas のパイプラインをそのまま。同じフラグ、同じディレクトリ、同じ atlas.sum で、下にはネイティブのコマンド体系がある。"
       }
     },
 
@@ -221,9 +221,9 @@
       "# Drift compares that file with the database it came from.":
         "# ドリフト検査は、そのファイルと取得元のデータベースを比べる。",
       "# Now ask for a column, by rewriting the schema you want.":
-        "# 欲しいスキーマを書き換えて、列を 1 つ要求する。",
+        "# 目標スキーマを書き換えて、列を 1 つ要求する。",
       "# The same check now has something to report.":
-        "# 同じ検査が、今度は報告すべきものを持っている。",
+        "# 今度は同じ検査が報告を返す。",
       "# Ask what it would take to close it. A dry run executes nothing.":
         "# 差を埋めるのに何が要るかを尋ねる。ドライランは何も実行しない。",
       "# Run the reviewed plan. --auto-approve suits a disposable file.":
@@ -279,7 +279,7 @@
         "# 終了コード 2。書き換えられた計画は、誰も承認していない計画である。",
 
       "# Seed files carry the environment in the name.":
-        "# シードファイルは名前に環境を持っている。",
+        "# シードファイルは環境名をファイル名に含む。",
       "# Run it again. Applied seeds are recorded, so this is a no-op.":
         "# もう一度実行する。適用済みのシードは記録されているので、何も起きない。",
       "# And prod is not an environment you reach by typing it.":
@@ -327,7 +327,7 @@
         "# 最後のフィールドは外部キーで、リレーションとして読まれている。",
 
       "# The tables also describe the payloads that carry them.":
-        "# テーブルは、それを運ぶペイロードも記述している。",
+        "# テーブル定義は、その行を運ぶペイロードの形も決めている。",
       "# NOT NULL became required. The two cannot disagree.":
         "# NOT NULL は required になった。両者がずれることはない。",
 
@@ -352,14 +352,14 @@
         "# 関連は外部キーから読まれる。2 つ目のファイルからではない。",
 
       "# Publish the schema itself, as an artifact with a digest.":
-        "# スキーマそのものを、ダイジェスト付きの成果物として公開する。",
+        "# スキーマそのものを、ダイジェスト付きのアーティファクトとして公開する。",
       "# Two tags now point at it, and only the two that were asked for.":
         "# 2 つのタグがそれを指している。指定した 2 つだけ。",
       "# A moving tag resolves to the digest that cannot move.":
         "# 動くタグは、動かないダイジェストに解決される。",
 
       "# What does that artifact declare? Ask without downloading it.":
-        "# その成果物は何を宣言しているのか。ダウンロードせずに尋ねる。",
+        "# そのアーティファクトは何を宣言しているのか。ダウンロードせずに尋ねる。",
       "# 843 bytes of manifest answered that. The payload stayed put.":
         "# 答えたのは 843 バイトのマニフェスト。ペイロードは動いていない。",
 
@@ -375,7 +375,7 @@
       "# And apply reads that same directory.":
         "# apply は、その同じディレクトリを読む。",
       "# No script changed. The native surface is still there underneath.":
-        "# スクリプトは 1 つも変えていない。下にはネイティブの表面がそのままある。"
+        "# スクリプトは 1 つも変えていない。下にはネイティブのコマンド体系がそのままある。"
     }
   };
 

@@ -79,6 +79,15 @@ jobs:
       - name: The English and Japanese trees carry the same structure
         run: node scripts/check-locales.mjs
 
+      # The check above compares a Japanese page with its English counterpart,
+      # so nothing in it compares Japanese with Japanese: two pages written
+      # months apart can call the same thing by two names and both be right
+      # against their own English. This reads the glossary out of
+      # TRANSLATING.md and holds every Japanese page to one rendering per term,
+      # and to the typography rules the same file states.
+      - name: The Japanese follows the glossary in TRANSLATING.md
+        run: node scripts/check-japanese.mjs
+
       - name: The version stamp works on a copy of the pages
         run: |
           set -euo pipefail

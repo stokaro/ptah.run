@@ -184,6 +184,9 @@ const LANGS = {
     prefix: "",
     other: "ja",
     otherName: "日本語",
+    // What pressing the switch does, rather than what it is named after; see
+    // langSwitch below for why the name of a language is not enough.
+    langAria: "View this page in Japanese",
     skip: "Skip to content",
     navLabel: "Site",
     docs: "Docs",
@@ -197,6 +200,7 @@ const LANGS = {
     footCommunity: "Community",
     footChangelog: "Changelog",
     footLicense: "License",
+    footNote: "",
     title: "Ptah in practice",
     description:
       "Twenty-four recorded runs of Ptah: schema drift, versioned migrations, embedding cutover, OCI artifacts, format conversion and the Atlas-compatible surface. Read one, or watch it typed.",
@@ -224,6 +228,7 @@ const LANGS = {
     prefix: "/ja",
     other: "en",
     otherName: "English",
+    langAria: "このページを英語で表示",
     skip: "本文へスキップ",
     navLabel: "サイト",
     docs: "ドキュメント",
@@ -233,20 +238,22 @@ const LANGS = {
     operator: "オペレーター",
     theme: "ダークテーマ",
     menu: "メニュー",
-    footIssues: "課題",
+    footIssues: "Issue",
     footCommunity: "コミュニティ",
     footChangelog: "変更履歴",
     footLicense: "ライセンス",
+    footNote:
+      "日本語で読めるのは、この日本語のページだけである。ドキュメント、プレイグラウンド、リポジトリへのリンクは、どれも英語のページに続く。",
     title: "Ptah 実践例",
     description:
-      "端末で記録した Ptah の実行 24 件。スキーマのドリフト、バージョン付きマイグレーション、埋め込みの切り替え、OCI 成果物、フォーマット変換、Atlas 互換の表面。読むこともできるし、打ち込まれる様子を見ることもできる。",
+      "端末で記録した Ptah の実行 24 件。スキーマのドリフト、バージョン付きマイグレーション、埋め込みの切り替え、OCI アーティファクト、フォーマット変換、Atlas 互換のコマンド体系。読むこともできるし、打ち込まれる様子を見ることもできる。",
     ogDescription: "端末で記録した Ptah の実行 24 件。読んでもよいし、打ち込まれる様子を見てもよい。",
     // The one place プタハ appears on this page. Everywhere after it, Ptah.
     h1: "Ptah（プタハ）の実践例",
     // 再生 is what the button in the player says; naming it Play here would
     // send the reader looking for a control that is not on the page.
     lede: `端末で記録した Ptah の実行 ${RUNS.order.length} 件。ページのために書かれたものは一つもない。開けば読めるし、再生を押せば打ち込まれていく。`,
-    quickStart: "次はクイックスタート（英語）→",
+    quickStart: "次はクイックスタート →",
     installPtah: "Ptah をインストール",
     speedLabel: "再生速度 1×。押すと変わります。",
     speedTitle: "速度",
@@ -259,7 +266,11 @@ const LANGS = {
     expandAria: "デモを拡大",
     close: "閉じる",
     counts: (commands, lines) => `コマンド ${commands} 件 · ${lines} 行`,
-    transcriptLabel: (label) => `${label} のトランスクリプト`
+    // A run's name is a verb phrase -- スキーマを変更する -- so joining it to
+    // のトランスクリプト across a space left a fragment with a space Japanese
+    // does not write. 鉤括弧 close the name instead, which is what marks off a
+    // title in Japanese and needs no space to do it.
+    transcriptLabel: (label) => `「${label}」のトランスクリプト`
   }
 };
 
@@ -277,9 +288,17 @@ function alternates(path) {
 // language's home: a reader who has found the page they wanted should not be
 // put back at the front door. It is a link, so it needs no JavaScript and the
 // keyboard reaches it in reading order beside the theme button.
+//
+// The word on it is the name of the other language, which says what is on the
+// far side and not what pressing it does -- a screen reader announcing
+// "English" on a Japanese page could as easily be offering English
+// documentation. aria-label says the action instead, and it is written in the
+// language of the page, so the reader's own voice reads it: that is why the
+// element is left to inherit the document's lang and only the visible word,
+// which really is in the other language, carries a lang of its own.
 function langSwitch(L, path) {
   const href = L.other === "ja" ? `/ja${path}` : path;
-  return `      <a class="icon-btn lang-btn" href="${href}" hreflang="${L.other}" lang="${L.other}">${L.otherName}</a>`;
+  return `      <a class="icon-btn lang-btn" href="${href}" hreflang="${L.other}" aria-label="${L.langAria}"><span lang="${L.other}">${L.otherName}</span></a>`;
 }
 
 function header(L, path) {
@@ -308,7 +327,14 @@ ${langSwitch(L, path)}
 </header>`;
 }
 
+// The Japanese pages are the only Japanese on the domain, and a marker on each
+// English link cannot say so: the community page alone links to more than
+// thirty English destinations, and a badge on every one of them marks nothing.
+// The rule is stated once instead, in the footer, and it holds for every link
+// that leaves. The English pages have nothing to say here, so footNote is
+// empty there and the paragraph is left out rather than written blank.
 function footer(L) {
+  const note = L.footNote ? `\n    <p class="foot-note">${L.footNote}</p>` : "";
   return `<footer class="site-footer">
   <div class="wrap">
     <div class="foot-brand"><img src="/assets/logo.svg" alt="" width="18" height="18"><span>ptah.run · <span class="v" data-version>v0.4.0</span> · pre-GA · MIT</span></div>
@@ -318,7 +344,7 @@ function footer(L) {
       <li><a href="${L.prefix}/community/">${L.footCommunity}</a></li>
       <li><a href="https://github.com/stokaro/ptah/releases">${L.footChangelog}</a></li>
       <li><a href="https://github.com/stokaro/ptah/blob/master/LICENSE">${L.footLicense}</a></li>
-    </ul>
+    </ul>${note}
   </div>
 </footer>`;
 }
