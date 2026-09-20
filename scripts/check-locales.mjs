@@ -332,8 +332,8 @@ export function audit({ source, stamper, sitemap, robots }) {
           fail(page, `untranslated prose: ${text}`);
         }
       }
-      const docsLabel = lang === 'de' ? 'Dokumentation (Englisch)' : 'Documentation (en anglais)';
-      if (!html.includes(`>${docsLabel}</a>`)) fail(page, "documentation language is not labeled");
+      const docsLabel = lang === 'de' ? 'Dokumentation' : 'Documentation';
+      if (!html.includes(`>${docsLabel}</a>`)) fail(page, "documentation link label is not localized");
       for (const href of links(html)) {
         if (/https:\/\/(?:docs|operator)\.ptah\.run\/(?:edge\/)?(?:de|fr)\//.test(href)) {
           fail(page, `invented localized documentation URL: ${href}`);

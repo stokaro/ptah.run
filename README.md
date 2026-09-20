@@ -74,8 +74,8 @@ is the domain-wide English/Japanese error page, and `testkit/index.html` is a
 Go vanity import endpoint. Neither is a localized landing page.
 
 Documentation, quick starts and the playground stay in English. Translated
-labels state that language and keep the existing destination URLs. No
-localized documentation routes are created here.
+links use concise labels without parenthetical language notices and keep the
+existing destination URLs. No localized documentation routes are created here.
 
 **Recorded output is not translated.** Commands, flags, SQL, file names and
 anything Ptah printed are what the program did; a transcript that changed them
