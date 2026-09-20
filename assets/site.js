@@ -4,6 +4,12 @@
  * the mobile menu, copy-to-clipboard on commands, the platform-detecting tabs
  * on /install/, and a best-effort refresh of the release version from the
  * GitHub API (the HTML carries the last known release as a fallback).
+ *
+ * One file serves both language trees. Nothing here decides which language a
+ * reader gets: the page already says so in its `lang` attribute, and every
+ * string this file writes follows that. The run narration works the same way
+ * -- assets/runs.js holds the sessions, and the Japanese pages load
+ * assets/runs.ja.js beside it.
  */
 (function () {
   "use strict";
@@ -17,6 +23,58 @@
   function $$(sel, ctx) {
     return Array.prototype.slice.call((ctx || doc).querySelectorAll(sel));
   }
+
+  /* ---------- Language ----------
+   *
+   * Only the strings this file writes at run time live here; everything a
+   * reader sees before it runs is in the markup. An unknown `lang` falls back
+   * to English rather than to an empty interface.
+   */
+
+  var LANG = root.lang === "ja" ? "ja" : "en";
+  var TEXT = {
+    en: {
+      copied: "Copied",
+      copiedStatus: function (name) {
+        return "Copied the " + name + " to the clipboard.";
+      },
+      detected: function (name) {
+        return "detected: " + name;
+      },
+      speed: function (rate) {
+        return "Playback speed, " + rate + "×. Press to change.";
+      },
+      play: "Play",
+      pause: "Pause",
+      playAria: "Play the demo",
+      pauseAria: "Pause the demo",
+      expand: "Expand",
+      close: "Close",
+      expandAria: "Expand the demo",
+      closeAria: "Close the demo"
+    },
+    ja: {
+      copied: "コピーしました",
+      copiedStatus: function (name) {
+        return name + "をクリップボードにコピーしました。";
+      },
+      detected: function (name) {
+        return "検出: " + name;
+      },
+      speed: function (rate) {
+        return "再生速度 " + rate + "×。押すと変わります。";
+      },
+      play: "再生",
+      pause: "一時停止",
+      playAria: "デモを再生",
+      pauseAria: "デモを一時停止",
+      expand: "拡大",
+      close: "閉じる",
+      expandAria: "デモを拡大",
+      closeAria: "デモを閉じる"
+    }
+  };
+  var T = TEXT[LANG];
 
   /* ---------- Theme ---------- */
 
@@ -95,8 +153,8 @@
       var text = target.getAttribute("data-copy-text") || target.textContent.replace(/^\$\s+/, "");
       var done = function () {
         btn.setAttribute("data-state", "done");
-        label.textContent = "Copied";
-        if (copyStatus) copyStatus.textContent = "Copied the " + name + " to the clipboard.";
+        label.textContent = T.copied;
+        if (copyStatus) copyStatus.textContent = T.copiedStatus(name);
         clearTimeout(timer);
         timer = setTimeout(function () {
           btn.removeAttribute("data-state");
@@ -156,7 +214,7 @@
     var names = { macos: "macOS", linux: "Linux", windows: "Windows" };
     var detected = detectPlatform();
     var detectedEl = $(".detected");
-    if (detectedEl) detectedEl.textContent = "detected: " + names[detected];
+    if (detectedEl) detectedEl.textContent = T.detected(names[detected]);
 
     function select(id, opts) {
       opts = opts || {};
@@ -265,9 +323,33 @@
    * one there because of the other.
    */
   var RUNS = window.PTAH_RUNS;
+  // Loaded by the Japanese pages only. What it carries is narration: the name
+  // a session goes by, the sentence under it, the state pill, and the `#`
+  // comments the demo types. A command, a flag, SQL and a line Ptah printed
+  // are what the program did, so they are the same bytes in both trees.
+  var NARRATION = LANG === "ja" ? window.PTAH_RUNS_JA : null;
   // A page may list many sessions; only one of them plays. Two typewriters in
   // one column is two things to read, and neither gets read.
   var stopOthers = null;
+
+  // What a session is called and what is said about it, in this page's
+  // language. A run with no translation would have failed the build, so the
+  // fallback here is for a stale cached runs.ja.js rather than for normal use.
+  function about(key) {
+    var ja = NARRATION && NARRATION.scenarios[key];
+    return ja || RUNS.scenarios[key];
+  }
+
+  // The same session with its narration replaced. Done once, where the script
+  // is chosen, so everything downstream -- typing, committing, the settled
+  // transcript, the timing plan -- reads one text.
+  function localized(script) {
+    if (!NARRATION) return script;
+    return script.map(function (event) {
+      if (event[0] !== "note") return event;
+      return ["note", NARRATION.notes[event[1]] || event[1]];
+    });
+  }
 
   if (RUNS) $$("[data-demo]").forEach(setupDemo);
 
@@ -301,7 +383,7 @@
       for (var i = 0; i < slots.length && pool.length; i++) {
         var key = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
         slots[i].setAttribute("data-demo-scenario", key);
-        slots[i].textContent = SCENARIOS[key].label;
+        slots[i].textContent = about(key).label;
         slots[i].hidden = false;
       }
       pickBtns = $$("[data-demo-scenario]", pick);
@@ -312,7 +394,7 @@
     // The session this node starts on: what the markup names, or the first
     // pinned one, which is what the home page's transcript carries.
     var first = demo.getAttribute("data-demo-scenario") || RUNS.pinned[0];
-    var SCRIPT = SCENARIOS[first].script;
+    var SCRIPT = localized(SCENARIOS[first].script);
 
     var CLASS = { mute: "m", sql: "a", new: "n", err: "e", note: "c" };
 
@@ -546,8 +628,10 @@
       paint();
     }
 
+    // The pill reads in the page's language; which colour it takes is decided
+    // on the state assets/runs.js names, so a translation cannot change it.
     function setSync(state) {
-      syncPill.textContent = state;
+      syncPill.textContent = (NARRATION && NARRATION.sync[state]) || state;
       syncPill.setAttribute("data-state", state === "no drift" ? "clear" : "pending");
     }
 
@@ -608,7 +692,7 @@
       var left = remaining(beat);
       rate = next;
       speedLabel.textContent = next + "\u00d7";
-      speedBtn.setAttribute("aria-label", "Playback speed, " + next + "\u00d7. Press to change.");
+      speedBtn.setAttribute("aria-label", T.speed(next));
       if (beat && playing && !paused) after(left, beat.fn);
     }
 
@@ -774,13 +858,14 @@
     }
 
     function label() {
-      var next = !playing || paused ? "Play" : "Pause";
+      // What the button offers next, not what the player is doing now.
+      var offersPlay = !playing || paused;
       // The icon follows a data attribute rather than being swapped here, so
       // the two shapes live in the markup beside each other and CSS decides
       // which one shows -- the same shape the menu button already uses.
-      demo.setAttribute("data-paused", next === "Play" ? "1" : "0");
-      toggleBtn.setAttribute("aria-label", next + " the demo");
-      toggleBtn.setAttribute("title", next);
+      demo.setAttribute("data-paused", offersPlay ? "1" : "0");
+      toggleBtn.setAttribute("aria-label", offersPlay ? T.playAria : T.pauseAria);
+      toggleBtn.setAttribute("title", offersPlay ? T.play : T.pause);
       // While nothing is playing, Replay would do what Play does. One button
       // for one action keeps the bar to a single row on a phone.
       replayBtn.hidden = !playing;
@@ -811,10 +896,13 @@
     function choose(name) {
       var scenario = SCENARIOS[name];
       if (!scenario) return;
-      SCRIPT = scenario.script;
+      var said = about(name);
+      SCRIPT = localized(scenario.script);
+      // The shell and the directory the session ran in, which is a record of
+      // where it happened rather than something written for the page.
       where.textContent = scenario.where;
-      if (caption) caption.textContent = scenario.caption;
-      if (title) title.textContent = scenario.label;
+      if (caption) caption.textContent = said.caption;
+      if (title) title.textContent = said.label;
       for (var i = 0; i < pickBtns.length; i++) {
         pickBtns[i].setAttribute(
           "aria-pressed",
@@ -952,8 +1040,8 @@
 
     function setOpen(open, from) {
       expandBtn.setAttribute("aria-expanded", open ? "true" : "false");
-      expandBtn.setAttribute("aria-label", (open ? "Close" : "Expand") + " the demo");
-      expandBtn.setAttribute("title", open ? "Close" : "Expand");
+      expandBtn.setAttribute("aria-label", open ? T.closeAria : T.expandAria);
+      expandBtn.setAttribute("title", open ? T.close : T.expand);
       demo.classList.toggle("is-open", open);
 
       if (open) {

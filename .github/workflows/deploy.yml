@@ -36,20 +36,31 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The pages are discovered with `git ls-files`, never written out here and
+      # never walked off the filesystem. A written list is a second place a new
+      # page has to be added, and it was one language tree ago that the list and
+      # the tree last disagreed. The floor is what keeps discovery honest: a
+      # pattern that stopped matching would find nothing and read as success.
       - name: Every page references files that exist
         run: |
           set -euo pipefail
+          found="$(git ls-files '*.html' | wc -l)"
+          if [ "$found" -lt 8 ]; then
+            echo "::error::found only $found HTML pages; the discovery is broken"
+            exit 1
+          fi
           status=0
-          for page in index.html install/index.html 404.html in-practice/index.html community/index.html; do
-            grep -oE '(href|src)="/[^"#?]+' "$page" | sed -E 's/^(href|src)="\///' | sort -u | while read -r path; do
+          while IFS= read -r page; do
+            while IFS= read -r path; do
+              [ -n "$path" ] || continue
               # Directory links resolve to their index.html.
               if [ -d "$path" ] && [ -f "$path/index.html" ]; then continue; fi
               if [ ! -f "$path" ]; then
                 echo "::error file=$page::references /$path, which does not exist"
-                exit 1
+                status=1
               fi
-            done || status=1
-          done
+            done < <(grep -oE '(href|src)="/[^"#?]+' "$page" | sed -E 's/^(href|src)="\///' | sort -u)
+          done < <(git ls-files '*.html')
           exit "$status"
 
       - name: CNAME names the production domain
@@ -57,19 +68,26 @@ jobs:
 
       - name: No github.io address on the pages
         run: |
-          if grep -n "github\.io" index.html install/index.html 404.html in-practice/index.html community/index.html; then
+          if git ls-files -z '*.html' | xargs -0 -r grep -n "github\.io"; then
             echo "::error::the pages must use ptah.run addresses, never github.io"
             exit 1
           fi
 
-      - name: The in-practice page and the home transcript match assets/runs.js
+      - name: Both in-practice pages and both home transcripts match assets/runs.js
         run: node scripts/build-runs.mjs --check
+
+      - name: The English and Japanese trees carry the same structure
+        run: node scripts/check-locales.mjs
 
       - name: The version stamp works on a copy of the pages
         run: |
           set -euo pipefail
           tmp="$(mktemp -d)"
-          cp -R index.html install 404.html in-practice community scripts "$tmp/"
+          # The whole tracked tree, so this check cannot be the one that misses
+          # a page somebody added. stamp-version.mjs names its pages because it
+          # has to run here, outside a git checkout; check-locales.mjs is what
+          # holds that list to the tree.
+          git ls-files -z | tar --null -T - -cf - | tar -xf - -C "$tmp"
           (cd "$tmp" && node scripts/stamp-version.mjs v9.9.9 && node scripts/stamp-version.mjs v9.9.9 --check)
           ! (cd "$tmp" && node scripts/stamp-version.mjs v0.0.1 --check) || { echo "::error::--check did not detect a stale version"; exit 1; }
           rm -rf "$tmp"

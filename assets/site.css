@@ -94,6 +94,16 @@
   --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
   --ascii: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
+  /* Japanese is not subset and self-hosted the way the Latin faces are: a
+   * usable Japanese face is megabytes, and every platform this site is read on
+   * already ships one. Instrument Sans and IBM Plex Mono stay at the front of
+   * the stack, so a sentence with a command in it sets the command in the same
+   * face as everywhere else and only the kana and kanji fall through. */
+  --sans-jp: "Instrument Sans", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Yu Gothic Medium", "Yu Gothic", "Noto Sans JP", "Noto Sans CJK JP", Meiryo, system-ui,
+    sans-serif;
+  --mono-jp: "IBM Plex Mono", ui-monospace, Menlo, Consolas, "Noto Sans Mono CJK JP",
+    "Hiragino Sans", "Yu Gothic", Meiryo, monospace;
 
   --bg: #fbfbfa;
   --fg: #111417;
@@ -158,6 +168,30 @@
   --termamber: oklch(0.8 0.15 70);
   --logo-ring: var(--line);
   color-scheme: dark;
+}
+
+/* The Japanese tree swaps the two text faces and nothing else; the colours
+ * above are the same site. Kana and kanji carry more ink per line than Latin
+ * at the same size, so the prose gets a little more room between lines, and
+ * `palt` tightens the spacing a Japanese face leaves around punctuation on the
+ * faces that have it. Written as an attribute selector on the root so it
+ * outranks the plain `:root` above whatever order the file ends up in. */
+:root[lang="ja"] {
+  --sans: var(--sans-jp);
+  --mono: var(--mono-jp);
+}
+:root[lang="ja"] body {
+  line-height: 1.75;
+  font-feature-settings: "palt" 1;
+}
+/* Japanese wraps between characters, so a long run of kana in a narrow column
+ * needs no help; what it must not do is break a Latin identifier in half. */
+:root[lang="ja"] p,
+:root[lang="ja"] li,
+:root[lang="ja"] dd {
+  line-break: strict;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 /* ---------- Base ---------- */
@@ -376,6 +410,24 @@ button {
 :root[data-theme="dark"] .theme-btn svg {
   transform: scaleX(-1);
 }
+/* The language switch is a link, not a toggle: it goes to this same page in
+ * the other language. So it needs no JavaScript, the keyboard reaches it in
+ * reading order, and it keeps the theme button's shape because the two belong
+ * to the same group of controls. It carries a word rather than a glyph, so it
+ * sets its own width. */
+.lang-btn {
+  width: auto;
+  min-width: 28px;
+  padding-inline: 8px;
+  font: 500 12px var(--sans-jp);
+  text-decoration: none;
+  white-space: nowrap;
+}
+/* Sitting inside the nav's 28px gap, the pair would read as two unrelated
+ * controls. Pulling the theme button in makes them one. */
+.lang-btn + .theme-btn {
+  margin-left: -18px;
+}
 .menu-btn {
   display: none;
 }
@@ -508,6 +560,10 @@ button {
   padding: 3px 8px 3px 6px;
   min-height: 24px;
   cursor: pointer;
+  /* 一時停止 is four characters where Pause is one word, and a control that
+   * breaks over two lines makes the bar twice as tall. The session name beside
+   * them already truncates; let it give up the room instead. */
+  white-space: nowrap;
 }
 .demo-btn svg {
   width: 12px;
@@ -1318,6 +1374,21 @@ html:not(.js) .panel-title {
   color: var(--fg2);
   max-width: 560px;
 }
+/* GitHub Pages serves this one document for every unknown address on the
+ * domain, so it is the one page that carries both languages instead of having
+ * a counterpart. The rule keeps the second language from reading as a
+ * continuation of the first. */
+.notfound .alt {
+  margin-top: 18px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 22px;
+}
+.notfound .alt p {
+  font-family: var(--sans-jp);
+  line-height: 1.75;
+}
 
 /* ---------- Responsive ---------- */
 
@@ -1375,6 +1446,15 @@ html:not(.js) .panel-title {
   }
   .icon-btn:hover {
     border: 0;
+  }
+  /* A 44px tap target, still sized by its word. The nav's gap is already 0
+   * here, so the pair needs no pulling together. */
+  .lang-btn {
+    width: auto;
+    padding-inline: 12px;
+  }
+  .lang-btn + .theme-btn {
+    margin-left: 0;
   }
   html.js .menu-btn {
     display: grid;

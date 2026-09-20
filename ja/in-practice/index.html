@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ptah 実践例</title>
+<meta name="description" content="端末で記録した Ptah の実行 24 件。スキーマのドリフト、バージョン付きマイグレーション、埋め込みの切り替え、OCI 成果物、フォーマット変換、Atlas 互換の表面。読むこともできるし、打ち込まれる様子を見ることもできる。">
+<link rel="canonical" href="https://ptah.run/ja/in-practice/">
+<link rel="alternate" hreflang="en" href="https://ptah.run/in-practice/">
+<link rel="alternate" hreflang="ja" href="https://ptah.run/ja/in-practice/">
+<link rel="alternate" hreflang="x-default" href="https://ptah.run/in-practice/">
+<meta name="go-import" content="ptah.run git https://github.com/stokaro/ptah">
+<meta name="go-source" content="ptah.run https://github.com/stokaro/ptah https://github.com/stokaro/ptah/tree/master{/dir} https://github.com/stokaro/ptah/blob/master{/dir}/{file}#L{line}">
+<meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161311" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ptah">
+<meta property="og:title" content="Ptah 実践例">
+<meta property="og:description" content="端末で記録した Ptah の実行 24 件。読んでもよいし、打ち込まれる様子を見てもよい。">
+<meta property="og:url" content="https://ptah.run/ja/in-practice/">
+<meta property="og:image" content="https://ptah.run/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Ptah ASCII wordmark above the line: Database migrations without surprises.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="/assets/fonts/instrument-sans-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script>(function(){var d=document.documentElement,t=null;try{t=localStorage.getItem("ptah-theme")}catch(e){}if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.setAttribute("data-theme",t);d.classList.add("js")})();</script>
+</head>
+<body>
+<a class="skip" href="#main">本文へスキップ</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/ja/"><img src="/assets/logo.svg" alt="" width="22" height="22">Ptah</a>
+    <nav class="nav" aria-label="サイト">
+      <ul class="nav-links" id="nav-links">
+        <li><a href="https://docs.ptah.run/">ドキュメント</a></li>
+        <li><a href="/ja/install/">インストール</a></li>
+        <li><a href="/ja/in-practice/" aria-current="page">実践例</a></li>
+        <li><a href="https://play.ptah.run/">プレイグラウンド</a></li>
+        <li><a href="https://operator.ptah.run/">オペレーター</a></li>
+        <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
+      </ul>
+      <a class="icon-btn lang-btn" href="/in-practice/" hreflang="en" lang="en">English</a>
+      <button class="icon-btn theme-btn" type="button" aria-label="ダークテーマ" aria-pressed="false">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/></svg>
+      </button>
+      <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="メニュー">
+        <svg class="icon-menu" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg class="icon-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="page">
+  <div class="wrap">
+
+    <div class="page-head">
+      <h1>Ptah（プタハ）の実践例</h1>
+      <p class="lede">端末で記録した Ptah の実行 24 件。ページのために書かれたものは一つもない。開けば読めるし、再生を押せば打ち込まれていく。</p>
+    </div>
+
+    <ul class="tiles">
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="change">
+            <span class="tile-head">
+              <span class="tile-name">スキーマを変更する</span><span class="tile-tag">スキーマ変更</span>
+            </span>
+            <span class="tile-note">欲しいスキーマを書く。実行前に何が起きるかを Ptah が示し、実行後はドリフト検査がデータベースとの一致を確かめる。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah db read --db-url sqlite://app.db | tee schema.sql</span>
+            <span class="tile-meta">コマンド 7 件 · 43 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="スキーマを変更する のトランスクリプト"><span class="l"><span class="c"># データベース自身のスキーマをファイルに書き出す。</span></span><span class="l"><span class="p">$</span> ptah db read --db-url sqlite://app.db | tee schema.sql</span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># ドリフト検査は、そのファイルと取得元のデータベースを比べる。</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span><span class="l"> </span><span class="l"><span class="c"># 欲しいスキーマを書き換えて、列を 1 つ要求する。</span></span><span class="l"><span class="p">$</span> cat &gt; schema.sql &lt;&lt;'SQL'</span><span class="l">CREATE TABLE "users" (</span><span class="l">  "id" INTEGER PRIMARY KEY,</span><span class="l">  "email" TEXT NOT NULL,</span><span class="l"><span class="n">  "created_at" TEXT</span></span><span class="l">);</span><span class="l">SQL</span><span class="l"> </span><span class="l"><span class="c"># 同じ検査が、今度は報告すべきものを持っている。</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l"><span class="e">Schema drift detected (highest severity: warning).</span></span><span class="l"><span class="m">Failure threshold: all. Failing: true.</span></span><span class="l"><span class="m">Database: sqlite://app.db</span></span><span class="l"> </span><span class="l"><span class="m">Findings:</span></span><span class="l"><span class="n">- columns_added: 1 (warning)</span></span><span class="l"> </span><span class="l"><span class="c"># 差を埋めるのに何が要るかを尋ねる。ドライランは何も実行しない。</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --dry-run</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"> </span><span class="l"><span class="c"># レビュー済みの計画を実行する。使い捨てのファイルなら --auto-approve でよい。</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --auto-approve</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"><span class="m">Auto-approval enabled; applying schema changes.</span></span><span class="l">Schema apply completed successfully.</span><span class="l"> </span><span class="l"><span class="c"># そして同じ検査を、3 度目に。</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="versioned">
+            <span class="tile-head">
+              <span class="tile-name">マイグレーションを書く</span><span class="tile-tag">スキーマ変更</span>
+            </span>
+            <span class="tile-note">もう一つの経路。Ptah が up と down を書き、未適用のものを実行し、何を実行したかを記録する。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah migrations generate --root-dir ./entities</span>
+            <span class="tile-meta">コマンド 3 件 · 25 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="マイグレーションを書く のトランスクリプト"><span class="l"><span class="c"># 宣言をバージョン付きマイグレーションにする。</span></span><span class="l"><span class="p">$</span> ptah migrations generate --root-dir ./entities \</span><span class="l l-wide">    --db-url sqlite://app.db --migrations-dir ./migrations \</span><span class="l l-wide">    --name create_users_and_posts</span><span class="l l-wide">Generated migration files for sqlite://app.db:</span><span class="l l-wide"><span class="m">UP:   /tmp/app/migrations/1788809709_create_users_and_posts.up.sql</span></span><span class="l l-wide"><span class="m">DOWN: /tmp/app/migrations/1788809709_create_users_and_posts.down.sql</span></span><span class="l"> </span><span class="l"><span class="c"># down も同時に書かれる。</span></span><span class="l"><span class="p">$</span> ptah migrations up --db-url sqlite://app.db \</span><span class="l">    --migrations-dir ./migrations</span><span class="l"><span class="m">=== MIGRATE UP ===</span></span><span class="l"><span class="m">Current version: 0</span></span><span class="l"><span class="m">Total migrations: 1</span></span><span class="l"><span class="m">Pending migrations: 1</span></span><span class="l"> </span><span class="l">✅ Migrations completed successfully!</span><span class="l"><span class="n">Database is now at version: 1788809709</span></span><span class="l"> </span><span class="l"><span class="c"># リビジョンテーブルも一致している。</span></span><span class="l"><span class="p">$</span> ptah migrations status --db-url sqlite://app.db \</span><span class="l">    --migrations-dir ./migrations</span><span class="l"><span class="m">=== MIGRATION STATUS ===</span></span><span class="l"><span class="m">Database: ***</span></span><span class="l"><span class="m">Current Version: 1788809709</span></span><span class="l"><span class="m">Applied Migrations: 1</span></span><span class="l"><span class="n">Pending Migrations: 0</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="rollback">
+            <span class="tile-head">
+              <span class="tile-name">1 つ戻す</span><span class="tile-tag">スキーマ変更</span>
+            </span>
+            <span class="tile-note">どのマイグレーションにも down がある。取り消す前に、取り消される内容がそのまま表示される。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ls migrations</span>
+            <span class="tile-meta">コマンド 2 件 · 19 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="1 つ戻す のトランスクリプト"><span class="l"><span class="c"># 生成されたマイグレーションには必ず down が付いてくる。</span></span><span class="l"><span class="p">$</span> ls migrations</span><span class="l">1788810699_create_users.down.sql</span><span class="l">1788810699_create_users.up.sql</span><span class="l"> </span><span class="l"><span class="c"># 戻したら何が起きるかを尋ねる。何も実行されない。</span></span><span class="l"><span class="p">$</span> ptah migrations down --db-url sqlite://app.db \</span><span class="l">    --migrations-dir ./migrations --dry-run</span><span class="l"><span class="m">=== DRY RUN MODE ===</span></span><span class="l"><span class="m">No actual changes will be made to the database</span></span><span class="l"> </span><span class="l"><span class="m">=== MIGRATE DOWN ===</span></span><span class="l"><span class="m">Target version: 0</span></span><span class="l"><span class="m">Current version: 1788810699</span></span><span class="l"><span class="m">Migrations to roll back: 1</span></span><span class="l"> </span><span class="l">✅ Dry run completed successfully!</span><span class="l"><span class="n">Would have rolled back to version: 0</span></span><span class="l"><span class="m">Would have rolled back these migrations: [1788810699]</span></span><span class="l"> </span><span class="l"><span class="c"># まず計画、次にロールバック。前進のときと同じ規則。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="diff">
+            <span class="tile-head">
+              <span class="tile-name">2 つのスキーマを比較する</span><span class="tile-tag">スキーマ変更</span>
+            </span>
+            <span class="tile-note">2 つのファイルと、その差を埋める SQL。どちらも実データベースである必要はない。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema diff --from file://schema.sql</span>
+            <span class="tile-meta">コマンド 1 件 · 7 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="2 つのスキーマを比較する のトランスクリプト"><span class="l"><span class="c"># この 2 つのファイルの間にある SQL は何か。</span></span><span class="l"><span class="p">$</span> ptah schema diff --from file://schema.sql \</span><span class="l">    --to file://schema-next.sql \</span><span class="l">    --dev-url "sqlite://dev.db?mode=memory"</span><span class="l"><span class="n">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"><span class="n">CREATE INDEX IF NOT EXISTS "idx_users_email" ON "users" ("email");</span></span><span class="l"> </span><span class="l"><span class="c"># 任意の 2 状態。どちらも実データベースではない。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="inference">
+            <span class="tile-head">
+              <span class="tile-name">埋め込みを移行する</span><span class="tile-tag">推論</span>
+            </span>
+            <span class="tile-note">配信中の埋め込みの隣に新しい世代を作り、検証してから切り替える。切り替えはその計画を名指しした承認なしには走らない。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah inference plan</span>
+            <span class="tile-meta">コマンド 10 件 · 38 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="埋め込みを移行する のトランスクリプト"><span class="l"><span class="c"># 新しい埋め込みモデル。まず計画を立てる。これには何が要るのか。</span></span><span class="l"><span class="p">$</span> ptah inference plan</span><span class="l">source.estimated_rows = 3 (measured)</span><span class="l">target.capability.vector_type = true (measured)</span><span class="l"><span class="a">[backfill] embed 3 in-scope source rows</span></span><span class="l"><span class="m">Consistency mode: outbox</span></span><span class="l"> </span><span class="l"><span class="c"># 配信中の世代の隣に、新しい世代を作る。</span></span><span class="l"><span class="p">$</span> ptah inference prepare</span><span class="l">prepared run quick-start for generation b7cc9eb5c7d2</span><span class="l"><span class="m">  - snapshot boundary: 753</span></span><span class="l"><span class="p">$</span> ptah inference backfill --batch-rows 10</span><span class="l">backfill finished: 3 scanned, 3 embedded, 0 skipped</span><span class="l"> </span><span class="l"><span class="c"># 実行中に変わった行を追いつかせ、そのあとインデックスを張る。</span></span><span class="l"><span class="p">$</span> ptah inference catchup --batch-rows 10</span><span class="l">caught up to transaction 761: 0 changed rows, 0 tombstoned</span><span class="l"><span class="p">$</span> ptah inference index</span><span class="l">generation b7cc9eb5c7d2 has a valid index</span><span class="l"> </span><span class="l"><span class="c"># 何かが読む前に検証する。</span></span><span class="l"><span class="p">$</span> ptah inference verify</span><span class="l">3 source rows, 3 target rows</span><span class="l"><span class="n">every deterministic layer passed</span></span><span class="l"> </span><span class="l"><span class="c"># クエリはまだ古いベクトルを読んでいる。切り替えは独立した手順。</span></span><span class="l"><span class="p">$</span> ptah inference cutover</span><span class="l"><span class="m">plan 5bbecb32c113</span></span><span class="l"><span class="e">cutover refused:</span></span><span class="l"><span class="e">  - this policy requires an approval and none was given</span></span><span class="l"><span class="e">error: cutover refused</span></span><span class="l"> </span><span class="l"><span class="c"># その計画をダイジェストで承認する。承認されるのはその 1 つだけ。</span></span><span class="l"><span class="p">$</span> export PTAH_APPROVE=5bbecb32c113</span><span class="l"><span class="p">$</span> ptah inference cutover --approver 'quick-start check'</span><span class="l"><span class="n">queries now read generation b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866 (plan 5bbecb32c113)</span></span><span class="l"><span class="m">  - this is the first generation over this target, so there is no previous one to keep current and nothing to roll back to</span></span><span class="l"> </span><span class="l"><span class="c"># クエリがたどるポインタが、新しい世代を指している。</span></span><span class="l"><span class="p">$</span> psql -c 'SELECT target_table, active_generation FROM ptah_embedding_pointer;'</span><span class="l l-wide"><span class="m"> target_table |                        active_generation</span></span><span class="l l-wide"><span class="m">--------------+------------------------------------------------------------------</span></span><span class="l l-wide"><span class="n"> docs         | b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866</span></span><span class="l l-wide"><span class="m">(1 row)</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="guard">
+            <span class="tile-head">
+              <span class="tile-name">危険な変更を止める</span><span class="tile-tag">安全性</span>
+            </span>
+            <span class="tile-note">列を削除するプルリクエストが出された。ビルドが落ちる様子と、その理由、そして安全だった順序。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> cat migrations/1700000100_drop_email.up.sql</span>
+            <span class="tile-meta">コマンド 3 件 · 14 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="危険な変更を止める のトランスクリプト"><span class="l"><span class="c"># このマイグレーションを追加するプルリクエストが出た。</span></span><span class="l"><span class="p">$</span> cat migrations/1700000100_drop_email.up.sql</span><span class="l"><span class="a">ALTER TABLE "users" DROP COLUMN "email";</span></span><span class="l"> </span><span class="l"><span class="c"># データベースに届く前に検査する。</span></span><span class="l"><span class="p">$</span> ptah migrations lint --dir ./migrations \</span><span class="l">    --dialect postgres</span><span class="l"><span class="m">migrations/1700000100_drop_email.up.sql:1 [warning] BC104: dropping a column retires a name application versions already deployed against the old schema still select and insert, so each of them starts failing the moment this migration commits, whether or not the column held any rows; deploy readers that no longer use the column first, then drop it in a later release (dropped column breaks deployed code)</span></span><span class="l"><span class="e">migrations/1700000100_drop_email.up.sql:1 [error] DS102: DROP COLUMN permanently deletes the column's data; deploy readers that no longer use the column first, then drop it in a later release (column dropped)</span></span><span class="l"> </span><span class="l">2 finding(s).</span><span class="l"><span class="m">warning: DS110P ran without the baseline schema it reads, so this analysis is thinner than the same directory would get against a dev database the run can read</span></span><span class="l"> </span><span class="l"><span class="c"># ビルドを落とすのは終了コード。</span></span><span class="l"><span class="p">$</span> echo $?</span><span class="l">1</span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="approve">
+            <span class="tile-head">
+              <span class="tile-name">計画に署名する</span><span class="tile-tag">安全性</span>
+            </span>
+            <span class="tile-note">SSH 鍵で計画に署名する。あとから識別子を 1 つ書き換えれば検証は通らない。レビュー関門はそのために存在する。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema plan --schema-file schema.sql</span>
+            <span class="tile-meta">コマンド 5 件 · 23 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="計画に署名する のトランスクリプト"><span class="l"><span class="c"># 計画を保存する。レビューされたものが、そのまま実行される。</span></span><span class="l"><span class="p">$</span> ptah schema plan --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --name add-active-users \</span><span class="l">    --output plan.json</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL,</span></span><span class="l"><span class="a">  "legacy_ref" TEXT</span></span><span class="l"><span class="a">);</span></span><span class="l">Plan saved to file://plan.json</span><span class="l"> </span><span class="l"><span class="c"># 署名する。鍵を読むのは ssh-keygen であって、Ptah ではない。</span></span><span class="l"><span class="p">$</span> ptah schema approve --plan plan.json --key ./release_key</span><span class="l">Approved plan.json</span><span class="l"><span class="m">Signature: plan.json.sig</span></span><span class="l"><span class="p">$</span> ptah schema verify-approval --plan plan.json</span><span class="l">Approved by release@example.com</span><span class="l"><span class="m">Plan digest: cb74d5837d3efb8c1a8c93bd930fd0321d12abc5e13fd731ff129c43bf0bfc41</span></span><span class="l"> </span><span class="l"><span class="c"># 承認済みの計画で、識別子を 1 つ書き換えてみる。</span></span><span class="l"><span class="p">$</span> sed -i 's/legacy_ref/legacy_id/g' plan.json</span><span class="l"><span class="p">$</span> ptah schema verify-approval --plan plan.json</span><span class="l"><span class="e">error: approval does not verify against .ptah/allowed_signers: either the plan changed after it was approved, or it was signed by a key that file does not list</span></span><span class="l"> </span><span class="l"><span class="c"># 終了コード 2。書き換えられた計画は、誰も承認していない計画である。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="seed">
+            <span class="tile-head">
+              <span class="tile-name">環境に初期データを入れる</span><span class="tile-tag">安全性</span>
+            </span>
+            <span class="tile-note">dev にしか入らない開発用データ。2 度目の実行は何もせず、prod を指定すれば拒否される。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ls seeds</span>
+            <span class="tile-meta">コマンド 4 件 · 20 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="環境に初期データを入れる のトランスクリプト"><span class="l"><span class="c"># シードファイルは名前に環境を持っている。</span></span><span class="l"><span class="p">$</span> ls seeds</span><span class="l">001_demo_accounts.dev.sql</span><span class="l">002_reference_data.prod.sql</span><span class="l"><span class="p">$</span> ptah seed --db-url sqlite://app.db --seeds-dir ./seeds --env dev</span><span class="l"><span class="m">=== SEED ===</span></span><span class="l"><span class="m">Environment: dev</span></span><span class="l"> </span><span class="l"><span class="m">Matching seeds: 1</span></span><span class="l"><span class="n">Applied seeds: 1</span></span><span class="l">Seeds completed successfully.</span><span class="l"> </span><span class="l"><span class="c"># もう一度実行する。適用済みのシードは記録されているので、何も起きない。</span></span><span class="l"><span class="p">$</span> ptah seed --db-url sqlite://app.db --seeds-dir ./seeds --env dev</span><span class="l"><span class="m">Matching seeds: 1</span></span><span class="l"><span class="m">Applied seeds: 0</span></span><span class="l"><span class="n">Skipped seeds: 1</span></span><span class="l">Database seed data is already up to date.</span><span class="l"> </span><span class="l"><span class="c"># そして prod は、打ち込めば届く環境ではない。</span></span><span class="l"><span class="p">$</span> ptah seed --db-url sqlite://app.db --seeds-dir ./seeds --env prod</span><span class="l"><span class="e">error: refusing to seed protected environment "prod" without --allow-prod</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="entities">
+            <span class="tile-head">
+              <span class="tile-name">Go 構造体から SQL へ</span><span class="tile-tag">Go アノテーション</span>
+            </span>
+            <span class="tile-note">1 つの Go 構造体を 2 つのエンジンへ。PostgreSQL には本物の enum 型が、SQLite には同じ意味の CHECK 制約が出る。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> cat entities/user.go</span>
+            <span class="tile-meta">コマンド 3 件 · 34 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Go 構造体から SQL へ のトランスクリプト"><span class="l"><span class="c"># スキーマは Go の構造体。宣言はアノテーションのほう。</span></span><span class="l"><span class="p">$</span> cat entities/user.go</span><span class="l"><span class="m">package entities</span></span><span class="l"> </span><span class="l"><span class="a">//ptah:schema:table name="users"</span></span><span class="l"><span class="m">type User struct {</span></span><span class="l"><span class="a">	//ptah:schema:field name="id" type="SERIAL" primary="true"</span></span><span class="l"><span class="m">	ID int64</span></span><span class="l"><span class="a">	//ptah:schema:field name="email" type="VARCHAR(255)" not_null="true"</span></span><span class="l"><span class="m">	Email string</span></span><span class="l"><span class="a">	//ptah:schema:field name="plan" type="ENUM" enum="free,team,enterprise"</span></span><span class="l"><span class="m">	Plan string</span></span><span class="l"><span class="m">}</span></span><span class="l"> </span><span class="l"><span class="c"># PostgreSQL 向けに出力する。</span></span><span class="l"><span class="p">$</span> ptah schema render --root-dir . --dialect postgres</span><span class="l"><span class="m">-- Statement 1/2</span></span><span class="l"><span class="n">CREATE TYPE "enum_user_plan" AS ENUM ('free', 'team', 'enterprise');</span></span><span class="l"> </span><span class="l"><span class="m">-- Statement 2/2</span></span><span class="l"><span class="m">-- POSTGRES TABLE: users --</span></span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" SERIAL PRIMARY KEY NOT NULL,</span></span><span class="l"><span class="a">  "email" VARCHAR(255) NOT NULL,</span></span><span class="l"><span class="n">  "plan" enum_user_plan</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># 同じファイル、違うのはフラグ 1 つ。</span></span><span class="l"><span class="p">$</span> ptah schema render --root-dir . --dialect sqlite</span><span class="l"><span class="m">-- Statement 1/1</span></span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL,</span></span><span class="l"><span class="n">  "plan" TEXT CHECK (plan IN ('free', 'team', 'enterprise'))</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># SQLite に enum 型はないので CHECK になる。落ちたものは何もない。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="adopt">
+            <span class="tile-head">
+              <span class="tile-name">既存のデータベースを取り込む</span><span class="tile-tag">Go アノテーション</span>
+            </span>
+            <span class="tile-note">誰も宣言を書かなかったデータベース。Ptah を向ければ、制約名も参照動作も含めて Go が返ってくる。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah introspect --db-url sqlite://app.db --out ./models</span>
+            <span class="tile-meta">コマンド 2 件 · 20 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="既存のデータベースを取り込む のトランスクリプト"><span class="l"><span class="c"># 誰もスキーマファイルを書かなかったデータベース。</span></span><span class="l"><span class="p">$</span> ptah introspect --db-url sqlite://app.db --out ./models</span><span class="l">Generated 2 Go file(s) in /tmp/app/models</span><span class="l"><span class="m">Imported 2 table(s), 5 field(s), 0 enum(s)</span></span><span class="l"> </span><span class="l"><span class="c"># 出てきたのは、自分で書いたであろうアノテーション付きの Go。</span></span><span class="l"><span class="p">$</span> cat models/posts.go</span><span class="l"><span class="m">// Code generated by ptah introspect; DO NOT EDIT.</span></span><span class="l"> </span><span class="l"><span class="m">package models</span></span><span class="l"> </span><span class="l"><span class="a">//ptah:schema:table name="posts"</span></span><span class="l"><span class="m">type Posts struct {</span></span><span class="l"><span class="a">	//ptah:schema:field name="id" type="INTEGER" primary="true"</span></span><span class="l"><span class="m">	Id *int</span></span><span class="l"><span class="n">	//ptah:schema:field name="user_id" type="INT" not_null="true" foreign="users(id)" foreign_key_name="fk_posts_user_id" on_delete="NO ACTION" on_update="NO ACTION"</span></span><span class="l"><span class="m">	UserId int</span></span><span class="l"><span class="a">	//ptah:schema:field name="title" type="TEXT" not_null="true"</span></span><span class="l"><span class="m">	Title string</span></span><span class="l"><span class="m">}</span></span><span class="l"> </span><span class="l"><span class="c"># 制約は、名前と参照動作を伴って返ってきた。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="capabilities">
+            <span class="tile-head">
+              <span class="tile-name">対応機能を問い合わせる</span><span class="tile-tag">調査</span>
+            </span>
+            <span class="tile-note">接続先のサーバーについて Ptah が何を判定し、その答えがどこから来たのかを尋ねる。対象について推測することは何もない。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah db capabilities --db-url sqlite://app.db</span>
+            <span class="tile-meta">コマンド 1 件 · 17 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="対応機能を問い合わせる のトランスクリプト"><span class="l"><span class="c"># 接続先のサーバーについて Ptah が何を判定したかを尋ねる。</span></span><span class="l"><span class="p">$</span> ptah db capabilities --db-url sqlite://app.db</span><span class="l l-wide"><span class="m">Dialect:            sqlite</span></span><span class="l l-wide"><span class="m">Server version:     3.53.4</span></span><span class="l l-wide"><span class="m">Capability preset:  SQLite3 (sqlite)</span></span><span class="l l-wide"><span class="m">Preset source:      version-ladder</span></span><span class="l l-wide">Support level:      certified</span><span class="l"> </span><span class="l l-wide"><span class="m">Behavior:</span></span><span class="l l-wide"><span class="m">  identifier_limit       unlimited</span></span><span class="l l-wide"><span class="n">  enum_modeling          unsupported</span></span><span class="l l-wide"><span class="m">  foreign_key_reference  unique</span></span><span class="l"> </span><span class="l l-wide"><span class="m">Capabilities:</span></span><span class="l l-wide"><span class="m">  advisory_locks                          unsupported</span></span><span class="l l-wide"><span class="m">  catalog_partitions                      supported</span></span><span class="l"> </span><span class="l"><span class="c"># 宣言した enum がここで CHECK になる理由が enum_modeling。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="inspect">
+            <span class="tile-head">
+              <span class="tile-name">データベースを読み戻す</span><span class="tile-tag">調査</span>
+            </span>
+            <span class="tile-note">次のツールが求める形で実スキーマを読み戻す。DBML、JSON、HCL、SQL のいずれでも。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema inspect --db-url sqlite://app.db --format dbml</span>
+            <span class="tile-meta">コマンド 2 件 · 10 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="データベースを読み戻す のトランスクリプト"><span class="l"><span class="c"># 別のツールが読める形でデータベースを読み戻す。</span></span><span class="l"><span class="p">$</span> ptah schema inspect --db-url sqlite://app.db --format dbml</span><span class="l"><span class="a">Table "users" {</span></span><span class="l"><span class="a">  "id" INTEGER [pk]</span></span><span class="l"><span class="a">  "email" TEXT [not null]</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="c"># 人間以外が読むなら JSON で。</span></span><span class="l"><span class="p">$</span> ptah schema inspect --db-url sqlite://app.db --format json</span><span class="l"><span class="n">{"schemas":[{"name":"main","tables":[{"name":"users","columns":[{"name":"id","type":"INTEGER","null":true},{"name":"email","type":"TEXT"}],"primary_key":{"parts":[{"column":"id"}]}}]}]}</span></span><span class="l"> </span><span class="l"><span class="c"># 残る 2 つは hcl と sql。--out-dir を付ければファイルに書く。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="lineage">
+            <span class="tile-head">
+              <span class="tile-name">列をたどる</span><span class="tile-tag">調査</span>
+            </span>
+            <span class="tile-note">列を削除する前に、それを読んでいるものを調べる。解析は静的で、データベース URL がなければ何にも接続しない。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema lineage --schema-file schema.sql</span>
+            <span class="tile-meta">コマンド 1 件 · 7 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="列をたどる のトランスクリプト"><span class="l"><span class="c"># どのビュー列が、どの実テーブル列に依存しているのか。</span></span><span class="l"><span class="p">$</span> ptah schema lineage --schema-file schema.sql \</span><span class="l l-wide">    --dialect sqlite</span><span class="l l-wide"><span class="m">SOURCE       FEEDS               KIND</span></span><span class="l l-wide"><span class="n">users.email  active_users.email  view</span></span><span class="l l-wide">users.id     active_users.id     view</span><span class="l"> </span><span class="l"><span class="c"># 解析は静的。--db-url がなければ何にも接続しない。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="stats">
+            <span class="tile-head">
+              <span class="tile-name">ダッシュボードに流す</span><span class="tile-tag">調査</span>
+            </span>
+            <span class="tile-note">スキーマの形を、メトリクス基盤がすでに扱える数値として。数えるのはオブジェクトであって、行ではない。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema stats --db-url sqlite://app.db</span>
+            <span class="tile-meta">コマンド 1 件 · 12 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="ダッシュボードに流す のトランスクリプト"><span class="l"><span class="c"># スキーマの形を、メトリクス基盤がすでに読める形式で。</span></span><span class="l"><span class="p">$</span> ptah schema stats --db-url sqlite://app.db</span><span class="l"><span class="m"># HELP ptah_schema_tables Tables.</span></span><span class="l"><span class="m"># TYPE ptah_schema_tables gauge</span></span><span class="l"><span class="n">ptah_schema_tables{dialect="sqlite"} 2</span></span><span class="l"><span class="m"># HELP ptah_schema_columns Columns across all tables.</span></span><span class="l"><span class="m"># TYPE ptah_schema_columns gauge</span></span><span class="l"><span class="n">ptah_schema_columns{dialect="sqlite"} 5</span></span><span class="l"><span class="m"># HELP ptah_schema_indexes Indexes.</span></span><span class="l"><span class="m"># TYPE ptah_schema_indexes gauge</span></span><span class="l"><span class="m">ptah_schema_indexes{dialect="sqlite"} 0</span></span><span class="l"> </span><span class="l"><span class="c"># 数えるのはオブジェクトで、行ではない。中身ではなく形。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="api">
+            <span class="tile-head">
+              <span class="tile-name">GraphQL API を書き出す</span><span class="tile-tag">エクスポート</span>
+            </span>
+            <span class="tile-note">API はすでにテーブルが記述している。外部キーはリレーションフィールドとして届き、手作業で同期を保つものは残らない。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema export --to graphql --root-dir ./entities</span>
+            <span class="tile-meta">コマンド 2 件 · 20 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="GraphQL API を書き出す のトランスクリプト"><span class="l"><span class="c"># テーブルは、それを読む API をすでに記述している。</span></span><span class="l"><span class="p">$</span> ptah schema export --to graphql --root-dir ./entities \</span><span class="l">    --out schema.graphql</span><span class="l">Exported GraphQL schema to /tmp/app/schema.graphql</span><span class="l"><span class="m">Found 2 table(s), 5 field(s), 0 enum(s)</span></span><span class="l"><span class="p">$</span> cat schema.graphql</span><span class="l"><span class="m"># Code generated by ptah; DO NOT EDIT.</span></span><span class="l"> </span><span class="l"><span class="a">type User {</span></span><span class="l"><span class="a">  id: ID!</span></span><span class="l"><span class="a">  email: String!</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="a">type Post {</span></span><span class="l"><span class="a">  id: ID!</span></span><span class="l"><span class="a">  user_id: Int!</span></span><span class="l"><span class="a">  title: String!</span></span><span class="l"><span class="n">  user: User!</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="c"># 最後のフィールドは外部キーで、リレーションとして読まれている。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="openapi">
+            <span class="tile-head">
+              <span class="tile-name">OpenAPI 仕様を書き出す</span><span class="tile-tag">エクスポート</span>
+            </span>
+            <span class="tile-note">HTTP のペイロードは、それを載せているテーブルから出てくる。NOT NULL 列は required として届くので、両者がずれることはない。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema export --to openapi-v3 --from sql</span>
+            <span class="tile-meta">コマンド 2 件 · 23 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="OpenAPI 仕様を書き出す のトランスクリプト"><span class="l"><span class="c"># テーブルは、それを運ぶペイロードも記述している。</span></span><span class="l"><span class="p">$</span> ptah schema export --to openapi-v3 --from sql \</span><span class="l">    --schema-file schema.sql --out openapi.yaml</span><span class="l">Exported OpenAPI schema to /tmp/app/openapi.yaml</span><span class="l"><span class="m">Found 2 table(s), 5 field(s), 0 enum(s)</span></span><span class="l"><span class="p">$</span> head -20 openapi.yaml</span><span class="l"><span class="m">openapi: 3.0.3</span></span><span class="l"><span class="m">info:</span></span><span class="l"><span class="m">  title: Ptah Exported Schema</span></span><span class="l"><span class="m">  version: 1.0.0</span></span><span class="l"><span class="m">paths: {}</span></span><span class="l"><span class="a">components:</span></span><span class="l"><span class="a">  schemas:</span></span><span class="l"><span class="a">    users:</span></span><span class="l"><span class="a">      type: object</span></span><span class="l"><span class="n">      required:</span></span><span class="l"><span class="n">        - id</span></span><span class="l"><span class="n">        - email</span></span><span class="l"><span class="a">      properties:</span></span><span class="l"><span class="a">        id:</span></span><span class="l"><span class="a">          type: integer</span></span><span class="l"><span class="a">          format: int32</span></span><span class="l"> </span><span class="l"><span class="c"># NOT NULL は required になった。両者がずれることはない。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="protobuf">
+            <span class="tile-head">
+              <span class="tile-name">ワイヤ契約を保つ</span><span class="tile-tag">エクスポート</span>
+            </span>
+            <span class="tile-note">フィールド番号は約束である。Ptah はそれを約束にする履歴を保持し、次回のエクスポートは同じ番号を再利用するか、書き込みを拒否する。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema export --to protobuf --from sql</span>
+            <span class="tile-meta">コマンド 2 件 · 25 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="ワイヤ契約を保つ のトランスクリプト"><span class="l"><span class="c"># 同じスキーマを、ワイヤ契約として。</span></span><span class="l"><span class="p">$</span> ptah schema export --to protobuf --from sql \</span><span class="l">    --schema-file schema.sql --out schema.proto \</span><span class="l">    --proto-package acme.app.v1</span><span class="l">Exported Protobuf schema to /tmp/app/schema.proto</span><span class="l"><span class="m">Exported 2 message(s), 5 field(s), 0 enum(s)</span></span><span class="l"><span class="n">bootstrapped new compatibility history</span></span><span class="l"><span class="e">1 export warning(s) reported</span></span><span class="l"> </span><span class="l"><span class="c"># 警告こそが要点。フィールド番号は約束である。</span></span><span class="l"><span class="p">$</span> head -14 schema.proto</span><span class="l"><span class="m">edition = "2023";</span></span><span class="l"> </span><span class="l"><span class="m">package acme.app.v1;</span></span><span class="l"> </span><span class="l"><span class="a">message Post {</span></span><span class="l"><span class="n">  int32 id = 1;</span></span><span class="l"><span class="n">  int32 user_id = 2;</span></span><span class="l"><span class="n">  string title = 3;</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="a">message User {</span></span><span class="l"><span class="a">  int32 id = 1;</span></span><span class="l"><span class="a">  string email = 2;</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="c"># 次のエクスポートは、この番号を再利用するか、書き込みを拒否する。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="dbml">
+            <span class="tile-head">
+              <span class="tile-name">DBML に書き出す</span><span class="tile-tag">エクスポート</span>
+            </span>
+            <span class="tile-note">作図ツールが求めるのは DBML。フラグ 1 つで済み、HCL、OpenAPI、GraphQL、Protobuf、Markdown も同様。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema export --to dbml --root-dir ./entities</span>
+            <span class="tile-meta">コマンド 2 件 · 19 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="DBML に書き出す のトランスクリプト"><span class="l"><span class="c"># 作図ツールが求めるのは DBML。フラグを 1 つ変えるだけ。</span></span><span class="l"><span class="p">$</span> ptah schema export --to dbml --root-dir ./entities \</span><span class="l">    --out schema.dbml</span><span class="l">Exported DBML schema to /tmp/app/schema.dbml</span><span class="l"><span class="m">Found 2 table(s), 5 field(s), 0 enum(s)</span></span><span class="l"><span class="p">$</span> cat schema.dbml</span><span class="l"><span class="a">Table "posts" {</span></span><span class="l"><span class="a">  "id" SERIAL [pk]</span></span><span class="l"><span class="a">  "user_id" INT [not null]</span></span><span class="l"><span class="a">  "title" VARCHAR(200) [not null]</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="a">Table "users" {</span></span><span class="l"><span class="a">  "id" SERIAL [pk]</span></span><span class="l"><span class="a">  "email" VARCHAR(255) [not null]</span></span><span class="l"><span class="a">}</span></span><span class="l"> </span><span class="l"><span class="n">Ref "posts"."user_id" &gt; "users"."id"</span></span><span class="l"> </span><span class="l"><span class="c"># これを得るために二重に記述したものは何もない。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="docs">
+            <span class="tile-head">
+              <span class="tile-name">リファレンスを書く</span><span class="tile-tag">エクスポート</span>
+            </span>
+            <span class="tile-note">誰も手では最新に保てないスキーマリファレンス。外部キーも含まれる。ここでは Markdown、フラグ 1 つで HTML。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema export --to markdown --from sql</span>
+            <span class="tile-meta">コマンド 2 件 · 19 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="リファレンスを書く のトランスクリプト"><span class="l"><span class="c"># 誰も手では最新に保てないリファレンスページ。</span></span><span class="l"><span class="p">$</span> ptah schema export --to markdown --from sql \</span><span class="l">    --schema-file schema.sql --out SCHEMA.md</span><span class="l">Exported schema documentation to /tmp/app/SCHEMA.md</span><span class="l"><span class="m">Found 2 table(s), 5 field(s), 0 enum(s)</span></span><span class="l"><span class="p">$</span> head -13 SCHEMA.md</span><span class="l"><span class="m"># Schema reference</span></span><span class="l"> </span><span class="l"><span class="m">- [posts](#posts)</span></span><span class="l"><span class="m">- [users](#users)</span></span><span class="l"> </span><span class="l"><span class="a">## posts</span></span><span class="l"> </span><span class="l l-wide"><span class="m">| Column | Type | Null | Default | Key | Comment |</span></span><span class="l l-wide"><span class="m">| --- | --- | --- | --- | --- | --- |</span></span><span class="l l-wide"><span class="a">| id | INTEGER | yes | — | PK | — |</span></span><span class="l l-wide"><span class="n">| user_id | INTEGER | no | — | FK → users(id) | — |</span></span><span class="l l-wide"><span class="a">| title | TEXT | no | — | — | — |</span></span><span class="l"> </span><span class="l"><span class="c"># HTML は、--to を変えただけの同じコマンド。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="diagram">
+            <span class="tile-head">
+              <span class="tile-name">スキーマを描く</span><span class="tile-tag">エクスポート</span>
+            </span>
+            <span class="tile-note">同じアノテーションを図にしたもの。矢印は外部キーから引かれるので、図がスキーマと食い違うことはない。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah viz --root-dir ./entities --format mermaid</span>
+            <span class="tile-meta">コマンド 1 件 · 15 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="スキーマを描く のトランスクリプト"><span class="l"><span class="c"># 宣言は、そのまま図でもある。</span></span><span class="l"><span class="p">$</span> ptah viz --root-dir ./entities --format mermaid \</span><span class="l">    --include-columns</span><span class="l">erDiagram</span><span class="l">  users {</span><span class="l">    SERIAL id PK</span><span class="l">    VARCHAR_255 email</span><span class="l">  }</span><span class="l">  posts {</span><span class="l">    SERIAL id PK</span><span class="l">    INT user_id FK</span><span class="l">    VARCHAR_200 title</span><span class="l">  }</span><span class="l"><span class="n">  users ||--o{ posts : "fk_posts_user_id"</span></span><span class="l"> </span><span class="l"><span class="c"># 関連は外部キーから読まれる。2 つ目のファイルからではない。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="ociPublish">
+            <span class="tile-head">
+              <span class="tile-name">スキーマを公開する</span><span class="tile-tag">レジストリ</span>
+            </span>
+            <span class="tile-note">スキーマそのものを push する。返ってくるのはダイジェスト、指定したタグだけ、そして動かないものを指す動くタグ。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema push oci://registry.example/acme/schema:v1</span>
+            <span class="tile-meta">コマンド 3 件 · 14 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="スキーマを公開する のトランスクリプト"><span class="l"><span class="c"># スキーマそのものを、ダイジェスト付きの成果物として公開する。</span></span><span class="l"><span class="p">$</span> ptah schema push oci://registry.example/acme/schema:v1 \</span><span class="l">    --schema-file schema.sql --dialect sqlite --latest</span><span class="l">Pushed schema as oci://registry.example/acme/schema:v1</span><span class="l"><span class="n">Digest: sha256:66fed834333daafa24448c7c6b5fe548c4f429d036977194f5b417c505fb933f</span></span><span class="l"><span class="m">Version: </span></span><span class="l"><span class="m">Tags: [v1 latest]</span></span><span class="l"> </span><span class="l"><span class="c"># 2 つのタグがそれを指している。指定した 2 つだけ。</span></span><span class="l"><span class="p">$</span> ptah oci tags oci://registry.example/acme/schema</span><span class="l">latest</span><span class="l">v1</span><span class="l"> </span><span class="l"><span class="c"># 動くタグは、動かないダイジェストに解決される。</span></span><span class="l"><span class="p">$</span> ptah oci resolve oci://registry.example/acme/schema:latest</span><span class="l"><span class="n">oci://registry.example/acme/schema@sha256:66fed834333daafa24448c7c6b5fe548c4f429d036977194f5b417c505fb933f</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="ociInspect">
+            <span class="tile-head">
+              <span class="tile-name">リモートの成果物を読む</span><span class="tile-tag">レジストリ</span>
+            </span>
+            <span class="tile-note">その参照先に何があるか。マニフェスト 843 バイトが答え、ペイロードは置かれたまま動かない。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah oci inspect oci://registry.example/acme/schema:v1</span>
+            <span class="tile-meta">コマンド 1 件 · 18 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="リモートの成果物を読む のトランスクリプト"><span class="l"><span class="c"># その成果物は何を宣言しているのか。ダウンロードせずに尋ねる。</span></span><span class="l"><span class="p">$</span> ptah oci inspect oci://registry.example/acme/schema:v1</span><span class="l l-wide"><span class="m">Reference:     oci://registry.example/acme/schema:v1</span></span><span class="l l-wide"><span class="m">Digest:        sha256:66fed834333daafa24448c7c6b5fe548c4f429d036977194f5b417c505fb933f</span></span><span class="l l-wide"><span class="m">Media type:    application/vnd.oci.image.manifest.v1+json</span></span><span class="l l-wide"><span class="m">Size:          843</span></span><span class="l l-wide"><span class="n">Artifact type: application/vnd.stokaro.ptah.schema.v1</span></span><span class="l l-wide"><span class="m">Discovery:     none</span></span><span class="l"> </span><span class="l l-wide"><span class="m">Annotations:</span></span><span class="l l-wide"><span class="m">  io.stokaro.ptah.kind               application/vnd.stokaro.ptah.schema.v1</span></span><span class="l l-wide"><span class="m">  io.stokaro.ptah.schema-format      hcl</span></span><span class="l l-wide"><span class="m">  org.opencontainers.image.revision  112a72244a81db149899df0ce43afc704a152bc4</span></span><span class="l"> </span><span class="l l-wide"><span class="m">Files:</span></span><span class="l l-wide"><span class="m">  NAME        MEDIA TYPE                                  SIZE  DIGEST</span></span><span class="l l-wide">  schema.hcl  application/vnd.stokaro.ptah.schema.hcl.v1  483   sha256:11719c3690781f43aadc70a236e5494dd5435e9418b6197e4048fc3a5fd23366</span><span class="l"> </span><span class="l"><span class="c"># 答えたのは 843 バイトのマニフェスト。ペイロードは動いていない。</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="ociConsume">
+            <span class="tile-head">
+              <span class="tile-name">レジストリからビルドする</span><span class="tile-tag">レジストリ</span>
+            </span>
+            <span class="tile-note">レジストリ参照はファイル名と同じように使える。そこから直接ビルドするか、保存された HCL として取り出す。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah schema render</span>
+            <span class="tile-meta">コマンド 3 件 · 30 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="レジストリからビルドする のトランスクリプト"><span class="l"><span class="c"># レジストリ参照は、ファイルと同じくスキーマの入力元である。</span></span><span class="l"><span class="p">$</span> ptah schema render \</span><span class="l">    --schema-file oci://registry.example/acme/schema:v1 \</span><span class="l">    --dialect postgres</span><span class="l"><span class="m">-- Statement 1/3</span></span><span class="l"><span class="m">-- POSTGRES TABLE: users --</span></span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY NOT NULL,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># あるいは、保存されたままの正規形の HCL として取り出す。</span></span><span class="l"><span class="p">$</span> ptah schema pull oci://registry.example/acme/schema:v1 \</span><span class="l">    --out pulled.hcl</span><span class="l">Pulled oci://registry.example/acme/schema:v1 to /tmp/app/pulled.hcl</span><span class="l"><span class="m">Digest: sha256:66fed834333daafa24448c7c6b5fe548c4f429d036977194f5b417c505fb933f</span></span><span class="l"><span class="p">$</span> head -12 pulled.hcl</span><span class="l"><span class="m">// Code generated by ptah; DO NOT EDIT.</span></span><span class="l"> </span><span class="l"><span class="a">table "posts" {</span></span><span class="l"><span class="a">  column "id" {</span></span><span class="l"><span class="a">    type = INTEGER</span></span><span class="l"><span class="a">  }</span></span><span class="l"><span class="a">  primary_key {</span></span><span class="l"><span class="a">    columns = [column.id]</span></span><span class="l"><span class="a">  }</span></span><span class="l"><span class="n">  foreign_key "fk_posts_user_id" {</span></span><span class="l"><span class="a">    columns = [column.user_id]</span></span><span class="l"><span class="a">    ref_columns = [table.users.column.id]</span></span><span class="l"><span class="a">  }</span></span><span class="l"><span class="a">}</span></span></pre>
+        </li>
+        <li class="tile-slot">
+          <button class="tile" type="button" data-demo-tile data-demo-scenario="compat">
+            <span class="tile-head">
+              <span class="tile-name">Atlas のスクリプトを動かす</span><span class="tile-tag">Atlas</span>
+            </span>
+            <span class="tile-note">Atlas のパイプラインをそのまま。同じフラグ、同じディレクトリ、同じ atlas.sum で、下にはネイティブの表面がある。</span>
+            <span class="tile-cmd"><span class="tile-prompt">$</span> ptah-compat migrate diff add_users --dir file://migrations</span>
+            <span class="tile-meta">コマンド 3 件 · 16 行</span>
+          </button>
+          <pre class="tile-transcript" aria-label="Atlas のスクリプトを動かす のトランスクリプト"><span class="l"><span class="c"># 既存の Atlas パイプラインと、同じフラグ。</span></span><span class="l"><span class="p">$</span> ptah-compat migrate diff add_users --dir file://migrations \</span><span class="l">    --to file://schema.sql \</span><span class="l">    --dev-url "sqlite://dev.db?mode=memory"</span><span class="l">Created migration file: /tmp/app/migrations/20260907193826_add_users.sql</span><span class="l"><span class="m">Updated migration checksum: /tmp/app/migrations/atlas.sum</span></span><span class="l"> </span><span class="l"><span class="c"># 書かれたのは Atlas のディレクトリ。タイムスタンプ付きファイルと atlas.sum。</span></span><span class="l"><span class="p">$</span> cat migrations/atlas.sum</span><span class="l"><span class="m">h1:9q+8PcnP03kKT2aZzOj4MHlWEilRmbPXaScNvs2FJzI=</span></span><span class="l"><span class="m">20260907193826_add_users.sql h1:eXKVFuXvHFnneZKiWkpyJSHeF5q8KlZCCXJqM7JNymE=</span></span><span class="l"> </span><span class="l"><span class="c"># apply は、その同じディレクトリを読む。</span></span><span class="l"><span class="p">$</span> ptah-compat migrate apply --dir file://migrations \</span><span class="l">    --url sqlite://app.db</span><span class="l"><span class="m">Migrating to version 20260907193826 from 1 pending migrations.</span></span><span class="l">Migration complete. Current version: 20260907193826</span><span class="l"> </span><span class="l"><span class="c"># スクリプトは 1 つも変えていない。下にはネイティブの表面がそのままある。</span></span></pre>
+        </li>
+    </ul>
+
+    <div class="actions">
+      <a class="btn" href="https://docs.ptah.run/edge/start/quick-start/">次はクイックスタート（英語）→</a>
+      <a class="btn btn-ghost" href="/ja/install/">Ptah をインストール</a>
+    </div>
+
+  </div>
+</main>
+
+<div class="term demo" data-demo data-demo-scenario="change" hidden>
+  <div class="term-bar">
+    <span class="demo-where">sh · ptah-quick-start</span>
+    <span class="demo-sync" data-demo-sync hidden></span>
+        <span class="demo-controls" data-demo-controls hidden>
+          <button class="demo-btn demo-btn-speed" type="button" data-demo-speed aria-label="再生速度 1×。押すと変わります。" title="速度"><span data-demo-speed-label>1×</span></button>
+          <button class="demo-btn" type="button" data-demo-toggle aria-label="デモを再生" title="再生">
+            <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.25 3.5h1.9v9h-1.9zM8.85 3.5h1.9v9h-1.9z" fill="currentColor"/></svg>
+            <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.5 3.4l7 4.6-7 4.6z" fill="currentColor"/></svg>
+            <span class="i-pause">一時停止</span><span class="i-play">再生</span>
+          </button>
+          <button class="demo-btn" type="button" data-demo-replay aria-label="デモを最初から再生" title="最初から" hidden>
+            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13.2 8a5.2 5.2 0 1 1-1.75-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12.4 1.9v2.9H9.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>最初から</span>
+          </button>
+          <button class="demo-btn" type="button" data-demo-expand aria-expanded="false" aria-label="デモを拡大" title="拡大">
+            <svg class="i-expand" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6.2 2.6H2.6v3.6M9.8 13.4h3.6V9.8M13.4 6.2V2.6H9.8M2.6 9.8v3.6h3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg class="i-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span class="i-expand">拡大</span><span class="i-close">閉じる</span>
+          </button>
+        </span>
+  </div>
+  <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
+  <pre class="demo-transcript" data-demo-transcript></pre>
+  <div class="demo-progress" data-demo-progress hidden aria-hidden="true"><span></span></div>
+</div>
+
+<dialog class="demo-modal" data-demo-modal aria-labelledby="run-title">
+  <div class="demo-modal-head">
+    <h2 id="run-title" data-demo-title></h2>
+    <p data-demo-caption></p>
+  </div>
+</dialog>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-brand"><img src="/assets/logo.svg" alt="" width="18" height="18"><span>ptah.run · <span class="v" data-version>v0.4.0</span> · pre-GA · MIT</span></div>
+    <ul class="foot-links">
+      <li><a href="https://github.com/stokaro/ptah">GitHub</a></li>
+      <li><a href="https://github.com/stokaro/ptah/issues">課題</a></li>
+      <li><a href="/ja/community/">コミュニティ</a></li>
+      <li><a href="https://github.com/stokaro/ptah/releases">変更履歴</a></li>
+      <li><a href="https://github.com/stokaro/ptah/blob/master/LICENSE">ライセンス</a></li>
+    </ul>
+  </div>
+</footer>
+
+<div class="sr-only" role="status" id="copy-status"></div>
+<script src="/assets/runs.js" defer></script>
+<script src="/assets/runs.ja.js" defer></script>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>
