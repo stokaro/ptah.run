@@ -254,20 +254,20 @@ const LANGS = {
     operator: "オペレーター",
     theme: "ダークテーマ",
     menu: "メニュー",
-    footIssues: "課題",
+    footIssues: "Issue",
     footCommunity: "コミュニティ",
     footChangelog: "変更履歴",
     footLicense: "ライセンス",
     title: "Ptah 実践例",
     description:
-      "端末で記録した Ptah の実行 24 件。スキーマのドリフト、バージョン付きマイグレーション、埋め込みの切り替え、OCI 成果物、フォーマット変換、Atlas 互換の表面。読むこともできるし、打ち込まれる様子を見ることもできる。",
+      "端末で記録した Ptah の実行 24 件。スキーマのドリフト、バージョン管理型マイグレーション、埋め込みの切り替え、OCI アーティファクト、フォーマット変換、Atlas 互換のコマンド体系。読むこともできるし、打ち込まれる様子を見ることもできる。",
     ogDescription: "端末で記録した Ptah の実行 24 件。読んでもよいし、打ち込まれる様子を見てもよい。",
     // The one place プタハ appears on this page. Everywhere after it, Ptah.
     h1: "Ptah（プタハ）の実践例",
     // 再生 is what the button in the player says; naming it Play here would
     // send the reader looking for a control that is not on the page.
     lede: `端末で記録した Ptah の実行 ${RUNS.order.length} 件。ページのために書かれたものは一つもない。開けば読めるし、再生を押せば打ち込まれていく。`,
-    quickStart: "次はクイックスタート→",
+    quickStart: "次はクイックスタート →",
     installPtah: "Ptah をインストール",
     speedLabel: "再生速度 1×。押すと変わります。",
     speedTitle: "速度",
@@ -280,7 +280,8 @@ const LANGS = {
     expandAria: "デモを拡大",
     close: "閉じる",
     counts: (commands, lines) => `コマンド ${commands} 件 · ${lines} 行`,
-    transcriptLabel: (label) => `${label} のトランスクリプト`
+    // Quote the session name before adding the Japanese suffix.
+    transcriptLabel: (label) => `「${label}」のトランスクリプト`
   },
   de: {
     code: "de", prefix: "/de", skip: "Zum Inhalt springen", navLabel: "Website",
@@ -357,6 +358,9 @@ ${langSwitch(L.code, path)}
 }
 
 function footer(L) {
+  const note = L.code === "ja"
+    ? '\n    <p class="foot-note">ドキュメント、プレイグラウンド、リポジトリのリンク先は英語です。</p>'
+    : "";
   return `<footer class="site-footer">
   <div class="wrap">
     <div class="foot-brand"><img src="/assets/logo.svg" alt="" width="18" height="18"><span>ptah.run · <span class="v" data-version>v0.4.0</span> · pre-GA · MIT</span></div>
@@ -366,7 +370,7 @@ function footer(L) {
       <li><a href="${L.prefix}/community/">${L.footCommunity}</a></li>
       <li><a href="https://github.com/stokaro/ptah/releases">${L.footChangelog}</a></li>
       <li><a href="https://github.com/stokaro/ptah/blob/master/LICENSE">${L.footLicense}</a></li>
-    </ul>
+    </ul>${note}
   </div>
 </footer>`;
 }

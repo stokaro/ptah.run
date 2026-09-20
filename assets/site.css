@@ -1223,6 +1223,7 @@ h2 {
   padding-top: 28px;
   padding-bottom: 28px;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 24px;
@@ -1251,6 +1252,15 @@ h2 {
 }
 .foot-links a {
   text-decoration: none;
+}
+
+/* Give the Japanese resource-language note its own footer row. */
+.foot-note {
+  flex-basis: 100%;
+  order: 1;
+  margin: 0;
+  max-width: 70ch;
+  line-height: 1.6;
 }
 
 /* ---------- Install page ---------- */

@@ -34,6 +34,8 @@ pages served at `ptah.run` itself.
 | `scripts/build-runs.mjs` | Writes all in-practice pages and home transcripts from `assets/runs.js` |
 | `scripts/check-locales.mjs` | Checks locale coverage, links, metadata and indexability |
 | `scripts/locales.mjs` | Language names, paths, alternate links and the shared language picker |
+| `scripts/check-japanese.mjs` | Bounded typography checks for Japanese HTML and runtime labels |
+| `TRANSLATING.md` | Translation guidance, contextual Japanese terminology and project typography conventions |
 | `scripts/check-browser.mjs` | Responsive and interaction checks; saves screenshots and layout readings |
 | `.github/workflows/deploy.yml` | Checks local references, stamps the latest release, deploys to GitHub Pages |
 
@@ -143,9 +145,15 @@ npm run check:browser
 The browser check measures all four page types at mobile, tablet and desktop
 widths, in both themes, with and without JavaScript. It follows all language
 switches and exercises mobile navigation, installation tabs, copy status and
-the transcript player. Screenshots of the German and French homepages and
+the transcript player. Screenshots of the Japanese, German and French homepages and
 layout readings go to `artifacts/locales/`, or `SCREENSHOT_DIR`. CI uploads
 them as `localization-browser-checks`.
+
+`TRANSLATING.md` records Japanese terminology as editorial guidance. The style
+check covers heading and title punctuation, Japanese/Latin spacing in prose,
+link notices and sampled runtime labels from `assets/site.js`. Its fixtures
+exercise refusals and valid ordinary words; it does not enforce a glossary or
+claim to measure translation quality. `npm run check` includes this check.
 
 These checks detect missing content and structural drift. Translation meaning
 still needs review against the current English page when that page changes.

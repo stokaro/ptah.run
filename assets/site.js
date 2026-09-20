@@ -58,7 +58,7 @@
       command: "コマンド",
       copied: "コピーしました",
       copiedStatus: function (name) {
-        return name + "をクリップボードにコピーしました。";
+        return name + (/[A-Za-z]$/.test(name) ? " を" : "を") + "クリップボードにコピーしました。";
       },
       detected: function (name) {
         return "検出: " + name;

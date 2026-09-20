@@ -2,7 +2,7 @@
   "name": "ptah-landing-checks",
   "private": true,
   "scripts": {
-    "check": "node scripts/build-runs.mjs --selftest && node scripts/build-runs.mjs --check && node scripts/check-locales.mjs --selftest && node scripts/check-locales.mjs",
+    "check": "node scripts/build-runs.mjs --selftest && node scripts/build-runs.mjs --check && node scripts/check-locales.mjs --selftest && node scripts/check-locales.mjs && node scripts/check-japanese.mjs --selftest",
     "check:browser": "node scripts/check-browser.mjs"
   },
   "devDependencies": {
