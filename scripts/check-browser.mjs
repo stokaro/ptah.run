@@ -85,7 +85,7 @@ try {
               await page.keyboard.press("Escape");
               assert.equal(await page.locator(".menu-btn").getAttribute("aria-expanded"), "false");
             }
-            if (javaScriptEnabled && ["de", "fr"].includes(lang) && path === "/" && [390, 1280].includes(width)) {
+            if (javaScriptEnabled && ["ja", "de", "fr"].includes(lang) && path === "/" && [390, 1280].includes(width)) {
               await page.evaluate(() => document.activeElement.blur());
               await page.screenshot({ path: join(output, `${lang}-${width}-${colorScheme}.png`), fullPage: true });
             }
@@ -102,17 +102,17 @@ try {
         }
       }
       if (javaScriptEnabled) {
-        for (const lang of ["de", "fr"]) {
+        for (const lang of ["ja", "de", "fr"]) {
           await page.goto(origin + `/${lang}/install/`);
           await page.locator('[data-tab="windows"]').click();
           assert.equal(await page.locator('#panel-windows').isVisible(), true);
           await page.locator('[data-copy="cmd-windows"]').click();
           await page.waitForFunction(() => document.querySelector('#copy-status').textContent.length > 0);
-          assert.match(await page.locator('#copy-status').textContent(), lang === "de" ? /Zwischenablage/ : /presse-papiers/);
+          assert.match(await page.locator('#copy-status').textContent(), { ja: /クリップボードにコピーしました/, de: /Zwischenablage/, fr: /presse-papiers/ }[lang]);
           await page.goto(origin + `/${lang}/in-practice/`);
           await page.locator('[data-demo-tile][data-demo-scenario="change"]').click();
           assert.equal(await page.locator('.demo-modal').isVisible(), true);
-          assert.equal(await page.locator('[data-demo-title]').textContent(), lang === "de" ? "Ein Schema ändern" : "Modifier un schéma");
+          assert.equal(await page.locator('[data-demo-title]').textContent(), { ja: "スキーマを変更する", de: "Ein Schema ändern", fr: "Modifier un schéma" }[lang]);
           await page.keyboard.press('Escape');
         }
       }
