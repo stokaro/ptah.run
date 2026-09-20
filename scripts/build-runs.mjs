@@ -1,22 +1,15 @@
 #!/usr/bin/env node
-/* Write in-practice/index.html and ja/in-practice/index.html from
- * assets/runs.js and assets/runs.ja.js.
- *
- * The page prints every session as a transcript, which is what a reader
- * without JavaScript gets and what a reader who does not want to wait for a
- * typewriter reads. The player takes over one block at a time from the same
- * data. Both come from one file so neither can drift from the other.
- *
- * The Japanese page is the same generator over the same sessions, with the
- * narration replaced: a command, a flag, a file name, SQL and a line Ptah
- * printed are what the program did, so they are the same bytes in both trees.
- * That is also what stops the two pages drifting -- there is no second page to
- * keep in step, only a second column of narration, and the coverage check
- * below refuses to write anything while that column has a hole in it.
+/* Write each language's in-practice page and homepage transcript from the
+ * same commands and output in assets/runs.js. Only narration is translated;
+ * missing, empty or orphaned translations stop generation.
  *
  *   node scripts/build-runs.mjs           write the pages
  *   node scripts/build-runs.mjs --check   fail when they are out of date
+ *   node scripts/build-runs.mjs --selftest exercise narration refusals
  */
+
+import assert from "node:assert/strict";
+import { LOCALES, alternates, langSwitch } from "./locales.mjs";
 
 import { createRequire } from "node:module";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
@@ -27,7 +20,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..");
 const require = createRequire(import.meta.url);
 const RUNS = require(join(root, "assets", "runs.js"));
-const JA = require(join(root, "assets", "runs.ja.js"));
+const NARRATIONS = Object.fromEntries(Object.keys(LOCALES).filter((lang) => lang !== "en")
+  .map((lang) => [lang, require(join(root, "assets", `runs.${lang}.js`))]));
 
 // The same mapping the player uses. A kind missing here renders unwrapped,
 // which is what an ordinary line of output is.
@@ -38,11 +32,11 @@ const esc = (text) =>
 
 /* ---------- Narration coverage ----------
  *
- * Every table in assets/runs.ja.js is keyed by the English it replaces, so a
+ * Every table in a narration dictionary is keyed by the English it replaces, so a
  * hole and an orphan are both findable: a session or a line added to
- * assets/runs.js with no Japanese beside it, and a line edited in English
+ * assets/runs.js with no translation beside it, and a line edited in English
  * whose old key is still sitting in the translation. Both stop the build,
- * because either one would publish a Japanese page carrying English the reader
+ * because either one would publish a translated page carrying English the reader
  * was told had been translated -- or, worse, narration for a run that no
  * longer exists.
  */
@@ -59,47 +53,76 @@ function sourceStrings() {
   return { notes, sync, scenarios: new Set(Object.keys(RUNS.scenarios)) };
 }
 
-function compare(what, source, translated) {
+function compare(lang, what, source, translated) {
   const missing = [...source].filter((k) => !translated.has(k));
   const orphaned = [...translated].filter((k) => !source.has(k));
   const problems = [];
-  for (const k of missing) problems.push(`  ${what}: no Japanese for ${JSON.stringify(k)}`);
+  for (const k of missing) problems.push(`  ${what}: no ${lang} translation for ${JSON.stringify(k)}`);
   for (const k of orphaned) {
     problems.push(`  ${what}: ${JSON.stringify(k)} is translated but no longer in assets/runs.js`);
   }
   return problems;
 }
 
-function checkNarration() {
+function narrationProblems(lang, narration) {
   const src = sourceStrings();
   const problems = [
-    ...compare("scenario", src.scenarios, new Set(Object.keys(JA.scenarios))),
-    ...compare("note", src.notes, new Set(Object.keys(JA.notes))),
-    ...compare("sync", src.sync, new Set(Object.keys(JA.sync)))
+    ...compare(lang, "scenario", src.scenarios, new Set(Object.keys(narration.scenarios))),
+    ...compare(lang, "note", src.notes, new Set(Object.keys(narration.notes))),
+    ...compare(lang, "sync", src.sync, new Set(Object.keys(narration.sync)))
   ];
-  for (const key of Object.keys(JA.scenarios)) {
+  for (const key of Object.keys(narration.scenarios)) {
     for (const field of ["tag", "label", "caption"]) {
-      if (!JA.scenarios[key][field]) problems.push(`  scenario: ${key} has no ${field}`);
+      if (typeof narration.scenarios[key][field] !== "string" || !narration.scenarios[key][field].trim()) problems.push(`  scenario: ${key} has no ${field}`);
     }
   }
-  if (problems.length) {
-    console.error("assets/runs.ja.js does not cover assets/runs.js:");
-    problems.forEach((p) => console.error(p));
-    process.exit(1);
+  for (const group of ["notes", "sync"]) {
+    for (const [key, value] of Object.entries(narration[group])) {
+      if (typeof value !== "string" || !value.trim()) problems.push(`  ${group}: ${key} is empty`);
+    }
   }
+  return problems;
 }
 
-checkNarration();
+for (const [lang, narration] of Object.entries(NARRATIONS)) {
+  const problems = narrationProblems(lang, narration);
+  if (problems.length) throw new Error(`assets/runs.${lang}.js: ${problems.join("; ")}`);
+}
+if (process.argv.includes("--selftest")) {
+  let checks = 0;
+  for (const lang of ["ja", "de", "fr"]) {
+    const valid = NARRATIONS[lang];
+    assert.deepEqual(narrationProblems(lang, valid), []);
+    const mutations = [
+      (n) => { delete n.scenarios.change; },
+      (n) => { n.scenarios.change.caption = ""; },
+      (n) => { n.scenarios.change.label = "   "; },
+      (n) => { delete n.notes[Object.keys(n.notes)[0]]; },
+      (n) => { n.notes[Object.keys(n.notes)[0]] = ""; },
+      (n) => { n.notes["# Removed source line"] = "Orphan"; },
+      (n) => { delete n.sync["no drift"]; },
+      (n) => { n.sync["no drift"] = ""; }
+    ];
+    for (const mutate of mutations) {
+      const broken = structuredClone(valid);
+      mutate(broken);
+      assert(narrationProblems(lang, broken).length > 0, `${lang}: missing or orphaned narration must fail`);
+      checks++;
+    }
+  }
+  console.log(`build-runs: ${checks} narration refusal checks passed`);
+  process.exit(0);
+}
 
 // What a session is called, and what is said about it, in one language.
 function about(lang, key) {
-  return lang === "ja" ? JA.scenarios[key] : RUNS.scenarios[key];
+  return lang === "en" ? RUNS.scenarios[key] : NARRATIONS[lang].scenarios[key];
 }
 
 // Narration inside a transcript. Everything else in a script is what the
-// program printed and is the same text in both trees.
+// program printed and is the same text in every language.
 function line(lang, kind, text) {
-  if (lang === "ja" && kind === "note") return JA.notes[text];
+  if (lang !== "en" && kind === "note") return NARRATIONS[lang].notes[text];
   return text;
 }
 
@@ -171,19 +194,18 @@ function wideRuns(rows) {
   return wide;
 }
 
-/* ---------- The two languages ----------
+/* ---------- Interface dictionaries ----------
  *
  * Only the interface text lives here. Addresses are computed from `prefix` so
- * a link can be wrong in one place rather than in two, and the pair of pages
- * always points at each other.
+ * a link can be wrong in one place rather than in each language, and the pages
+ * always point at each other.
  */
 
 const LANGS = {
   en: {
+    imageAlt: "The Ptah ASCII wordmark above the line: Database migrations without surprises.",
     code: "en",
     prefix: "",
-    other: "ja",
-    otherName: "日本語",
     skip: "Skip to content",
     navLabel: "Site",
     docs: "Docs",
@@ -220,13 +242,12 @@ const LANGS = {
     transcriptLabel: (label) => `${label} transcript`
   },
   ja: {
+    imageAlt: "Ptah の ASCII ロゴと、データベースのマイグレーションについての英語の見出し。",
     code: "ja",
     prefix: "/ja",
-    other: "en",
-    otherName: "English",
     skip: "本文へスキップ",
     navLabel: "サイト",
-    docs: "ドキュメント",
+    docs: "ドキュメント（英語）",
     install: "インストール",
     inPractice: "実践例",
     playground: "プレイグラウンド",
@@ -260,26 +281,53 @@ const LANGS = {
     close: "閉じる",
     counts: (commands, lines) => `コマンド ${commands} 件 · ${lines} 行`,
     transcriptLabel: (label) => `${label} のトランスクリプト`
+  },
+  de: {
+    code: "de", prefix: "/de", skip: "Zum Inhalt springen", navLabel: "Website",
+    docs: "Dokumentation (Englisch)", install: "Installation", inPractice: "Praxisbeispiele",
+    playground: "Testumgebung (Englisch)", operator: "Operator (Englisch)", theme: "Dunkles Design", menu: "Menü",
+    footIssues: "Fehlerberichte", footCommunity: "Community", footChangelog: "Änderungsprotokoll", footLicense: "Lizenz",
+    title: "Ptah in der Praxis",
+    description: "24 aufgezeichnete Ptah-Abläufe: Schema-Drift, versionierte Migrationen, Embedding-Umschaltung, OCI-Artefakte, Formatkonvertierung und Atlas-kompatible Befehle. Als Text oder Wiedergabe.",
+    ogDescription: "24 aufgezeichnete Ptah-Abläufe. Als Text lesen oder im Terminal abspielen.",
+    imageAlt: "Der Ptah-Schriftzug in ASCII über einer englischen Überschrift zu Datenbankmigrationen.",
+    h1: "Ptah in der Praxis",
+    lede: `${RUNS.order.length} im Terminal aufgezeichnete Ptah-Abläufe. Die Ausgaben stammen aus echten Ausführungen. Öffnen Sie ein Beispiel zum Lesen oder wählen Sie Abspielen für die Wiedergabe.`,
+    quickStart: "Weiter zum Schnellstart (Englisch) →", installPtah: "Ptah installieren",
+    speedLabel: "Wiedergabegeschwindigkeit: 1×. Zum Ändern drücken.", speedTitle: "Geschwindigkeit",
+    play: "Abspielen", playAria: "Demo abspielen", pause: "Pause", replay: "Erneut abspielen", replayAria: "Demo erneut abspielen",
+    expand: "Vergrößern", expandAria: "Demo vergrößern", close: "Schließen",
+    counts: (commands, lines) => `${commands} ${commands === 1 ? "Befehl" : "Befehle"} · ${lines} Zeilen`,
+    transcriptLabel: (label) => `Transkript: ${label}`
+  },
+  fr: {
+    code: "fr", prefix: "/fr", skip: "Aller au contenu", navLabel: "Navigation du site",
+    docs: "Documentation (en anglais)", install: "Installation", inPractice: "En pratique",
+    playground: "Bac à sable (en anglais)", operator: "Operator (en anglais)", theme: "Thème sombre", menu: "Menu",
+    footIssues: "Signalements", footCommunity: "Communauté", footChangelog: "Historique des versions", footLicense: "Licence",
+    title: "Ptah en pratique",
+    description: "24 exécutions enregistrées de Ptah : dérive de schéma, migrations versionnées, bascule d’embeddings, artefacts OCI, conversion de formats et commandes compatibles Atlas. À lire ou à regarder.",
+    ogDescription: "24 exécutions enregistrées de Ptah. Lisez-les ou regardez-les dans le terminal.",
+    imageAlt: "Le nom Ptah en ASCII au-dessus d’un titre en anglais sur les migrations de bases de données.",
+    h1: "Ptah en pratique",
+    lede: `${RUNS.order.length} exécutions de Ptah enregistrées dans le terminal. Les sorties proviennent d’exécutions réelles. Ouvrez un exemple pour le lire ou appuyez sur Lire pour le regarder.`,
+    quickStart: "Suite : démarrage rapide (en anglais) →", installPtah: "Installer Ptah",
+    speedLabel: "Vitesse de lecture : 1×. Appuyez pour changer.", speedTitle: "Vitesse",
+    play: "Lire", playAria: "Lire la démonstration", pause: "Pause", replay: "Relancer", replayAria: "Relancer la démonstration",
+    expand: "Agrandir", expandAria: "Agrandir la démonstration", close: "Fermer",
+    counts: (commands, lines) => `${commands} commande${commands === 1 ? "" : "s"} · ${lines} lignes`,
+    transcriptLabel: (label) => `Transcription : ${label}`
   }
 };
 
-// Both pages carry the same block, so each one names itself, its counterpart
-// and the default a search engine should serve to a reader with no preference.
-function alternates(path) {
-  return [
-    `<link rel="alternate" hreflang="en" href="https://ptah.run${path}">`,
-    `<link rel="alternate" hreflang="ja" href="https://ptah.run/ja${path}">`,
-    `<link rel="alternate" hreflang="x-default" href="https://ptah.run${path}">`
-  ].join("\n");
-}
-
-// The switch goes to this same page in the other language, never to the other
-// language's home: a reader who has found the page they wanted should not be
-// put back at the front door. It is a link, so it needs no JavaScript and the
-// keyboard reaches it in reading order beside the theme button.
-function langSwitch(L, path) {
-  const href = L.other === "ja" ? `/ja${path}` : path;
-  return `      <a class="icon-btn lang-btn" href="${href}" hreflang="${L.other}" lang="${L.other}">${L.otherName}</a>`;
+for (const code of Object.keys(LOCALES)) {
+  for (const key of Object.keys(LANGS.en)) {
+    if (typeof LANGS[code]?.[key] !== typeof LANGS.en[key] || LANGS[code][key] === "") {
+      // The root prefix is intentionally empty only in English.
+      if (key === "prefix" && code === "en") continue;
+      throw new Error(`${code}: missing interface translation ${key}`);
+    }
+  }
 }
 
 function header(L, path) {
@@ -295,7 +343,7 @@ function header(L, path) {
         <li><a href="https://operator.ptah.run/">${L.operator}</a></li>
         <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
       </ul>
-${langSwitch(L, path)}
+${langSwitch(L.code, path)}
       <button class="icon-btn theme-btn" type="button" aria-label="${L.theme}" aria-pressed="false">
         <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/></svg>
       </button>
@@ -373,10 +421,10 @@ function tile(L, key) {
         </li>`;
 }
 
-// The Japanese pages load the narration beside the sessions. The order matters
+// Translated pages load the narration beside the sessions. The order matters
 // only in that both are read by assets/site.js, which runs after them.
 function runScripts(L) {
-  const ja = L.code === "ja" ? '\n<script src="/assets/runs.ja.js" defer></script>' : "";
+  const ja = L.code !== "en" ? `\n<script src="/assets/runs.${L.code}.js" defer></script>` : "";
   return `<script src="/assets/runs.js" defer></script>${ja}
 <script src="/assets/site.js" defer></script>`;
 }
@@ -406,7 +454,7 @@ ${alternates("/in-practice/")}
 <meta property="og:image" content="https://ptah.run/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The Ptah ASCII wordmark above the line: Database migrations without surprises.">
+<meta property="og:image:alt" content="${L.imageAlt}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/fonts/instrument-sans-var-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -487,12 +535,12 @@ function withHomeTranscript(html, path, lang) {
   );
 }
 
-// Every file this script owns, in both trees: the generated page, and the
+// Every file this script owns, in every language: the generated page, and the
 // home page whose transcript it writes between markers.
 const targets = [];
-for (const code of ["en", "ja"]) {
+for (const code of Object.keys(LOCALES)) {
   const L = LANGS[code];
-  const dir = join(root, ...(L.prefix ? ["ja"] : []));
+  const dir = join(root, ...(L.prefix ? [code] : []));
   const homePath = join(dir, "index.html");
   const home = readFileSync(homePath, "utf8");
   targets.push(
@@ -528,13 +576,13 @@ if (process.argv.includes("--check")) {
     }
   }
   if (failed) process.exit(1);
-  console.log(`both in-practice pages and both home transcripts are current`);
+  console.log(`all in-practice pages and home transcripts are current`);
 } else {
   for (const t of targets) {
     mkdirSync(dirname(t.path), { recursive: true });
     writeFileSync(t.path, t.want);
   }
   console.log(
-    `wrote in-practice and ja/in-practice (${RUNS.order.length} runs each) and the ${homeKey} transcript in both home pages`
+    `wrote ${Object.keys(LOCALES).length} in-practice pages (${RUNS.order.length} runs each) and home transcripts`
   );
 }

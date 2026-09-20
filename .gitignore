@@ -5,3 +5,7 @@ Thumbs.db
 # Fetched from stokaro/ptah at deploy time; never committed here.
 /install.sh
 /install.ps1
+
+# Local browser checks.
+node_modules/
+artifacts/
