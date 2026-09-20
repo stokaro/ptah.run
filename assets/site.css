@@ -1223,7 +1223,6 @@ h2 {
   padding-top: 28px;
   padding-bottom: 28px;
   display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 24px;
@@ -1252,17 +1251,6 @@ h2 {
 }
 .foot-links a {
   text-decoration: none;
-}
-/* Only the Japanese footer carries this line, and it says once what a marker
- * on each English link could not: the linked documentation, playground and
- * repositories are in English. It takes a row of its own so the brand and the
- * links keep their shape. */
-.foot-note {
-  flex-basis: 100%;
-  order: 1;
-  margin: 0;
-  max-width: 70ch;
-  line-height: 1.6;
 }
 
 /* ---------- Install page ---------- */

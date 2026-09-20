@@ -107,24 +107,28 @@ const textOf = (markup) =>
 // A line whose first character is `#` is dropped. On these pages a shell
 // comment is the demo's own narration rather than anything Ptah reads, so it
 // is prose and is translated; a comment after a command stays, and takes its
-// command with it. `read` counts the blocks this looked inside, held to a
-// floor at the end so an extraction that stopped matching cannot pass as a
-// page with nothing to say.
+// command with it. Occurrence counts catch a missing repeated literal without
+// requiring translations to keep the English sentence order.
 function literals(html) {
-  const lines = new Set();
-  let read = 0;
+  const lines = new Map();
   for (const block of html.matchAll(CODE_BLOCK)) {
     if (GENERATED.test(block[2])) continue;
     // The flow diagram contains translated prose, not executable examples.
     // Its accessibility label is checked below.
     if (/\bclass="diagram"/.test(block[2]) && /\brole="img"/.test(block[2])) continue;
-    read += 1;
     for (const raw of textOf(block[3]).split("\n")) {
       const line = raw.trim();
-      if (line && !line.startsWith("#")) lines.add(line);
+      if (line && !line.startsWith("#")) lines.set(line, (lines.get(line) || 0) + 1);
     }
   }
-  return { lines, read };
+  return lines;
+}
+
+function literalDifference(a, b) {
+  const changes = [...new Set([...a.keys(), ...b.keys()])]
+    .filter((line) => (a.get(line) || 0) !== (b.get(line) || 0))
+    .map((line) => `${JSON.stringify(line)}: English ${a.get(line) || 0}, translation ${b.get(line) || 0}`);
+  return changes.length ? `the commands, flags and paths written on the page differ -- ${changes.join('; ')}` : null;
 }
 
 function differ(what, a, b, sides) {
@@ -285,22 +289,18 @@ export function audit({ source, stamper, sitemap, robots }) {
   /* ---------- Translations preserve source commands, destinations and controls ---------- */
 
   const localized = new Set(pages.filter((p) => language(p) === "en" && !UNPAIRED[p]).map(urlPath));
-  let blocksRead = 0;
-  let linesCompared = 0;
 
   for (const page of pages) {
     if (language(page) !== "en" || UNPAIRED[page]) continue;
     const en = source.get(page);
     const written = literals(en);
-    blocksRead += written.read;
-    linesCompared += written.lines.size;
     for (const lang of Object.keys(LOCALES).filter((lang) => lang !== "en")) {
       const other = inLocale(page, lang);
       if (!has(other)) continue;
       const translated = source.get(other);
       const seen = [
         differ("the commands offered for copying differ", copyable(en), copyable(translated)),
-        differ("the commands, flags and paths written on the page differ", written.lines, literals(translated).lines),
+        literalDifference(written, literals(translated)),
         differ(
           "the destinations linked to differ",
           new Set([...destinations(en)].map((href) => localized.has(href) ? localizedPath(lang, href) : href)),
@@ -328,22 +328,6 @@ export function audit({ source, stamper, sitemap, robots }) {
         }
       }
     }
-  }
-
-  // The floors leave room to rewrite a page. A markup change that puts the
-  // code blocks out of reach of CODE_BLOCK, or a GENERATED that starts matching
-  // everything, lands under them instead of reporting a clean run over nothing.
-  const BLOCK_FLOOR = 55;
-  const LINE_FLOOR = 80;
-  if (blocksRead < BLOCK_FLOOR) {
-    problems.push(
-      `scripts/check-locales.mjs: read ${blocksRead} code blocks off the paired pages, fewer than the ${BLOCK_FLOOR} expected; the extraction is broken, not the pages`
-    );
-  }
-  if (linesCompared < LINE_FLOOR) {
-    problems.push(
-      `scripts/check-locales.mjs: compared ${linesCompared} written command lines, fewer than the ${LINE_FLOOR} expected; the extraction is broken, not the pages`
-    );
   }
 
   /* ---------- Every translated player carries its narration ---------- */
@@ -536,6 +520,7 @@ if (process.argv.includes('--selftest')) {
     assert(audit(test).some((problem) => problem.includes(expected)), label);
     assertions++;
   };
+  refuse('empty page discovery', (test) => test.source.clear(), 'a listing with no page');
   for (const lang of ['de', 'fr']) {
     const page = `${lang}/index.html`;
     const change = (test, before, after) => test.source.set(page, test.source.get(page).replace(before, after));
@@ -561,6 +546,12 @@ if (process.argv.includes('--selftest')) {
     refuse(`${lang}: written command drift`, (test) => {
       test.source.set(install, test.source.get(install).replace('<code>ptah-compat</code>', '<code>ptah-kompat</code>'));
     }, 'the commands, flags and paths written on the page differ');
+    const community = `${lang}/community/index.html`;
+    for (const [label, replacement] of [['missing', ''], ['extra', '<code>ptah</code><code>ptah</code>']]) {
+      refuse(`${lang}: ${label} occurrence of a repeated literal`, (test) => {
+        test.source.set(community, test.source.get(community).replace('<code>ptah</code>', replacement));
+      }, 'the commands, flags and paths written on the page differ');
+    }
     refuse(`${lang}: navigation enters English tree`, (test) => {
       test.source.set(home, test.source.get(home).replace(`href="/${lang}/install/"`, 'href="/install/"'));
     }, 'the destinations linked to differ');
@@ -580,9 +571,18 @@ if (process.argv.includes('--selftest')) {
     test.source.set(page, test.source.get(page).replace('Ptah（プタハ）', 'Ptah')
       .replace('</head>', '<meta name="test" content="Ptah（プタハ）"></head>'));
   }, 'where a reader does not meet it');
-  refuse('command extraction cannot pass with an empty corpus', (test) => {
-    for (const [page, html] of test.source) test.source.set(page, html.replace(CODE_BLOCK, ''));
-  }, 'code blocks off the paired pages');
+  // Fixtures exercise the extractor itself, independently of today's page size.
+  const fixture = `<code>ptah</code><code>ptah</code>
+    <pre><code># translated narration\nptah schema apply --url &quot;db&quot;\nptah # retained</code></pre>
+    <pre class="diagram" role="img">translated diagram</pre>
+    <pre data-demo-transcript>generated</pre><pre data-demo-screen>generated</pre>
+    <pre class="tile-transcript">generated</pre><code>&lt;x&gt; &amp; &#65;</code>`;
+  const expected = new Map([['ptah', 2], ['ptah schema apply --url "db"', 1], ['ptah # retained', 1], ['<x> & A', 1]]);
+  assert.deepEqual(literals(fixture), expected, 'extract nested blocks, decode entities, keep counts, exclude narration');
+  assert.deepEqual(literals('<p>No commands on this page.</p>'), new Map(), 'empty prose is valid');
+  assert.equal(literalDifference(expected, new Map([...expected].reverse())), null, 'sentence order may differ');
+  assert.match(literalDifference(expected, new Map([['ptah', 1]])), /English 2, translation 1/);
+  console.log('check-locales: command extraction fixtures passed');
   refuse('robots exclusion', (test) => { test.robots += '\nDisallow: /de/\n'; }, 'blocks crawling');
   console.log(`check-locales: ${assertions} refusal checks passed`);
 } else if (problems.length) {

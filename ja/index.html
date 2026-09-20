@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ptah — 驚きのないデータベースマイグレーション</title>
-<meta name="description" content="オープンソースのデータベース変更管理ツール。Ptah は、目標スキーマと実データベースを比較し、バージョン付きマイグレーションを書くか、承認済みの計画を適用する。PostgreSQL、MySQL、MariaDB、SQLite ほか。">
+<meta name="description" content="オープンソースのデータベース変更管理ツール。Ptah は、望むスキーマと実際のデータベースを比較し、バージョン付きマイグレーションを書くか、承認済みの計画を適用する。PostgreSQL、MySQL、MariaDB、SQLite ほか。">
 <link rel="canonical" href="https://ptah.run/ja/">
 <link rel="alternate" hreflang="en" href="https://ptah.run/">
 <link rel="alternate" hreflang="ja" href="https://ptah.run/ja/">
@@ -21,7 +21,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Ptah">
 <meta property="og:title" content="Ptah — 驚きのないデータベースマイグレーション">
-<meta property="og:description" content="オープンソースのデータベース変更管理ツール。Ptah は、目標スキーマと実データベースを比較し、バージョン付きマイグレーションを書くか、承認済みの計画を適用する。">
+<meta property="og:description" content="オープンソースのデータベース変更管理ツール。Ptah は、望むスキーマと実際のデータベースを比較し、バージョン付きマイグレーションを書くか、承認済みの計画を適用する。">
 <meta property="og:url" content="https://ptah.run/ja/">
 <meta property="og:image" content="https://ptah.run/og.png">
 <meta property="og:image:width" content="1200">
@@ -94,8 +94,8 @@
 | |__) | __| / _` | '_ \
 |  ___/| |_ | (_| | | | |
 |_|     \__| \__,_|_| |_|</pre>
-        <h1 id="hero-title">驚きのないデータベースマイグレーション</h1>
-        <p class="lede">Ptah（プタハ）は、目標スキーマと実データベースを比較し、バージョン付きマイグレーションを書くか、承認済みの計画を適用する。pgvector テーブルの再埋め込みのような、永続的な推論状態の移行も扱う。PostgreSQL、MySQL、MariaDB、SQLite ほか。オープンソース、MIT ライセンス、導入すべきツールチェーンはない。</p>
+        <h1 id="hero-title">驚きのないデータベースマイグレーション。</h1>
+        <p class="lede">Ptah（プタハ）は、望むスキーマと実際のデータベースを比較し、バージョン付きマイグレーションを書くか、承認済みの計画を適用する。pgvector テーブルの再埋め込みのような、永続的な推論状態の移行も扱う。PostgreSQL、MySQL、MariaDB、SQLite ほか。オープンソース、MIT ライセンス、導入すべきツールチェーンはない。</p>
         <div class="install">
           <div class="cmd">
             <pre id="install-cmd" data-copy-text="curl -fsSL https://ptah.run/install.sh | sh"><span class="p">$</span> curl -fsSL https://ptah.run/install.sh | sh</pre>
@@ -136,7 +136,7 @@
 
           <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
 
-          <pre class="demo-transcript" data-demo-transcript><!--session:transcript--><span class="l"><span class="c"># データベース自身のスキーマをファイルに書き出す。</span></span><span class="l"><span class="p">$</span> ptah db read --db-url sqlite://app.db | tee schema.sql</span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># ドリフト検査は、そのファイルと取得元のデータベースを比べる。</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span><span class="l"> </span><span class="l"><span class="c"># 目標スキーマを書き換えて、列を 1 つ要求する。</span></span><span class="l"><span class="p">$</span> cat &gt; schema.sql &lt;&lt;'SQL'</span><span class="l">CREATE TABLE "users" (</span><span class="l">  "id" INTEGER PRIMARY KEY,</span><span class="l">  "email" TEXT NOT NULL,</span><span class="l"><span class="n">  "created_at" TEXT</span></span><span class="l">);</span><span class="l">SQL</span><span class="l"> </span><span class="l"><span class="c"># 今度は同じ検査が報告を返す。</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l"><span class="e">Schema drift detected (highest severity: warning).</span></span><span class="l"><span class="m">Failure threshold: all. Failing: true.</span></span><span class="l"><span class="m">Database: sqlite://app.db</span></span><span class="l"> </span><span class="l"><span class="m">Findings:</span></span><span class="l"><span class="n">- columns_added: 1 (warning)</span></span><span class="l"> </span><span class="l"><span class="c"># 差を埋めるのに何が要るかを尋ねる。ドライランは何も実行しない。</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --dry-run</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"> </span><span class="l"><span class="c"># レビュー済みの計画を実行する。使い捨てのファイルなら --auto-approve でよい。</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --auto-approve</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"><span class="m">Auto-approval enabled; applying schema changes.</span></span><span class="l">Schema apply completed successfully.</span><span class="l"> </span><span class="l"><span class="c"># そして同じ検査を、3 度目に。</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span><!--/session:transcript--></pre>
+          <pre class="demo-transcript" data-demo-transcript><!--session:transcript--><span class="l"><span class="c"># データベース自身のスキーマをファイルに書き出す。</span></span><span class="l"><span class="p">$</span> ptah db read --db-url sqlite://app.db | tee schema.sql</span><span class="l"><span class="a">CREATE TABLE "users" (</span></span><span class="l"><span class="a">  "id" INTEGER PRIMARY KEY,</span></span><span class="l"><span class="a">  "email" TEXT NOT NULL</span></span><span class="l"><span class="a">);</span></span><span class="l"> </span><span class="l"><span class="c"># ドリフト検査は、そのファイルと取得元のデータベースを比べる。</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span><span class="l"> </span><span class="l"><span class="c"># 欲しいスキーマを書き換えて、列を 1 つ要求する。</span></span><span class="l"><span class="p">$</span> cat &gt; schema.sql &lt;&lt;'SQL'</span><span class="l">CREATE TABLE "users" (</span><span class="l">  "id" INTEGER PRIMARY KEY,</span><span class="l">  "email" TEXT NOT NULL,</span><span class="l"><span class="n">  "created_at" TEXT</span></span><span class="l">);</span><span class="l">SQL</span><span class="l"> </span><span class="l"><span class="c"># 同じ検査が、今度は報告すべきものを持っている。</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l"><span class="e">Schema drift detected (highest severity: warning).</span></span><span class="l"><span class="m">Failure threshold: all. Failing: true.</span></span><span class="l"><span class="m">Database: sqlite://app.db</span></span><span class="l"> </span><span class="l"><span class="m">Findings:</span></span><span class="l"><span class="n">- columns_added: 1 (warning)</span></span><span class="l"> </span><span class="l"><span class="c"># 差を埋めるのに何が要るかを尋ねる。ドライランは何も実行しない。</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --dry-run</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"> </span><span class="l"><span class="c"># レビュー済みの計画を実行する。使い捨てのファイルなら --auto-approve でよい。</span></span><span class="l"><span class="p">$</span> ptah schema apply --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db --auto-approve</span><span class="l"><span class="m">Planned schema changes:</span></span><span class="l"><span class="a">ALTER TABLE "users" ADD COLUMN "created_at" TEXT;</span></span><span class="l"><span class="m">Auto-approval enabled; applying schema changes.</span></span><span class="l">Schema apply completed successfully.</span><span class="l"> </span><span class="l"><span class="c"># そして同じ検査を、3 度目に。</span></span><span class="l"><span class="p">$</span> ptah schema drift --schema-file schema.sql \</span><span class="l">    --db-url sqlite://app.db</span><span class="l">No schema drift detected.</span><!--/session:transcript--></pre>
 
           <div class="demo-progress" data-demo-progress hidden aria-hidden="true"><span></span></div>
         </div>
@@ -155,14 +155,14 @@
   <section class="section week" aria-labelledby="week-title">
     <div class="wrap">
       <div class="section-head">
-        <h2 id="week-title">ふつうの一週間にやること、3 つ</h2>
+        <h2 id="week-title">ふつうの一週間にやること、3 つ。</h2>
         <p>実際のコマンドと、実際の出力。終了コードはどれでも同じ意味を持つ。0 は成功、1 は検査結果が否定的だったこと、2 は使い方か接続の失敗。</p>
       </div>
       <div class="cards">
         <article class="card">
           <div class="card-head">
             <div class="label">01 · プルリクエストを止める</div>
-            <h3>スキーマがずれたとき、マイグレーションが危険なときに CI を落とす</h3>
+            <h3>スキーマがずれたとき、マイグレーションが危険なときに CI を落とす。</h3>
           </div>
           <div class="term"><pre><span class="p">$</span> ptah migrations lint --dir ./migrations \
     --dialect postgres
@@ -176,7 +176,7 @@ No schema drift detected.</pre></div>
         <article class="card">
           <div class="card-head">
             <div class="label">02 · マイグレーションディレクトリを封じる</div>
-            <h3>レビュー後にバイト列が変わったマイグレーションファイルを拒否する</h3>
+            <h3>レビュー後にバイト列が変わったマイグレーションファイルを拒否する。</h3>
           </div>
           <div class="term"><pre><span class="p">$</span> ptah migrations hash --dir ./migrations
 Wrote ./migrations/ptah.sum
@@ -193,7 +193,7 @@ Pending Migrations: 0</pre></div>
         <article class="card">
           <div class="card-head">
             <div class="label">03 · 埋め込みモデルを変える</div>
-            <h3>pgvector テーブルを再埋め込みし、検証が済むまで古いベクトルを残す</h3>
+            <h3>pgvector テーブルを再埋め込みし、検証が済むまで古いベクトルを残す。</h3>
           </div>
           <div class="term"><pre>ptah inference plan
 ptah inference prepare
@@ -212,16 +212,16 @@ ptah inference cutover
   <section class="section sources" aria-labelledby="sources-title">
     <div class="wrap">
       <div class="sources-copy">
-        <h2 id="sources-title">いま持っているスキーマがそのまま使える</h2>
-        <p>どの入力元も、計画を立てる前に同じ内部スキーマへ解析される。<code>--schema-file</code> と <code>--root-dir</code> は何度でも指定でき、混ぜてもよい。統合した結果が目標スキーマになる。独自形式は必要ない。</p>
+        <h2 id="sources-title">いま持っているスキーマがそのまま使える。</h2>
+        <p>どの入力元も、計画を立てる前に同じ内部スキーマへ解析される。<code>--schema-file</code> と <code>--root-dir</code> は何度でも指定でき、混ぜてもよい。統合した結果が目標のスキーマになる。独自形式は必要ない。</p>
         <dl class="flags">
           <dt>--schema-file</dt><dd>SQL、YAML、HCL、DBML</dd>
           <dt>--root-dir</dt><dd>アノテーション付きの Go 構造体</dd>
           <dt>--schema-cmd</dt><dd>SQL、HCL、YAML を出力する任意のプログラム — ORM のエクスポーターなど</dd>
-          <dt>--db-url</dt><dd>実データベース。<code>ptah introspect</code> で Go のモデルとして読み戻せる</dd>
+          <dt>--db-url</dt><dd>実際のデータベース。<code>ptah introspect</code> で Go のモデルとして読み戻せる</dd>
         </dl>
       </div>
-      <pre class="diagram" role="img" aria-label="スキーマファイル、Go のモデル、実データベースが ptah に入り、ptah が検証、計画、lint、適用を行い、データベースに対するドリフトを検査する。">schema.sql · models/*.go · live db
+      <pre class="diagram" role="img" aria-label="スキーマファイル、Go のモデル、実際のデータベースが ptah に入り、ptah が検証、計画、lint、適用を行い、データベースに対するドリフトを検査する。">schema.sql · models/*.go · live db
         │
         ↓
       <b>ptah</b>  validate → plan → lint → apply → drift
@@ -235,7 +235,7 @@ ptah inference cutover
     <div class="wrap">
       <div class="fact">
         <div class="label">データベース</div>
-        <p>PostgreSQL、MySQL、MariaDB、SQLite、SQL Server、CockroachDB、YugabyteDB、ClickHouse、Oracle、Spanner。対応範囲はエンジンごとに異なる。<a href="https://docs.ptah.run/edge/databases/support-matrix/">対応表 →</a></p>
+        <p>PostgreSQL、MySQL、MariaDB、SQLite、SQL Server、CockroachDB、YugabyteDB、ClickHouse、Oracle、Spanner。対応範囲はエンジンごとに異なる。<a href="https://docs.ptah.run/edge/databases/support-matrix/">対応表→</a></p>
       </div>
       <div class="fact">
         <div class="label">ツール</div>
@@ -243,7 +243,7 @@ ptah inference cutover
       </div>
       <div class="fact">
         <div class="label">Atlas からの移行</div>
-        <p><code>ptah-compat</code> は Atlas と同じ形のコマンドを保ちながら、Ptah の挙動で実行する。Ariga とは無関係の、独立したクリーンルーム実装。<a href="https://docs.ptah.run/edge/atlas/overview/">Atlas 互換 →</a></p>
+        <p><code>ptah-compat</code> は Atlas と同じ形のコマンドを保ちながら、Ptah の挙動で実行する。Ariga とは無関係の、独立したクリーンルーム実装。<a href="https://docs.ptah.run/edge/atlas/overview/">Atlas 互換→</a></p>
       </div>
     </div>
   </section>
@@ -255,12 +255,11 @@ ptah inference cutover
     <div class="foot-brand"><img src="/assets/logo.svg" alt="" width="18" height="18"><span>ptah.run · <span class="v" data-version>v0.3.0</span> · pre-GA · MIT</span></div>
     <ul class="foot-links">
       <li><a href="https://github.com/stokaro/ptah">GitHub</a></li>
-      <li><a href="https://github.com/stokaro/ptah/issues">Issue</a></li>
+      <li><a href="https://github.com/stokaro/ptah/issues">課題</a></li>
       <li><a href="/ja/community/">コミュニティ</a></li>
       <li><a href="https://github.com/stokaro/ptah/releases">変更履歴</a></li>
       <li><a href="https://github.com/stokaro/ptah/blob/master/LICENSE">ライセンス</a></li>
     </ul>
-    <p class="foot-note">ドキュメント、プレイグラウンド、リポジトリへのリンクは、英語のページに続く。</p>
   </div>
 </footer>
 

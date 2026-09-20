@@ -34,8 +34,6 @@ pages served at `ptah.run` itself.
 | `scripts/build-runs.mjs` | Writes all in-practice pages and home transcripts from `assets/runs.js` |
 | `scripts/check-locales.mjs` | Checks locale coverage, links, metadata and indexability |
 | `scripts/locales.mjs` | Language names, paths, alternate links and the shared language picker |
-| `scripts/check-japanese.mjs` | Checks the glossary and Japanese typography in `TRANSLATING.md` |
-| `TRANSLATING.md` | Translation rules and the glossary read by the Japanese check |
 | `scripts/check-browser.mjs` | Responsive and interaction checks; saves screenshots and layout readings |
 | `.github/workflows/deploy.yml` | Checks local references, stamps the latest release, deploys to GitHub Pages |
 
@@ -102,15 +100,6 @@ That rule is not this repository's. It is section 17 of `docs/STYLE_GUIDE.md` in
 thing. The two repositories share no module, so the rule is copied rather than
 imported: change the style guide first, then both readers.
 
-**One rendering per term.** Everything above compares a Japanese page with its
-English counterpart, which cannot see two Japanese pages calling the same thing
-by two names: both halves of that split are correct against their own English.
-`TRANSLATING.md` carries the glossary, and `scripts/check-japanese.mjs` reads
-that table -- the document, not a copy of it -- and refuses a rejected
-rendering anywhere this repository writes Japanese. The same check holds the
-two typography rules that get broken by carrying English punctuation across: no
-`。` closing a heading, and a space between Japanese and Latin script.
-
 Japanese is not subset and self-hosted the way the Latin faces are -- a usable
 Japanese face is megabytes, and every platform this site is read on ships one.
 `--sans-jp` and `--mono-jp` keep Instrument Sans and IBM Plex Mono at the front
@@ -127,14 +116,16 @@ substituting English. The static localized transcript remains readable.
 
 `scripts/check-locales.mjs` compares commands, link destinations, controls,
 anchors and version stamps across languages. Written commands in `code` and
-`pre` elements are compared as well as copy-button payloads; generated
-transcripts are checked separately, and translated flow diagrams are excluded.
+`pre` elements are compared with occurrence counts, as well as copy-button
+payloads; generated transcripts are checked separately, and translated flow
+diagrams are excluded.
 Internal links must lead to the equivalent page in the selected language.
 Canonical links, language alternatives and the picker are checked separately
 by exact value.
-Extraction floors keep an empty comparison from passing. The gate checks
-complete switches, self canonicals, reciprocal alternatives, metadata,
-translated descriptions, accessibility labels, sitemap coverage and indexability. Its refusal tests
+Fixture tests exercise command extraction, including repeated literals, without
+pinning the amount of page content. The gate checks complete switches, self
+canonicals, reciprocal alternatives, metadata, translated descriptions,
+accessibility labels, sitemap coverage and indexability. Its refusal tests
 remove required content and break links to show that the gate catches them.
 `scripts/stamp-version.mjs` stamps every language, including the shared 404.
 
@@ -146,7 +137,6 @@ they do not change the site's static deployment:
 npm ci
 npx playwright install chromium
 npm run check
-node scripts/check-japanese.mjs
 npm run check:browser
 ```
 

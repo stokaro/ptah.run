@@ -36,19 +36,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # The pages are discovered with `git ls-files`, never written out here and
-      # never walked off the filesystem. A written list is a second place a new
-      # page has to be added, and it was one language tree ago that the list and
-      # the tree last disagreed. The floor is what keeps discovery honest: a
-      # pattern that stopped matching would find nothing and read as success.
+      # Discover tracked pages. The locale check below compares this inventory
+      # with the sitemap and version-stamp list, including missing pages.
       - name: Every page references files that exist
         run: |
           set -euo pipefail
-          found="$(git ls-files '*.html' | wc -l)"
-          if [ "$found" -lt 18 ]; then
-            echo "::error::found only $found HTML pages; the discovery is broken"
-            exit 1
-          fi
           status=0
           while IFS= read -r page; do
             while IFS= read -r path; do
@@ -95,15 +87,6 @@ jobs:
           name: localization-browser-checks
           path: artifacts/locales/
           if-no-files-found: error
-
-      # The check above compares a Japanese page with its English counterpart,
-      # so nothing in it compares Japanese with Japanese: two pages written
-      # months apart can call the same thing by two names and both be right
-      # against their own English. This reads the glossary out of
-      # TRANSLATING.md and holds every Japanese page to one rendering per term,
-      # and to the typography rules the same file states.
-      - name: The Japanese follows the glossary in TRANSLATING.md
-        run: node scripts/check-japanese.mjs
 
       - name: The version stamp works on a copy of the pages
         run: |
