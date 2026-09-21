@@ -471,7 +471,7 @@ export function audit({ source, stamper, sitemap, robots }) {
       }
       const originalProse = prose(en);
       for (const text of prose(html)) {
-        if (text.split(/\s+/).length >= 4 && !['· pre-GA · MIT', 'SQL, YAML, HCL, DBML'].includes(text) && originalProse.has(text)) {
+        if (text.split(/\s+/).length >= 4 && !['· pre-GA · MIT', '· pre-GA · MIT · © 2026 Stokaro', 'SQL, YAML, HCL, DBML'].includes(text) && originalProse.has(text)) {
           fail(page, `untranslated prose: ${text}`);
         }
       }
