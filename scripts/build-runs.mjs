@@ -213,6 +213,7 @@ const LANGS = {
     inPractice: "In practice",
     playground: "Playground",
     operator: "Operator",
+    blog: "Blog",
     theme: "Dark theme",
     menu: "Menu",
     footIssues: "Issues",
@@ -252,6 +253,7 @@ const LANGS = {
     inPractice: "実践例",
     playground: "プレイグラウンド",
     operator: "オペレーター",
+    blog: "ブログ",
     theme: "ダークテーマ",
     menu: "メニュー",
     footIssues: "Issue",
@@ -286,7 +288,7 @@ const LANGS = {
   de: {
     code: "de", prefix: "/de", skip: "Zum Inhalt springen", navLabel: "Website",
     docs: "Dokumentation", install: "Installation", inPractice: "Praxisbeispiele",
-    playground: "Testumgebung", operator: "Operator", theme: "Dunkles Design", menu: "Menü",
+    playground: "Testumgebung", operator: "Operator", blog: "Blog", theme: "Dunkles Design", menu: "Menü",
     footIssues: "Fehlerberichte", footCommunity: "Community", footChangelog: "Änderungsprotokoll", footLicense: "Lizenz",
     title: "Ptah in der Praxis",
     description: "24 aufgezeichnete Ptah-Abläufe: Schema-Drift, versionierte Migrationen, Embedding-Umschaltung, OCI-Artefakte, Formatkonvertierung und Atlas-kompatible Befehle. Als Text oder Wiedergabe.",
@@ -304,7 +306,7 @@ const LANGS = {
   fr: {
     code: "fr", prefix: "/fr", skip: "Aller au contenu", navLabel: "Navigation du site",
     docs: "Documentation", install: "Installation", inPractice: "En pratique",
-    playground: "Bac à sable", operator: "Operator", theme: "Thème sombre", menu: "Menu",
+    playground: "Bac à sable", operator: "Operator", blog: "Blog", theme: "Thème sombre", menu: "Menu",
     footIssues: "Signalements", footCommunity: "Communauté", footChangelog: "Historique des versions", footLicense: "Licence",
     title: "Ptah en pratique",
     description: "24 exécutions enregistrées de Ptah : dérive de schéma, migrations versionnées, bascule d’embeddings, artefacts OCI, conversion de formats et commandes compatibles Atlas. À lire ou à regarder.",
@@ -342,6 +344,7 @@ function header(L, path) {
         <li><a href="${L.prefix}/in-practice/" aria-current="page">${L.inPractice}</a></li>
         <li><a href="https://play.ptah.run/">${L.playground}</a></li>
         <li><a href="https://operator.ptah.run/">${L.operator}</a></li>
+        <li><a href="https://blog.ptah.run/">${L.blog}</a></li>
         <li><a href="https://github.com/stokaro/ptah">GitHub&nbsp;↗</a></li>
       </ul>
 ${langSwitch(L.code, path)}
