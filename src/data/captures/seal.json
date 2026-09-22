@@ -1,0 +1,33 @@
+{
+ "ptah": "v0.8.0 (061fac0c6, official release binaries)",
+ "hash": {
+  "cmd": "ptah migrations hash --dir ./migrations",
+  "stdout": "Wrote ./migrations/ptah.sum\n4 migration file(s) hashed\n",
+  "stderr": "",
+  "exit": 0
+ },
+ "sum": {
+  "cmd": "cat ./migrations/ptah.sum",
+  "stdout": "h1:wmq3WUjBVQT+Ll4SPPan7wJGghKMtqi2yDc2Tc4AKnM=\n1790114505_create_users.down.sql h1:3hAVcH5B1mghhsNEDFiyIlGOdernvs+6dDRkaO79/F0=\n1790114505_create_users.up.sql h1:WJmUNv9ET7Qaypt2hpFNHHrqSQ5XGu0Yi0gMV0gLEMo=\n1790114510_add_created_at.down.sql h1:3E0vyUoTX+11C374nPdXruUtJycoXTRoGvl8XsHLLIk=\n1790114510_add_created_at.up.sql h1:9wID/+fArtJnyBz/JvM/NDDd1Ovm5SvkaJYcygIXLc4=\n",
+  "stderr": "",
+  "exit": 0
+ },
+ "verify": {
+  "cmd": "ptah migrations status --db-url sqlite://app.db --migrations-dir ./migrations --verify-sum",
+  "stdout": "",
+  "stderr": "error: migration sum verification failed:\nmigration directory does not match ptah.sum:\n  changed: 1790114505_create_users.up.sql\n",
+  "exit": 2
+ },
+ "up": {
+  "cmd": "ptah migrations up --db-url sqlite://app.db --migrations-dir ./migrations",
+  "stdout": "",
+  "stderr": "error: migration sum verification failed:\nmigration directory does not match ptah.sum:\n  changed: 1790114505_create_users.up.sql\n",
+  "exit": 2
+ },
+ "echo": {
+  "cmd": "sh -c ptah migrations up --db-url sqlite://app.db --migrations-dir ./migrations; echo $?",
+  "stdout": "2\n",
+  "stderr": "error: migration sum verification failed:\nmigration directory does not match ptah.sum:\n  changed: 1790114505_create_users.up.sql\n",
+  "exit": 0
+ }
+}

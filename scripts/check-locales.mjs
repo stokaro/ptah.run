@@ -2,7 +2,10 @@
 /* Hold every translated tree to the English structure and URL contract.
  * Compare commands, destinations, controls and version stamps; require complete
  * metadata, reciprocal alternatives, navigation and sitemap coverage.
- * Generated transcripts are checked by build-runs.mjs against assets/runs.js.
+ *
+ * It reads the built site, dist/, because that is what is published: a page
+ * is whatever Astro wrote, whichever component or fragment it came from. Run
+ * `npm run build` first.
  *
  *   node scripts/check-locales.mjs
  *   node scripts/check-locales.mjs --selftest
@@ -11,19 +14,35 @@
 import assert from "node:assert/strict";
 import { LOCALES, localizedPath } from "./locales.mjs";
 
-import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readFileSync, readdirSync } from "node:fs";
+import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const dist = join(root, "dist");
 
-// Ask git, not the filesystem: a walk would descend into any checkout parked
-// under the repository and report another branch's pages as this one's.
-function trackedPages() {
-  const out = execFileSync("git", ["ls-files", "*.html"], { cwd: root, encoding: "utf8" });
-  return out.split("\n").filter(Boolean).sort();
+// The pages the build wrote. dist/ is the build's own output directory, so a
+// walk sees nothing but this build; a glob that stopped matching would read
+// as a clean site, which is what the floor is for: four pages in four
+// languages, the 404 and the testkit import page.
+const PAGE_FLOOR = 18;
+function builtPages() {
+  const found = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else if (entry.name.endsWith(".html")) found.push(relative(dist, path).split("\\").join("/"));
+    }
+  };
+  walk(dist);
+  return found.sort();
 }
+
+// The release every page names: what the deploy passed in PTAH_VERSION, or
+// the committed value a local build uses.
+const expectedVersion =
+  process.env.PTAH_VERSION || JSON.parse(readFileSync(join(root, "src/data/release.json"), "utf8")).version;
 
 // A page that is deliberately not in a language group, and why. Anything else that is
 // not in a language group is a page somebody forgot.
@@ -200,7 +219,7 @@ function standaloneMention(text, name) {
 const lineOf = (text, at) => text.slice(0, at).split("\n").length;
 
 
-export function audit({ source, stamper, sitemap, robots }) {
+export function audit({ source, version, sitemap, robots }) {
   const problems = [];
   const fail = (page, message) => problems.push(`${page}: ${message}`);
   const pages = [...source.keys()];
@@ -344,25 +363,18 @@ export function audit({ source, stamper, sitemap, robots }) {
     }
   }
 
-  /* ---------- The release stamp reaches every page that asks for one ---------- */
+  /* ---------- Every page names the same release ---------- */
 
-
-  const declared = /const PAGES = \[([\s\S]*?)\];/.exec(stamper);
-  if (!declared) {
-    problems.push("scripts/stamp-version.mjs: cannot find its PAGES list");
-  } else {
-    const listed = new Set(all(declared[1], /"([^"]+)"/g));
-    const wants = new Set(pages.filter((p) => /\bdata-version(?![\w-])/.test(source.get(p))));
-    for (const p of wants) {
-      if (!listed.has(p)) {
-        fail("scripts/stamp-version.mjs", `does not list ${p}, which carries a data-version element`);
-      }
+  // The build writes the version into every data-version element, so two
+  // different values mean part of the site came from somewhere else -- a
+  // fragment with a number typed into it, or a page the build did not write.
+  for (const page of pages) {
+    const html = source.get(page);
+    for (const found of all(html, /\bdata-version(?![\w-])[^>]*>([^<]*)</g)) {
+      if (found !== version) fail(page, `names release ${found}, expected ${version}`);
     }
-    for (const p of listed) {
-      if (!has(p)) fail("scripts/stamp-version.mjs", `lists ${p}, which is not a tracked page`);
-      else if (!wants.has(p)) {
-        fail("scripts/stamp-version.mjs", `lists ${p}, which has no data-version element to stamp`);
-      }
+    for (const found of all(html, /\bdata-version-bare\b[^>]*>([^<]*)</g)) {
+      if (found !== version.slice(1)) fail(page, `names release ${found}, expected ${version.slice(1)}`);
     }
   }
 
@@ -471,7 +483,7 @@ export function audit({ source, stamper, sitemap, robots }) {
       }
       const originalProse = prose(en);
       for (const text of prose(html)) {
-        if (text.split(/\s+/).length >= 4 && !['· pre-GA · MIT', '· pre-GA · MIT · © 2026 Stokaro', 'SQL, YAML, HCL, DBML'].includes(text) && originalProse.has(text)) {
+        if (text.split(/\s+/).length >= 4 && !UNTRANSLATED.has(text) && originalProse.has(text)) {
           fail(page, `untranslated prose: ${text}`);
         }
       }
@@ -490,25 +502,37 @@ export function audit({ source, stamper, sitemap, robots }) {
   return problems;
 }
 
+// Text that reads like a sentence but is the same in every language: the
+// footer's brand line, a list of format names, the answers ptah assist offers
+// in the terminal (its own interface, in English), and the names of MCP
+// clients.
+const UNTRANSLATED = new Set([
+  '· pre-GA · MIT',
+  '· pre-GA · MIT · © 2026 Stokaro',
+  'SQL, YAML, HCL, DBML',
+  'Allow once · for this session · No',
+  'Claude · Cursor · VS Code · Zed',
+]);
+
 // Read rendered prose only. Recorded output, code and language names retain
 // their source spelling and cannot be mistaken for missing prose translations.
 function prose(html) {
-  const cleaned = html.replace(/<span class="tile-cmd">[\s\S]*?<\/span>[^<]*<\/span>/g, '').replace(/<(script|style|pre|code)\b[^>]*>[\s\S]*?<\/\1>/g, '')
+  const cleaned = html.replace(/<svg\b[\s\S]*?<\/svg>/g, '').replace(/<span class="tile-cmd">[\s\S]*?<\/span>[^<]*<\/span>/g, '').replace(/<(script|style|pre|code)\b[^>]*>[\s\S]*?<\/\1>/g, '')
     .replace(/<details class="lang-picker">[\s\S]*?<\/details>/g, '');
   return new Set([...cleaned.matchAll(/>([^<>]+)</g)].map((m) => m[1].trim()).filter(Boolean));
 }
 
 const source = new Map();
 const missing = [];
-for (const page of trackedPages()) {
-  try { source.set(page, readFileSync(join(root, page), "utf8")); }
-  catch { missing.push(`${page}: tracked page missing from working tree`); }
+for (const page of builtPages()) source.set(page, readFileSync(join(dist, page), "utf8"));
+if (source.size < PAGE_FLOOR) {
+  missing.push(`dist/: ${source.size} pages built, expected at least ${PAGE_FLOOR}; run npm run build`);
 }
 const input = {
   source,
-  stamper: readFileSync(join(root, "scripts/stamp-version.mjs"), "utf8"),
-  sitemap: readFileSync(join(root, "sitemap.xml"), "utf8"),
-  robots: readFileSync(join(root, "robots.txt"), "utf8")
+  version: expectedVersion,
+  sitemap: readFileSync(join(dist, "sitemap.xml"), "utf8"),
+  robots: readFileSync(join(dist, "robots.txt"), "utf8")
 };
 const problems = [...missing, ...audit(input)];
 if (process.argv.includes('--selftest')) {
@@ -533,7 +557,7 @@ if (process.argv.includes('--selftest')) {
     refuse('empty description', (test) => test.source.set(page, test.source.get(page).replace(/name="description" content="[^"]*"/, 'name="description" content=""')), 'missing metadata');
     refuse('missing accessibility label', (test) => test.source.set(page, test.source.get(page).replace(/ aria-label="[^"]+"/, '')), 'missing aria-label labels');
     refuse('empty accessibility label', (test) => test.source.set(page, test.source.get(page).replace(/aria-label="[^"]+"/, 'aria-label=""')), 'empty aria-label label');
-    refuse('English accessibility label', (test) => test.source.set(page, test.source.get(page).replace(/aria-label="(?:Wiedergabegeschwindigkeit|Vitesse de lecture)[^"]*"/, /aria-label="Playback speed[^"]*"/.exec(source.get('index.html'))[0])), 'untranslated aria-label label');
+    refuse('English accessibility label', (test) => test.source.set(`${lang}/in-practice/index.html`, test.source.get(`${lang}/in-practice/index.html`).replace(/aria-label="(?:Wiedergabegeschwindigkeit|Vitesse de lecture)[^"]*"/, /aria-label="Playback speed[^"]*"/.exec(source.get('in-practice/index.html'))[0])), 'untranslated aria-label label');
     refuse('English paragraph', (test) => test.source.set(page, test.source.get(page).replace(/<p class="lede">[^<]+<\/p>/, /<p class="lede">[^<]+<\/p>/.exec(source.get('index.html'))[0])), 'untranslated prose');
     refuse('missing body', (test) => test.source.set(page, test.source.get(page).replace(/<p class="lede">[^<]+<\/p>/, '')), 'missing p content');
     refuse('noindex', (test) => change(test, '</head>', '<meta name="robots" content="noindex"></head>'), 'blocks indexing');
@@ -584,6 +608,7 @@ if (process.argv.includes('--selftest')) {
   assert.match(literalDifference(expected, new Map([['ptah', 1]])), /English 2, translation 1/);
   console.log('check-locales: command extraction fixtures passed');
   refuse('robots exclusion', (test) => { test.robots += '\nDisallow: /de/\n'; }, 'blocks crawling');
+  refuse('a page naming another release', (test) => test.source.set('install/index.html', test.source.get('install/index.html').replace(/(data-version>)v\d+\.\d+\.\d+/, '$1v0.0.1')), 'names release v0.0.1');
   console.log(`check-locales: ${assertions} refusal checks passed`);
 } else if (problems.length) {
   console.error(problems.join('\n'));

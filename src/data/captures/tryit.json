@@ -1,0 +1,191 @@
+{
+ "ptah": "v0.8.0 (061fac0c6, official release binaries)",
+ "dialects": {
+  "sqlite": {
+   "none": {
+    "file": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL\n);\n",
+    "drift": {
+     "cmd": "ptah schema drift --schema-file schema.sql --db-url sqlite://app.db",
+     "stdout": "No schema drift detected.\n",
+     "stderr": "",
+     "exit": 0
+    },
+    "plan": {
+     "cmd": "ptah schema apply --schema-file schema.sql --db-url sqlite://app.db --dry-run",
+     "stdout": "Schema is synced, no changes to be made.\n",
+     "stderr": "",
+     "exit": 0
+    }
+   },
+   "add": {
+    "file": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL,\n  created_at TEXT\n);\n",
+    "drift": {
+     "cmd": "ptah schema drift --schema-file schema.sql --db-url sqlite://app.db",
+     "stdout": "Schema drift detected (highest severity: warning).\nFailure threshold: all. Failing: true.\nDatabase: sqlite://app.db\n\nFindings:\n- columns_added: 1 (warning)\n",
+     "stderr": "",
+     "exit": 1
+    },
+    "plan": {
+     "cmd": "ptah schema apply --schema-file schema.sql --db-url sqlite://app.db --dry-run",
+     "stdout": "Planned schema changes:\nALTER TABLE \"users\" ADD COLUMN \"created_at\" TEXT;\n",
+     "stderr": "",
+     "exit": 0
+    }
+   },
+   "drop": {
+    "file": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY\n);\n",
+    "drift": {
+     "cmd": "ptah schema drift --schema-file schema.sql --db-url sqlite://app.db",
+     "stdout": "Schema drift detected (highest severity: destructive).\nFailure threshold: all. Failing: true.\nDatabase: sqlite://app.db\n\nFindings:\n- columns_removed: 1 (destructive)\n",
+     "stderr": "",
+     "exit": 1
+    },
+    "plan": {
+     "cmd": "ptah schema apply --schema-file schema.sql --db-url sqlite://app.db --dry-run",
+     "stdout": "Planned schema changes:\n-- Disable foreign-key enforcement for the table rebuild below\nPRAGMA foreign_keys = off;\n-- SQLite table rebuild for changes ALTER TABLE cannot express on users\nCREATE TABLE \"__ptah_rebuild_users\" (\n  \"id\" INTEGER PRIMARY KEY\n);\nINSERT INTO \"__ptah_rebuild_users\" (\"id\") SELECT \"id\" FROM \"users\";\nDROP TABLE \"users\";\nALTER TABLE \"__ptah_rebuild_users\" RENAME TO \"users\";\n-- Restore foreign-key enforcement after the table rebuild\nPRAGMA foreign_keys = on;\n",
+     "stderr": "",
+     "exit": 0
+    }
+   },
+   "table": {
+    "file": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL\n);\n\nCREATE TABLE sessions (\n  id INTEGER PRIMARY KEY,\n  user_id INTEGER NOT NULL,\n  token TEXT NOT NULL,\n  FOREIGN KEY (user_id) REFERENCES users(id)\n);\n",
+    "drift": {
+     "cmd": "ptah schema drift --schema-file schema.sql --db-url sqlite://app.db",
+     "stdout": "Schema drift detected (highest severity: warning).\nFailure threshold: all. Failing: true.\nDatabase: sqlite://app.db\n\nFindings:\n- constraints_added: 1 (warning)\n- tables_added: 1 (safe)\n",
+     "stderr": "",
+     "exit": 1
+    },
+    "plan": {
+     "cmd": "ptah schema apply --schema-file schema.sql --db-url sqlite://app.db --dry-run",
+     "stdout": "Planned schema changes:\nCREATE TABLE \"sessions\" (\n  \"id\" INTEGER PRIMARY KEY,\n  \"user_id\" INTEGER NOT NULL,\n  \"token\" TEXT NOT NULL,\n  CONSTRAINT \"fk_sessions_user_id\" FOREIGN KEY (\"user_id\") REFERENCES \"users\" (\"id\")\n);\n",
+     "stderr": "",
+     "exit": 0
+    }
+   }
+  },
+  "postgres": {
+   "none": {
+    "file": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL\n);\n",
+    "drift": {
+     "cmd": "ptah schema drift --schema-file schema.sql --db-url postgres://app@db/app",
+     "stdout": "No schema drift detected.\n",
+     "stderr": "",
+     "exit": 0
+    },
+    "plan": {
+     "cmd": "ptah schema apply --schema-file schema.sql --db-url postgres://app@db/app --dry-run",
+     "stdout": "Schema is synced, no changes to be made.\n",
+     "stderr": "",
+     "exit": 0
+    }
+   },
+   "add": {
+    "file": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL,\n  created_at TEXT\n);\n",
+    "drift": {
+     "cmd": "ptah schema drift --schema-file schema.sql --db-url postgres://app@db/app",
+     "stdout": "Schema drift detected (highest severity: warning).\nFailure threshold: all. Failing: true.\nDatabase: postgres://app@db/app\n\nFindings:\n- columns_added: 1 (warning)\n",
+     "stderr": "",
+     "exit": 1
+    },
+    "plan": {
+     "cmd": "ptah schema apply --schema-file schema.sql --db-url postgres://app@db/app --dry-run",
+     "stdout": "Planned schema changes:\n-- Add/modify columns for table: users --\n-- ALTER statements: --\nALTER TABLE \"users\" ADD COLUMN \"created_at\" TEXT;\n",
+     "stderr": "",
+     "exit": 0
+    }
+   },
+   "drop": {
+    "file": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY\n);\n",
+    "drift": {
+     "cmd": "ptah schema drift --schema-file schema.sql --db-url postgres://app@db/app",
+     "stdout": "Schema drift detected (highest severity: destructive).\nFailure threshold: all. Failing: true.\nDatabase: postgres://app@db/app\n\nFindings:\n- columns_removed: 1 (destructive)\n",
+     "stderr": "",
+     "exit": 1
+    },
+    "plan": {
+     "cmd": "ptah schema apply --schema-file schema.sql --db-url postgres://app@db/app --dry-run",
+     "stdout": "Planned schema changes:\n-- Remove columns from table: users --\n-- ALTER statements: --\nALTER TABLE \"users\" DROP COLUMN \"email\" CASCADE;\n-- WARNING: Dropping column users.email with CASCADE - This will delete data and dependent objects! --;\n",
+     "stderr": "",
+     "exit": 0
+    }
+   },
+   "table": {
+    "file": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL\n);\n\nCREATE TABLE sessions (\n  id INTEGER PRIMARY KEY,\n  user_id INTEGER NOT NULL,\n  token TEXT NOT NULL,\n  FOREIGN KEY (user_id) REFERENCES users(id)\n);\n",
+    "drift": {
+     "cmd": "ptah schema drift --schema-file schema.sql --db-url postgres://app@db/app",
+     "stdout": "Schema drift detected (highest severity: warning).\nFailure threshold: all. Failing: true.\nDatabase: postgres://app@db/app\n\nFindings:\n- constraints_added: 1 (warning)\n- tables_added: 1 (safe)\n",
+     "stderr": "",
+     "exit": 1
+    },
+    "plan": {
+     "cmd": "ptah schema apply --schema-file schema.sql --db-url postgres://app@db/app --dry-run",
+     "stdout": "Planned schema changes:\n-- POSTGRES TABLE: sessions --\nCREATE TABLE \"sessions\" (\n  \"id\" INTEGER PRIMARY KEY NOT NULL,\n  \"user_id\" INTEGER NOT NULL,\n  \"token\" TEXT NOT NULL\n);\n-- ALTER statements: --\nALTER TABLE \"sessions\" ADD CONSTRAINT \"fk_sessions_user_id\" FOREIGN KEY (\"user_id\") REFERENCES \"users\"(\"id\");\n",
+     "stderr": "",
+     "exit": 0
+    }
+   }
+  },
+  "mysql": {
+   "none": {
+    "file": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL\n);\n",
+    "drift": {
+     "cmd": "ptah schema drift --schema-file schema.sql --db-url mysql://app@db/app",
+     "stdout": "No schema drift detected.\n",
+     "stderr": "",
+     "exit": 0
+    },
+    "plan": {
+     "cmd": "ptah schema apply --schema-file schema.sql --db-url mysql://app@db/app --dry-run",
+     "stdout": "Schema is synced, no changes to be made.\n",
+     "stderr": "",
+     "exit": 0
+    }
+   },
+   "add": {
+    "file": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL,\n  created_at TEXT\n);\n",
+    "drift": {
+     "cmd": "ptah schema drift --schema-file schema.sql --db-url mysql://app@db/app",
+     "stdout": "Schema drift detected (highest severity: warning).\nFailure threshold: all. Failing: true.\nDatabase: mysql://app@db/app\n\nFindings:\n- columns_added: 1 (warning)\n",
+     "stderr": "",
+     "exit": 1
+    },
+    "plan": {
+     "cmd": "ptah schema apply --schema-file schema.sql --db-url mysql://app@db/app --dry-run",
+     "stdout": "Planned schema changes:\n-- Modify table: users --\n-- ALTER statements: --\nALTER TABLE `users` ADD COLUMN `created_at` TEXT;\n",
+     "stderr": "",
+     "exit": 0
+    }
+   },
+   "drop": {
+    "file": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY\n);\n",
+    "drift": {
+     "cmd": "ptah schema drift --schema-file schema.sql --db-url mysql://app@db/app",
+     "stdout": "Schema drift detected (highest severity: destructive).\nFailure threshold: all. Failing: true.\nDatabase: mysql://app@db/app\n\nFindings:\n- columns_removed: 1 (destructive)\n",
+     "stderr": "",
+     "exit": 1
+    },
+    "plan": {
+     "cmd": "ptah schema apply --schema-file schema.sql --db-url mysql://app@db/app --dry-run",
+     "stdout": "Planned schema changes:\n-- Modify table: users --\n-- ALTER statements: --\nALTER TABLE `users` DROP COLUMN `email`;\n-- WARNING: Dropping column users.email - This will delete data! --;\n",
+     "stderr": "",
+     "exit": 0
+    }
+   },
+   "table": {
+    "file": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL\n);\n\nCREATE TABLE sessions (\n  id INTEGER PRIMARY KEY,\n  user_id INTEGER NOT NULL,\n  token TEXT NOT NULL,\n  FOREIGN KEY (user_id) REFERENCES users(id)\n);\n",
+    "drift": {
+     "cmd": "ptah schema drift --schema-file schema.sql --db-url mysql://app@db/app",
+     "stdout": "Schema drift detected (highest severity: warning).\nFailure threshold: all. Failing: true.\nDatabase: mysql://app@db/app\n\nFindings:\n- constraints_added: 1 (warning)\n- tables_added: 1 (safe)\n",
+     "stderr": "",
+     "exit": 1
+    },
+    "plan": {
+     "cmd": "ptah schema apply --schema-file schema.sql --db-url mysql://app@db/app --dry-run",
+     "stdout": "Planned schema changes:\n-- MYSQL TABLE: sessions --\nCREATE TABLE `sessions` (\n  `id` INTEGER PRIMARY KEY,\n  `user_id` INTEGER NOT NULL,\n  `token` TEXT NOT NULL\n);\n-- ALTER statements: --\nALTER TABLE `sessions` ADD CONSTRAINT `fk_sessions_user_id` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`);\n",
+     "stderr": "",
+     "exit": 0
+    }
+   }
+  }
+ }
+}

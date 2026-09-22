@@ -1,0 +1,133 @@
+---
+/* The hero: the pitch on the left, and on the right the site's recorded
+ * walkthrough with a "Try it" mode beside it. The walkthrough is the player
+ * from public/assets/site.js, rooted at the frame; Try it shows captured
+ * drift and dry-run output for four edits against three engines. */
+import Rich from "../Rich.astro";
+import { RUNS, about, transcript } from "../../lib/runs.mjs";
+import { VERSION, LINKS, prefix } from "../../lib/site.mjs";
+import { UI } from "../../i18n/ui.mjs";
+import { TRYIT } from "../../data/captures.mjs";
+
+interface Props {
+  lang: string;
+  t: any;
+}
+const { lang, t } = Astro.props;
+const h = t.hero;
+const T = UI[lang];
+const P = prefix(lang);
+const key = RUNS.pinned[0];
+const scenario = RUNS.scenarios[key];
+const printed = transcript(scenario.script, lang);
+const total = (printed.match(/<span class="l/g) || []).length;
+const EDITS = ["none", "add", "drop", "table"];
+const DIALECTS = Object.keys(TRYIT.dialects);
+// The recorded runs a reader can open from here, named by their own titles.
+const RUN_LINKS = ["versioned", "adopt", "guard", "inference", "compat"];
+const exitClass = (code: number) => `tryit-exit exit-${code}`;
+---
+<section class="hero5" aria-labelledby="hero-title">
+  <div class="wrap">
+    <div class="hero5-copy">
+      <pre class="banner" role="img" aria-label="Ptah"> _____  _          _
+|  __ \| |_   __ _| |__
+| |__) | __| / _` | '_ \
+|  ___/| |_ | (_| | | | |
+|_|     \__| \__,_|_| |_|</pre>
+      <div class="hero5-title">
+        <div class="eyebrow">{h.eyebrow}</div>
+        <h1 id="hero-title"><Rich parts={h.h1} /></h1>
+      </div>
+      <p class="lede"><Rich parts={h.lede} /></p>
+      <div class="install">
+        <div class="cmd">
+          <pre id="install-cmd" data-copy-text="curl -fsSL https://ptah.run/install.sh | sh"><span class="p">$</span> curl -fsSL https://ptah.run/install.sh | sh</pre>
+          <button class="copy" type="button" data-copy="install-cmd" data-copy-name={h.copyName}><span class="copy-text">{h.copy}</span><span class="sr-only"> {h.copyName}</span></button>
+        </div>
+        <p class="meta"><span><span class="v" data-version>{VERSION}</span> · pre-GA · MIT</span><span>{h.windows} <code>irm https://ptah.run/install.ps1 | iex</code></span></p>
+      </div>
+      <div class="actions">
+        <a class="btn" href={LINKS.quickStart}>{h.getStarted}</a>
+        <a class="btn btn-ghost" href={LINKS.playground}>{h.playground}</a>
+        <a class="btn btn-ghost" href={LINKS.github}>{h.github}</a>
+      </div>
+      <ul class="badges">
+        {h.badges.map((b: string) => <li>{b}</li>)}
+        <li class="why"><a href="#sovereignty">{h.why}</a></li>
+      </ul>
+    </div>
+
+    <div class="hframe demo" data-widget data-state="mode=walk edit=add dialect=sqlite" data-demo data-demo-autoplay data-demo-scenario={key}>
+      <div class="hframe-bar">
+        <div class="seg" role="group" aria-label={h.modesLabel} data-js-only>
+          <button class="chip" type="button" data-set="mode=walk" aria-pressed="true">{h.walk}</button>
+          <button class="chip" type="button" data-set="mode=try" aria-pressed="false">{h.try}</button>
+        </div>
+        <div class="hframe-links is-on" data-when="mode=walk">
+          <span class="demo-controls" data-demo-controls hidden>
+            <button class="demo-btn" type="button" data-demo-toggle aria-label={T.pauseAria ?? T.pause} title={T.pause}><span class="i-pause">{T.pause}</span><span class="i-play">{T.play}</span></button>
+            <button class="demo-btn" type="button" data-demo-replay aria-label={T.replayAria} title={T.replay} hidden>{T.replay}</button>
+          </span>
+          <a href={LINKS.playground}>{h.openPlayground}</a>
+        </div>
+        <div class="hframe-changes" data-when="mode=try">
+          <span class="label">{h.change}</span>
+          {EDITS.map((e) => <button class="chip" type="button" data-set={`edit=${e}`} aria-pressed={e === "add" ? "true" : "false"}>{h.edits[e]}</button>)}
+        </div>
+      </div>
+
+      <div class="walk is-on" data-when="mode=walk">
+        <div class="term-bar">
+          <span class="demo-where">{scenario.where}</span>
+          <span class="walk-count" data-demo-count data-total={total}>{total} / {total}</span>
+        </div>
+        <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
+        <pre class="demo-transcript" data-demo-transcript set:html={printed}></pre>
+        <div class="demo-progress" data-demo-progress hidden aria-hidden="true"><span></span></div>
+      </div>
+
+      <div class="tryit" data-when="mode=try">
+        <div class="tryit-file">
+          <span>schema.sql</span>
+          {EDITS.map((e) => <span data-when={`edit=${e}`} class:list={[{ "is-on": e === "add" }]}>{h.diff(TRYIT.files[e].added, TRYIT.files[e].removed)}</span>)}
+        </div>
+        {EDITS.map((e) => (
+          <pre class:list={["tryit-src", { "is-on": e === "add" }]} data-when={`edit=${e}`}>{TRYIT.files[e].rows.map((ln: any) => (
+              <span class:list={["ln", { "ln-add": ln.mark === "+", "ln-del": ln.mark === "-" }]}><span class="mk">{ln.mark === "-" ? "−" : ln.mark}</span>{ln.t || " "}</span>
+            ))}</pre>
+        ))}
+        <div class="tryit-term">
+          <div class="tframe-bar">
+            <span>sh</span>
+            <div class="dialects"><span>--db-url</span>
+              {DIALECTS.map((d) => <button class="chip chip-dark" type="button" data-set={`dialect=${d}`} aria-pressed={d === "sqlite" ? "true" : "false"}>{TRYIT.dialects[d].label}</button>)}
+            </div>
+          </div>
+          {DIALECTS.map((d) => EDITS.map((e) => (
+            <pre class:list={["tryit-out", { "is-on": d === "sqlite" && e === "add" }]} data-when={`edit=${e} dialect=${d}`}>{TRYIT.dialects[d].edits[e].lines.map((ln: any) =>
+                ln.k === "exit" ? (
+                  <span class="l m">exit <span class={exitClass(ln.code)}>{ln.code}</span></span>
+                ) : ln.k === "cmd" ? (
+                  <span class="l"><span class="p">$</span> {ln.t}</span>
+                ) : ln.k === "cont" ? (
+                  <span class="l">{ln.t}</span>
+                ) : (
+                  <span class={`l ${ln.k}`}>{ln.t || " "}</span>
+                )
+              )}</pre>
+          )))}
+        </div>
+      </div>
+
+      <div class="hframe-caption">
+        <span>{about(lang, key).caption}</span>
+        <a href={`${P}/in-practice/`}>{h.more} →</a>
+      </div>
+      <ul class="hframe-runs">
+        <li class="label">{h.inPractice}</li>
+        {RUN_LINKS.map((k) => <li><a href={`${P}/in-practice/#run-${k}`}>{about(lang, k).label}</a></li>)}
+      </ul>
+    </div>
+  </div>
+</section>

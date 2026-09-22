@@ -1,0 +1,18 @@
+{
+ "ptah": "v0.8.0 (061fac0c6, official release binary)",
+ "where": "linux/amd64 container, working directory /tmp/orm, sqlite app.db holding users(id, email)",
+ "runs": [
+  {
+   "cmd": "cat scripts/export-schema",
+   "stdout": "#!/bin/sh\n# Stands in for an ORM exporter: prints the complete schema as SQL.\ncat <<SQL\nCREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL\n);\nSQL\n",
+   "stderr": "",
+   "exit": 0
+  },
+  {
+   "cmd": "ptah schema drift --schema-cmd ./scripts/export-schema --db-url sqlite://app.db",
+   "stdout": "No schema drift detected.\n",
+   "stderr": "",
+   "exit": 0
+  }
+ ]
+}

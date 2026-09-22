@@ -1,0 +1,94 @@
+---
+/* Three things Ptah does in a week, as a switcher: a rail of three on the
+ * left, the chosen one at full width on the right. Every command and output
+ * line comes from src/data/captures.mjs. */
+import Rich from "../Rich.astro";
+import { renderLines, hl } from "../../lib/term.mjs";
+import { SCN } from "../../data/captures.mjs";
+
+interface Props {
+  t: any;
+}
+const c = Astro.props.t.scenarios;
+const IDS = ["s1", "s2", "s3"];
+const steps = SCN.s3.steps;
+---
+<section class="hs" aria-labelledby="week-title">
+  <div class="wrap">
+    <div class="hs-head">
+      <h2 id="week-title">{c.h2}</h2>
+      <p>{c.lead}</p>
+    </div>
+    <div class="scn" data-widget data-state="scn=s1">
+      <div class="scn-rail" role="tablist" aria-labelledby="week-title" data-js-only>
+        {c.tabs.map((tab: any, i: number) => (
+          <button class="scn-tab" type="button" role="tab" id={`scn-tab-${IDS[i]}`} aria-controls={`scn-${IDS[i]}`} data-set={`scn=${IDS[i]}`} aria-selected={i === 0 ? "true" : "false"}>
+            <span class="scn-num">{`0${i + 1}`}</span>
+            <span class="scn-text">
+              <span class="scn-name">{tab.name}</span>
+              <span class="scn-sub">{tab.sub}</span>
+              <span class="scn-short">{tab.short}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div class="scn-panels">
+        <div class="scn-panel is-on" id="scn-s1" role="tabpanel" aria-labelledby="scn-tab-s1" data-when="scn=s1">
+          <h3>{c.tabs[0].name}</h3>
+          <div class="two">
+            <div class="tframe">
+              <div class="tframe-bar"><span><span class="p">$</span> {c.inCi}</span><span>{SCN.s1.workflowFile}</span></div>
+              <pre class="wrap-lines"><Fragment set:html={hl("yaml", SCN.s1.workflow)} />{"\n\n"}<Fragment set:html={renderLines(SCN.s1.lines)} /></pre>
+            </div>
+            <div class="checks">
+              <div class="checks-head"><strong>{c.checks}</strong><span>{SCN.s1.checks.action}</span></div>
+              <div class="check check-fail"><code class="check-name">{SCN.s1.checks.name}</code><code class="check-res">{SCN.s1.checks.conclusion}</code></div>
+              <pre class="check-detail"><b>{SCN.s1.checks.title}</b>{SCN.s1.checks.summary.map((l: string) => "\n" + l)}</pre>
+              <div class="check-comment"><span>{c.postedBy}</span><pre>{SCN.s1.checks.comment}</pre></div>
+            </div>
+          </div>
+          <p class="hs-note"><Rich parts={c.s1Note} /></p>
+        </div>
+
+        <div class="scn-panel" id="scn-s2" role="tabpanel" aria-labelledby="scn-tab-s2" data-when="scn=s2">
+          <h3>{c.tabs[1].name}</h3>
+          <div class="two">
+            <div class="tframe">
+              <div class="tframe-bar"><span>sh</span><span>{c.s2Left}</span></div>
+              <pre set:html={renderLines(SCN.s2.left)}></pre>
+            </div>
+            <div class="tframe">
+              <div class="tframe-bar"><span>sh</span><span>{c.s2Right}</span></div>
+              <pre class="wrap-lines" set:html={renderLines(SCN.s2.right)}></pre>
+            </div>
+          </div>
+          <p class="hs-note"><Rich parts={c.s2Note} /></p>
+        </div>
+
+        <div class="scn-panel" id="scn-s3" role="tabpanel" aria-labelledby="scn-tab-s3" data-when="scn=s3">
+          <h3>{c.tabs[2].name}</h3>
+          <div class="lifecycle" data-widget data-state={`step=${steps[0].name}`} data-steps={steps.map((s: any) => s.name).join(" ")}>
+            <div class="lifecycle-steps" role="tablist" aria-label={c.stepsLabel} data-js-only>
+              {steps.map((s: any, i: number) => (
+                <button class="step" type="button" role="tab" data-set={`step=${s.name}`} aria-selected={i === 0 ? "true" : "false"}>{s.name}</button>
+              ))}
+            </div>
+            <div class="lifecycle-body">
+              {steps.map((s: any, i: number) => (
+                <div class:list={["gens", { "is-on": i === 0 }]} data-when={`step=${s.name}`}>
+                  <div class="gen"><span>{c.g1}</span><code class="gen-state" data-state="active">{s.g1}</code></div>
+                  <div class="gen"><span>{c.g2}</span><code class="gen-state" data-state={s.g2.startsWith("error") ? "none" : "run"}>{s.g2}</code></div>
+                </div>
+              ))}
+              {steps.map((s: any, i: number) => (
+                <pre class:list={["wrap-lines", { "is-on": i === 0 }]} data-when={`step=${s.name}`} set:html={renderLines(s.lines)}></pre>
+              ))}
+            </div>
+          </div>
+          <p class="hs-note"><Rich parts={c.s3Note} /></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

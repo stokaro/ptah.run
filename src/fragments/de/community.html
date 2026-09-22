@@ -1,0 +1,68 @@
+<main id="main" class="page community">
+  <div class="wrap">
+
+    <div class="page-head">
+      <h1>Community</h1>
+      <p class="lede">Ptah wird offen auf GitHub entwickelt. Fragen, Ideen, Fehlerberichte und Beiträge sind willkommen, unabhängig von Ihrer Erfahrung mit Datenbanken oder Go.</p>
+      <p class="meta"><span>Für die Teilnahme gilt der <a href="https://github.com/stokaro/ptah/blob/master/CODE_OF_CONDUCT.md">Verhaltenskodex</a>.</span></p>
+    </div>
+
+    <section class="block" aria-labelledby="discussions-title">
+      <h2 class="label" id="discussions-title">Eine Frage stellen</h2>
+      <p>In <a href="https://github.com/stokaro/ptah/discussions">GitHub Discussions</a> können Sie Fragen zu <code>ptah</code>, <code>ptah-compat</code> oder der Go-Bibliothek stellen, erste Ideen besprechen und Projekte mit Ptah zeigen. Alle können mitlesen. Zum Schreiben ist ein GitHub-Konto erforderlich.</p>
+      <p>Die <a href="https://docs.ptah.run/edge/faq/">FAQ</a> und die <a href="https://docs.ptah.run/edge/operate/troubleshooting/">Fehlerdiagnose</a> beantworten häufige Fragen. Suchen Sie deshalb zuerst in der <a href="https://docs.ptah.run/">Dokumentation</a>. Markieren Sie eine hilfreiche Lösung als Antwort, damit andere sie finden.</p>
+      <div class="actions">
+        <a class="btn" href="https://github.com/stokaro/ptah/discussions/categories/q-a">In Q&amp;A fragen →</a>
+        <a class="btn btn-ghost" href="https://github.com/stokaro/ptah/discussions">Diskussionen lesen</a>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="issues-title">
+      <h2 class="label" id="issues-title">Einen Fehler melden</h2>
+      <p>Fehler und Funktionswünsche gehören in den <a href="https://github.com/stokaro/ptah/issues">Issue-Tracker</a>. Dort erhalten sie ein Label und eine verantwortliche Person. Die Formulare fragen nach dem genauen Befehl, der Ausgabe von <code>ptah version</code>, Datenbankmotor und Serverversion sowie einer möglichst kleinen Eingabe, die den Fehler reproduziert. Nennen Sie das verwendete Programm: <code>ptah</code> und <code>ptah-compat</code> haben bewusst unterschiedliche Befehlsstrukturen.</p>
+      <p>Probleme mit dem Kubernetes-Operator gehören zu <a href="https://github.com/stokaro/ptah-operator/issues">stokaro/ptah-operator</a>, Probleme mit dieser Website zu <a href="https://github.com/stokaro/ptah.run/issues">stokaro/ptah.run</a>.</p>
+      <div class="actions">
+        <a class="btn" href="https://github.com/stokaro/ptah/issues/new/choose">Ein Issue öffnen →</a>
+        <a class="btn btn-ghost" href="https://github.com/stokaro/ptah/issues">Vorhandene Issues durchsuchen</a>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="security-title">
+      <h2 class="label" id="security-title">Eine Sicherheitslücke melden</h2>
+      <p>Melden Sie Sicherheitsprobleme vertraulich über das <a href="https://github.com/stokaro/ptah/security/advisories/new">GitHub-Formular für Sicherheitsmeldungen</a>, nicht in einem Issue oder einer Diskussion. Bis zur Veröffentlichung einer Sicherheitsmitteilung sehen nur Sie und die Maintainer den Bericht.</p>
+    </section>
+
+    <section class="block" aria-labelledby="contribute-title">
+      <h2 class="label" id="contribute-title">Mitwirken</h2>
+      <p>Beiträge müssen kein Code sein. Ein minimales Reproduktionsbeispiel, eine Messung an einem echten Server, eine Dokumentationskorrektur oder eine Antwort in Discussions helfen ebenso. <a href="https://github.com/stokaro/ptah/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a> beschreibt Vorschläge und erforderliche Prüfungen. <a href="https://github.com/stokaro/ptah/blob/master/AGENTS.md">AGENTS.md</a> enthält die von CI-Prüfungen durchgesetzten Arbeitsregeln. Beide Dokumente sind auf Englisch.</p>
+      <p>Öffnen Sie vor einer Verhaltensänderung ein Issue, damit der Entwurf vor der Implementierung abgestimmt ist.</p>
+    </section>
+
+    <section class="block" aria-labelledby="repos-title">
+      <h2 class="label" id="repos-title">Repositories</h2>
+      <p>Ptah umfasst mehrere Repositories in der Organisation <a href="https://github.com/stokaro">stokaro</a>. Jedes hat eigene Issues und Pull Requests.</p>
+      <dl class="flags">
+        <dt><a href="https://github.com/stokaro/ptah">stokaro/ptah</a></dt>
+        <dd>Die Programme <code>ptah</code>, <code>ptah-compat</code> und <code>ptah-ls</code>, die Go-Bibliothek und die englische Dokumentation auf <a href="https://docs.ptah.run/">docs.ptah.run</a>.</dd>
+        <dt><a href="https://github.com/stokaro/ptah-operator">stokaro/ptah-operator</a></dt>
+        <dd>Der Kubernetes-Operator. Seine englische Anleitung steht auf <a href="https://operator.ptah.run/">operator.ptah.run</a>.</dd>
+        <dt><a href="https://github.com/stokaro/ptah-action">stokaro/ptah-action</a></dt>
+        <dd>Die GitHub Action: Migrationsplanung, Linting, Pull-Request-Kommentare und Prüfungen auf destruktive Änderungen.</dd>
+        <dt><a href="https://github.com/stokaro/ptah-testkit">stokaro/ptah-testkit</a></dt>
+        <dd>Testhilfen für Projekte, die Ptah einbetten, importiert als <code>ptah.run/testkit</code>.</dd>
+        <dt><a href="https://github.com/stokaro/ptah-sandbox">stokaro/ptah-sandbox</a></dt>
+        <dd>Die <a href="https://play.ptah.run/">Testumgebung</a>: die zu WebAssembly kompilierte CLI mit einer echten SQLite-Datenbank im Browser.</dd>
+        <dt><a href="https://github.com/stokaro/homebrew-ptah">stokaro/homebrew-ptah</a></dt>
+        <dd>Der Homebrew-Tap für <code>brew install stokaro/ptah/ptah</code>.</dd>
+        <dt><a href="https://github.com/stokaro/ptah.run">stokaro/ptah.run</a></dt>
+        <dd>Diese Website.</dd>
+      </dl>
+    </section>
+
+    <section class="block" aria-labelledby="commercial-title">
+      <h2 class="label" id="commercial-title">Geschäftliche Unterstützung</h2>
+      <p>Geschäftliche Anfragen gehen per E-Mail an die in den <a href="https://docs.ptah.run/edge/faq/#commercial-support">FAQ</a> genannte Adresse. Fehlerberichte und Funktionswünsche bleiben im öffentlichen Issue-Tracker.</p>
+    </section>
+
+  </div>
+</main>

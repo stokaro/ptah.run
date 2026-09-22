@@ -1,0 +1,28 @@
+---
+/* The controls a played session carries in its terminal bar. The overlay on
+ * /in-practice/ uses all four; the hero puts its own two in the frame above
+ * the terminal and passes none here. */
+import { UI } from "../i18n/ui.mjs";
+
+interface Props {
+  lang: string;
+}
+const T = UI[Astro.props.lang];
+---
+<span class="demo-controls" data-demo-controls hidden>
+  <button class="demo-btn demo-btn-speed" type="button" data-demo-speed aria-label={T.speedLabel} title={T.speedTitle}><span data-demo-speed-label>1×</span></button>
+  <button class="demo-btn" type="button" data-demo-toggle aria-label={T.playAria} title={T.play}>
+    <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.25 3.5h1.9v9h-1.9zM8.85 3.5h1.9v9h-1.9z" fill="currentColor"/></svg>
+    <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.5 3.4l7 4.6-7 4.6z" fill="currentColor"/></svg>
+    <span class="i-pause">{T.pause}</span><span class="i-play">{T.play}</span>
+  </button>
+  <button class="demo-btn" type="button" data-demo-replay aria-label={T.replayAria} title={T.replay} hidden>
+    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13.2 8a5.2 5.2 0 1 1-1.75-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12.4 1.9v2.9H9.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>{T.replay}</span>
+  </button>
+  <button class="demo-btn" type="button" data-demo-expand aria-expanded="false" aria-label={T.expandAria} title={T.expand}>
+    <svg class="i-expand" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6.2 2.6H2.6v3.6M9.8 13.4h3.6V9.8M13.4 6.2V2.6H9.8M2.6 9.8v3.6h3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg class="i-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span class="i-expand">{T.expand}</span><span class="i-close">{T.close}</span>
+  </button>
+</span>

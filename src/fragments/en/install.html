@@ -1,0 +1,112 @@
+<main id="main" class="page">
+  <div class="wrap">
+
+    <div class="page-head">
+      <h1>Install Ptah</h1>
+      <p class="lede">The release installer downloads the archive for your OS and architecture, verifies its SHA-256 checksum, and installs <code>ptah</code>, <code>ptah-compat</code> and <code>ptah-ls</code> without administrator rights.</p>
+      <p class="meta"><span>Current release <span class="v" data-version>v0.3.0</span> · pre-GA: the native command tree and public Go API can still change · MIT</span></p>
+    </div>
+
+    <div class="tabs">
+      <div class="tabs-head">
+      <div class="tablist" role="tablist" aria-label="Installation method">
+        <button class="tab" role="tab" id="tab-macos" data-tab="macos" aria-controls="panel-macos" aria-selected="true">macOS</button>
+        <button class="tab" role="tab" id="tab-linux" data-tab="linux" aria-controls="panel-linux" aria-selected="false" tabindex="-1">Linux</button>
+        <button class="tab" role="tab" id="tab-windows" data-tab="windows" aria-controls="panel-windows" aria-selected="false" tabindex="-1">Windows</button>
+        <button class="tab" role="tab" id="tab-brew" data-tab="brew" aria-controls="panel-brew" aria-selected="false" tabindex="-1">Homebrew</button>
+        <button class="tab" role="tab" id="tab-go" data-tab="go" aria-controls="panel-go" aria-selected="false" tabindex="-1">Go</button>
+        <button class="tab" role="tab" id="tab-source" data-tab="source" aria-controls="panel-source" aria-selected="false" tabindex="-1">Source</button>
+      </div>
+      <span class="detected" aria-live="polite"></span>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-macos" aria-labelledby="tab-macos">
+        <div class="panel-title">macOS</div>
+        <div class="cmd">
+          <pre id="cmd-macos" data-copy-text="curl -fsSL https://ptah.run/install.sh | sh"><span class="p">$</span> curl -fsSL https://ptah.run/install.sh | sh</pre>
+          <button class="copy" type="button" data-copy="cmd-macos" data-copy-name="macOS install command"><span class="copy-text">Copy</span><span class="sr-only"> macOS install command</span></button>
+        </div>
+        <p>Installs to <code>~/.local/bin</code>. Needs a terminal, <code>tar</code>, and <code>curl</code>. Homebrew works too: <code>brew install stokaro/ptah/ptah</code>. Fetch archives with <code>curl</code> or <code>gh</code>, not a browser — browser downloads carry a quarantine attribute that Gatekeeper rejects on the ad-hoc-signed binaries.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-linux" aria-labelledby="tab-linux">
+        <div class="panel-title">Linux</div>
+        <div class="cmd">
+          <pre id="cmd-linux" data-copy-text="curl -fsSL https://ptah.run/install.sh | sh"><span class="p">$</span> curl -fsSL https://ptah.run/install.sh | sh
+<span class="m"># without curl</span>
+<span class="p">$</span> wget -qO- https://ptah.run/install.sh | sh</pre>
+          <button class="copy" type="button" data-copy="cmd-linux" data-copy-name="Linux install command"><span class="copy-text">Copy</span><span class="sr-only"> Linux install command</span></button>
+        </div>
+        <p>Installs to <code>~/.local/bin</code>. Archives: <code>ptah_<span data-version-bare>0.3.0</span>_linux_amd64.tar.gz</code>, <code>ptah_<span data-version-bare>0.3.0</span>_linux_arm64.tar.gz</code>.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-windows" aria-labelledby="tab-windows">
+        <div class="panel-title">Windows</div>
+        <div class="cmd">
+          <pre id="cmd-windows" data-copy-text="irm https://ptah.run/install.ps1 | iex"><span class="p">PS&gt;</span> irm https://ptah.run/install.ps1 | iex</pre>
+          <button class="copy" type="button" data-copy="cmd-windows" data-copy-name="Windows install command"><span class="copy-text">Copy</span><span class="sr-only"> Windows install command</span></button>
+        </div>
+        <p>PowerShell 5.1 or later. Installs to <code>%LOCALAPPDATA%\Ptah\bin</code> and updates the user <code>Path</code> unless disabled. Pin a version with <code>$env:PTAH_INSTALL_VERSION = '<span data-version>v0.3.0</span>'</code>.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-brew" aria-labelledby="tab-brew">
+        <div class="panel-title">Homebrew</div>
+        <div class="cmd">
+          <pre id="cmd-brew" data-copy-text="brew install stokaro/ptah/ptah"><span class="p">$</span> brew install stokaro/ptah/ptah
+<span class="m"># development branch, builds from source</span>
+<span class="p">$</span> brew install --HEAD stokaro/ptah/ptah-edge</pre>
+          <button class="copy" type="button" data-copy="cmd-brew" data-copy-name="Homebrew install command"><span class="copy-text">Copy</span><span class="sr-only"> Homebrew install command</span></button>
+        </div>
+        <p>macOS or Linux. Both formulas provide binaries with the same names; remove one before switching to the other.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-go" aria-labelledby="tab-go">
+        <div class="panel-title">Go</div>
+        <div class="cmd">
+          <pre id="cmd-go"><span class="p">$</span> go install ptah.run/cmd/ptah@<span data-version>v0.3.0</span>
+<span class="p">$</span> go install ptah.run/cmd/ptah-compat@<span data-version>v0.3.0</span>
+<span class="p">$</span> go install ptah.run/cmd/ptah-ls@<span data-version>v0.3.0</span></pre>
+        </div>
+        <p>Binaries land in <code>GOBIN</code>, or <code>$(go env GOPATH)/bin</code> when unset. That directory is not automatically on <code>PATH</code>.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-source" aria-labelledby="tab-source">
+        <div class="panel-title">Source</div>
+        <div class="cmd">
+          <pre id="cmd-source"><span class="p">$</span> git clone https://github.com/stokaro/ptah.git
+<span class="p">$</span> cd ptah
+<span class="p">$</span> make build</pre>
+        </div>
+        <p><code>make build</code> writes <code>ptah</code>, <code>ptah-compat</code>, <code>ptah-ls</code> and the integration-test runner under <code>bin/</code>, using the toolchain declared in <code>go.mod</code>.</p>
+      </div>
+    </div>
+
+    <section class="block" aria-labelledby="expected-title">
+      <div class="label" id="expected-title">Expected output</div>
+      <pre class="code plain">ptah: sha256 verified against checksums.txt
+ptah: installed ptah, ptah-compat, ptah-ls in &lt;install directory&gt;
+Version: &lt;installed version&gt;</pre>
+      <p>The <code>Version:</code> line comes from the installed binary — the script runs it before reporting success. On Linux and macOS, if the destination is not on <code>PATH</code>, the installer prints <code>export PATH="$HOME/.local/bin:$PATH"</code>.</p>
+    </section>
+
+    <section class="block" aria-labelledby="verify-title">
+      <div class="label" id="verify-title">Verify</div>
+      <pre class="code"><span class="p">$</span> ptah version
+<span class="p">$</span> ptah-compat version
+<span class="p">$</span> ptah-ls --version</pre>
+      <p>Each prints a version, commit, build date, Go toolchain and platform. <code>ptah-compat</code> uses a <code>version</code> command rather than a <code>--version</code> flag.</p>
+    </section>
+
+    <section class="tips" aria-label="More options">
+      <div class="tip"><strong>Pin a release</strong><code>install.sh | sh -s -- --version <span data-version>v0.3.0</span></code></div>
+      <div class="tip"><strong>Verify the signature</strong><span><code>checksums.txt</code> is signed with Sigstore; verify with <code>cosign verify-blob</code> or pass <code>--verify-signature</code>.</span></div>
+      <div class="tip"><strong>Inspect before running</strong><code>curl -fsSL https://ptah.run/install.sh -o install.sh &amp;&amp; less install.sh</code></div>
+    </section>
+
+    <div class="actions">
+      <a class="btn" href="https://docs.ptah.run/edge/start/quick-start/">Next: Quick start →</a>
+      <a class="btn btn-ghost" href="https://docs.ptah.run/edge/start/install-options/">Other installation methods</a>
+    </div>
+
+  </div>
+</main>

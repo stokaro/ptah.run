@@ -1,9 +1,15 @@
 {
-  "name": "ptah-landing-checks",
+  "name": "ptah-run",
   "private": true,
   "scripts": {
-    "check": "node scripts/build-runs.mjs --selftest && node scripts/build-runs.mjs --check && node scripts/check-locales.mjs --selftest && node scripts/check-locales.mjs && node scripts/check-japanese.mjs --selftest",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "node scripts/check-runs.mjs --selftest && node scripts/check-links.mjs && node scripts/check-locales.mjs --selftest && node scripts/check-locales.mjs && node scripts/check-japanese.mjs --selftest",
     "check:browser": "node scripts/check-browser.mjs"
+  },
+  "dependencies": {
+    "astro": "7.3.3"
   },
   "devDependencies": {
     "playwright": "1.63.0"

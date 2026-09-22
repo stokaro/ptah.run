@@ -1,0 +1,10 @@
+---
+import HomePage from "../../components/pages/HomePage.astro";
+import { PREFIXED } from "../../lib/site.mjs";
+
+export function getStaticPaths() {
+  return PREFIXED.map((lang) => ({ params: { lang } }));
+}
+const { lang } = Astro.params;
+---
+<HomePage lang={lang} />

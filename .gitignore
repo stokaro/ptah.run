@@ -2,7 +2,11 @@
 Thumbs.db
 *.log
 
-# Fetched from stokaro/ptah at deploy time; never committed here.
+# The build and Astro's cache.
+/dist/
+/.astro/
+
+# Fetched from stokaro/ptah into dist/ at deploy time; never committed here.
 /install.sh
 /install.ps1
 

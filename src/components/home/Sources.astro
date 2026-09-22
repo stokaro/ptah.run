@@ -1,0 +1,69 @@
+---
+/* Schema as code: one plan from five source formats, a program as a source,
+ * and the two things declared beside the tables (reference rows, access). */
+import Rich from "../Rich.astro";
+import { renderLines, hl } from "../../lib/term.mjs";
+import { FORMATS, ORM } from "../../data/captures.mjs";
+import EN from "../../i18n/home.en.mjs";
+
+interface Props {
+  t: any;
+}
+const c = Astro.props.t.sources;
+const keys = Object.keys(FORMATS);
+// Which steps of the two flows are code rather than prose: a file, a
+// directive, SQL keywords, a command. Those are the same in every language,
+// so they are read from the English copy whatever the page's language is.
+const REF_CODE = [true, false, true, true];
+const ACC_CODE = [true, true, false, false];
+const step = (codes: boolean[], en: string[], i: number, s: string) => (codes[i] ? en[i] : s);
+const first = keys[0];
+---
+<section class="hs" aria-labelledby="sources-title">
+  <div class="wrap">
+    <div class="hs-head">
+      <div class="hs-title"><div class="eyebrow">{c.eyebrow}</div><h2 id="sources-title">{c.h2}</h2></div>
+      <p>{c.lead}</p>
+    </div>
+    <div class="two">
+      <div class="fmt" data-widget data-state={`fmt=${first}`}>
+        <div class="tabs5" role="tablist" aria-label={c.formatsLabel}>
+          {keys.map((k) => (
+            <button class="tab5" type="button" role="tab" data-set={`fmt=${k}`} aria-selected={k === first ? "true" : "false"} data-js-only>{FORMATS[k].label}</button>
+          ))}
+          {keys.map((k) => <span class:list={["tabs5-file", { "is-on": k === first }]} data-when={`fmt=${k}`}>{FORMATS[k].file}</span>)}
+        </div>
+        {keys.map((k) => (
+          <pre class:list={["fmt-src", { "is-on": k === first }]} data-when={`fmt=${k}`} set:html={hl(FORMATS[k].lang, FORMATS[k].src)}></pre>
+        ))}
+        <div class="tframe">
+          <div class="tframe-bar"><span>{c.samePlan}</span>{keys.map((k) => <span class:list={[{ "is-on": k === first }]} data-when={`fmt=${k}`}>exit {FORMATS[k].exit}</span>)}</div>
+          {keys.map((k) => (
+            <pre class:list={[{ "is-on": k === first }]} data-when={`fmt=${k}`} set:html={renderLines(FORMATS[k].lines)}></pre>
+          ))}
+        </div>
+      </div>
+
+      <div class="orm">
+        <div class="orm-head"><div class="eyebrow">{c.ormEyebrow}</div><p class="hs-lead">{c.ormLead}</p></div>
+        <ul class="orm-chips">
+          {ORM.chips.map((o: any) => <li class:list={[{ "is-verified": o.verified }]}>{o.name}</li>)}
+          <li class="is-yours">{c.yourScript}</li>
+        </ul>
+        <p class="orm-legend">{c.ormLegend}</p>
+        <pre class="cmdbox" set:html={renderLines(ORM.lines)}></pre>
+      </div>
+    </div>
+
+    <div class="asc">
+      <div class="asc-item">
+        <div class="asc-text"><div class="eyebrow">{c.refEyebrow}</div><h3>{c.refH3}</h3><p><Rich parts={c.refP} /></p></div>
+        <ol class="flow">{c.refSteps.map((s: string, i: number) => <li class:list={[{ "is-key": i === 2 }]}>{REF_CODE[i] ? <code>{step(REF_CODE, EN.sources.refSteps, i, s)}</code> : s}</li>)}</ol>
+      </div>
+      <div class="asc-item">
+        <div class="asc-text"><div class="eyebrow">{c.accEyebrow}</div><h3>{c.accH3}</h3><p><Rich parts={c.accP} /></p></div>
+        <ol class="flow">{c.accSteps.map((s: string, i: number) => <li class:list={[{ "is-key": i === 2 }]}>{ACC_CODE[i] ? <code>{step(ACC_CODE, EN.sources.accSteps, i, s)}</code> : s}</li>)}</ol>
+      </div>
+    </div>
+  </div>
+</section>

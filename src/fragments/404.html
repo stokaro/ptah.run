@@ -1,0 +1,27 @@
+<main id="main" class="notfound">
+  <div class="wrap">
+    <div class="label">HTTP 404</div>
+    <h1>No such page.</h1>
+    <p>Nothing lives at this address on ptah.run. The documentation moved to <a href="https://docs.ptah.run/">docs.ptah.run</a>; the installer and the source are a click away.</p>
+    <div class="actions">
+      <a class="btn" href="/">Home</a>
+      <a class="btn btn-ghost" href="/install/">Install</a>
+      <a class="btn btn-ghost" href="https://docs.ptah.run/">Docs</a>
+    </div>
+
+    <!--
+      GitHub Pages answers every unknown address on the domain with this one
+      document, /ja/ included: there is no per-directory 404, so a second copy
+      under /ja/ would never be served to anyone. The page carries both
+      languages instead of having a counterpart of its own, which is why it is
+      the one page scripts/check-locales.mjs does not expect in pairs.
+    -->
+    <div class="alt" lang="ja">
+      <p>このアドレスには何もありません。Ptah（プタハ）のドキュメントは英語で <a href="https://docs.ptah.run/">docs.ptah.run</a> にあります。インストーラーとソースもすぐそこです。</p>
+      <div class="actions">
+        <a class="btn btn-ghost" href="/ja/">ホーム</a>
+        <a class="btn btn-ghost" href="/ja/install/">インストール</a>
+      </div>
+    </div>
+  </div>
+</main>

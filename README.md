@@ -3,7 +3,8 @@
 The website for [Ptah](https://github.com/stokaro/ptah), served at
 <https://ptah.run> from GitHub Pages.
 
-The site is static HTML, CSS and a small script with no application build step. The
+The site is built with [Astro](https://astro.build), the engine and the
+release docs.ptah.run is built with, and published as static files. The
 documentation is a separate site, <https://docs.ptah.run>, built from
 `docs/site` in the `stokaro/ptah` repository; this repository only holds the
 pages served at `ptah.run` itself.
@@ -12,50 +13,59 @@ pages served at `ptah.run` itself.
 
 | Path | What it is |
 | --- | --- |
-| `index.html` | Homepage |
-| `install/index.html` | Install page with platform-detecting tabs |
-| `in-practice/index.html` | The recorded runs as a grid; generated (see "Recorded runs") |
-| `community/index.html` | Community page: where to ask, report a bug or a vulnerability, and contribute |
-| `ja/**`, `de/**`, `fr/**` | Japanese, German and French; one page per English page (see "Languages") |
-| `404.html` | Not-found page (GitHub Pages serves it for unknown paths), in English and Japanese |
-| `assets/site.css` | The one stylesheet: tokens, layout, light and dark themes |
-| `assets/site.js` | Theme toggle, mobile menu, copy buttons, install tabs, release-version refresh |
-| `assets/runs.js` | Every recorded session: the commands, the output and the demo's narration |
-| `assets/runs.{ja,de,fr}.js` | Localized narration, keyed by the English it replaces |
-| `assets/fonts/` | Self-hosted font subsets and their licenses |
-| `assets/logo.svg`, `favicon.svg` | The Ptah mark, copied from `stokaro/ptah` (`docs/site/src/assets/logo.svg`) |
-| `og.png`, `apple-touch-icon.png`, `favicon.ico` | Generated from the mark and the ASCII wordmark |
-| `install.sh`, `install.ps1` | Not in git: the deploy fetches them from `docs/site/public/` on the master branch of `stokaro/ptah` (see "Installers") |
-| `CNAME` | The custom domain, as a record (see "Deployment settings") |
-| `robots.txt`, `sitemap.xml` | Crawl policy and the indexable URLs; add a row to the sitemap when a page is added |
-| `.nojekyll` | Tells GitHub Pages not to run Jekyll over the files |
-| `LICENSE` | MIT, for the site's own code |
-| `scripts/stamp-version.mjs` | Writes a release tag into the pages; run by the deploy workflow |
-| `scripts/build-runs.mjs` | Writes all in-practice pages and home transcripts from `assets/runs.js` |
-| `scripts/check-locales.mjs` | Checks locale coverage, links, metadata and indexability |
-| `scripts/locales.mjs` | Language names, paths, alternate links and the shared language picker |
+| `src/pages/` | The routes: `/`, `/install/`, `/in-practice/`, `/community/` and the 404, and the same four under `[lang]/` for Japanese, German and French |
+| `src/components/pages/` | One component per page, rendered once per language |
+| `src/components/home/` | The homepage sections, after the 5a design; the three diagrams are the design's SVG with the labels made translatable |
+| `src/layouts/Base.astro` | Every page's head, header and footer: canonical and alternate links, the Go import tags, the theme bootstrap |
+| `src/i18n/home.{en,ja,de,fr}.mjs` | The homepage copy; English is the source, and a translation with a missing or extra key stops the build |
+| `src/i18n/ui.mjs` | Interface text shared by every page (navigation, footer, player, in-practice page) |
+| `src/fragments/<lang>/{install,community}.html`, `src/fragments/404.html` | The authored install, community and 404 pages, as HTML |
+| `src/data/captures/*.json` | Every command and output the homepage shows, as Ptah printed it (see "Content rules") |
+| `src/data/captures.mjs` | Selects and arranges the captures for the page; it never writes output of its own |
+| `src/data/release.json` | The release named on the pages when the build is not given one |
+| `src/lib/runs.mjs` | Reads the recorded runs and writes their printed transcripts |
+| `src/lib/site.mjs` | Languages, addresses, the release version, the Go import tags |
+| `src/styles/site.css`, `src/styles/home.css` | Tokens, layout and both themes; the homepage's sections |
+| `src/scripts/widgets.js` | The homepage's switchers: every state is rendered at build time and this picks the one that shows |
+| `public/assets/site.js` | Theme toggle, mobile menu, copy buttons, install tabs, release-version refresh, the player |
+| `public/assets/runs.js` | Every recorded session: the commands, the output and the demo's narration |
+| `public/assets/runs.{ja,de,fr}.js` | Localized narration, keyed by the English it replaces |
+| `public/assets/fonts/` | Self-hosted font subsets and their licenses |
+| `public/assets/logo.svg`, `public/favicon.svg` | The Ptah mark, copied from `stokaro/ptah` (`docs/site/src/assets/logo.svg`) |
+| `public/og.png`, `public/apple-touch-icon.png`, `public/favicon.ico` | Generated from the mark and the ASCII wordmark |
+| `public/testkit/index.html` | The go-import page for `ptah.run/testkit` (see "Go vanity import path") |
+| `public/CNAME` | The custom domain, as a record (see "Deployment settings") |
+| `public/robots.txt`, `public/sitemap.xml` | Crawl policy and the indexable URLs; add a row to the sitemap when a page is added |
+| `install.sh`, `install.ps1` | Not in git: the deploy fetches them into `dist/` from `docs/site/public/` on the master branch of `stokaro/ptah` (see "Installers") |
+| `scripts/check-runs.mjs` | Proves that incomplete run narration is refused |
+| `scripts/check-links.mjs` | Every local link on a built page names a file that exists; no `github.io` address |
+| `scripts/check-locales.mjs` | Locale coverage, links, metadata, indexability and the release on every page |
 | `scripts/check-japanese.mjs` | Bounded typography checks for Japanese HTML and runtime labels |
-| `TRANSLATING.md` | Translation guidance, contextual Japanese terminology and project typography conventions |
 | `scripts/check-browser.mjs` | Responsive and interaction checks; saves screenshots and layout readings |
-| `.github/workflows/deploy.yml` | Checks local references, stamps the latest release, deploys to GitHub Pages |
+| `scripts/locales.mjs` | The language list for the checks, re-exported from `src/lib/site.mjs` |
+| `TRANSLATING.md` | Translation guidance, contextual Japanese terminology and project typography conventions |
+| `.github/workflows/deploy.yml` | Builds, checks, builds again with the latest release and deploys `dist/` to GitHub Pages |
+| `LICENSE` | MIT, for the site's own code |
 
 ## Working on it
 
-Serve the directory with any static file server. Absolute paths (`/assets/...`)
-are used throughout, so open the site from the repository root:
-
 ```sh
-python3 -m http.server 8000
-# then open http://localhost:8000/
+npm ci
+npm run dev        # http://localhost:4321/
+npm run build      # writes dist/
+npm run check      # reads dist/: runs, links, languages, Japanese typography
+npx playwright install chromium
+npm run check:browser
 ```
 
-Every push to `main` deploys. The workflow first checks that every local
-`href`/`src` on the pages points at a file that exists. It finds the pages with
-`git ls-files`, so adding one needs no edit there; what a new page does need is
-counterparts in every language, a row in `sitemap.xml` and an entry in
-`PAGES` in `scripts/stamp-version.mjs`, which cannot discover anything because
-it has to run on a bare copy of the pages. `scripts/check-locales.mjs` fails
-until all three are done.
+Every check reads the built site in `dist/`, because that is what is
+published. Build first. The checks discover the pages there and hold a floor on
+how many they find, so an empty build fails rather than passing on nothing.
+
+Every push to `main` deploys. A new page needs a route in `src/pages/` and in
+`src/pages/[lang]/`, and a row in `public/sitemap.xml`;
+`scripts/check-locales.mjs` fails until the page exists in every language and
+the sitemap lists it.
 
 ## Languages
 
@@ -110,11 +120,16 @@ same face and only the kana and kanji fall through to the system.
 
 ### Keeping translations complete
 
-`scripts/build-runs.mjs` generates every in-practice page and homepage
-transcript from the same commands and output in `assets/runs.js`. Narration
-lives in `assets/runs.{ja,de,fr}.js`; missing, empty or orphaned entries fail
-generation. The browser also refuses incomplete dictionaries instead of
-substituting English. The static localized transcript remains readable.
+`src/lib/runs.mjs` writes every in-practice page and the homepage transcript
+from the same commands and output in `public/assets/runs.js`. Narration lives
+in `public/assets/runs.{ja,de,fr}.js`; missing, empty or orphaned entries stop
+the build, and `scripts/check-runs.mjs` proves that they still do. The browser
+also refuses incomplete dictionaries instead of substituting English. The
+static localized transcript remains readable.
+
+The homepage copy is `src/i18n/home.{en,ja,de,fr}.mjs`. A translation carries
+every key the English has, with the same kind of value, and the same inline
+code, links and exit codes in each sentence; anything else stops the build.
 
 `scripts/check-locales.mjs` compares commands, link destinations, controls,
 anchors and version stamps across languages. Written commands in `code` and
@@ -129,10 +144,9 @@ pinning the amount of page content. The gate checks complete switches, self
 canonicals, reciprocal alternatives, metadata, translated descriptions,
 accessibility labels, sitemap coverage and indexability. Its refusal tests
 remove required content and break links to show that the gate catches them.
-`scripts/stamp-version.mjs` stamps every language, including the shared 404.
+It also holds every page to one release version.
 
-Run the source checks after staging new pages, since discovery uses tracked
-files. Browser checks require Node.js and the pinned development dependency;
+Browser checks require Node.js and the pinned development dependency;
 they do not change the site's static deployment:
 
 ```sh
@@ -151,7 +165,7 @@ them as `localization-browser-checks`.
 
 `TRANSLATING.md` records Japanese terminology as editorial guidance. The style
 check covers heading and title punctuation, Japanese/Latin spacing in prose,
-link notices and sampled runtime labels from `assets/site.js`. Its fixtures
+link notices and sampled runtime labels from `public/assets/site.js`. Its fixtures
 exercise refusals and valid ordinary words; it does not enforce a glossary or
 claim to measure translation quality. `npm run check` includes this check.
 
@@ -202,7 +216,7 @@ reader is about to see and why -- and never as a claim about what a command
 prints, which is the transcript's job.
 
 The hero demo is held to that rule hardest, because it moves. Every session in
-`assets/site.js` was captured by running Ptah, not written. The schema one is
+`public/assets/runs.js` was captured by running Ptah, not written. The schema one is
 the documented direct quick start
 (`docs/site/src/content/docs/start/quick-start-direct.mdx`) executed against a
 real `app.db`; the rest were run on Linux against a throwaway sqlite database in
@@ -213,11 +227,12 @@ Trimming a long block to its telling lines is what a transcript does and is
 allowed; reordering it, or writing a line Ptah did not print, is not.
 Re-capture rather than edit when a diagnostic changes wording.
 
-Every run lives in `assets/runs.js`, which all homepage and in-practice variants load and
-`scripts/build-runs.mjs` reads. Adding one is an entry in `SCENARIOS` plus
-its key in `ROTATING` and in `order`, its narration in every `assets/runs.{ja,de,fr}.js` dictionary,
-then a run of that script. The generator refuses to write while a translation
-has a hole in it, so the order those edits happen in does not matter.
+Every run lives in `public/assets/runs.js`, which the homepage and every
+in-practice page load and `src/lib/runs.mjs` reads. Adding one is an entry in
+`SCENARIOS` plus its key in `order`, and its narration in every
+`public/assets/runs.{ja,de,fr}.js` dictionary. The build refuses to finish
+while a translation has a hole in it, so the order those edits happen in does
+not matter.
 
 Each run carries one tag, and `order` groups the grid by it. The vocabulary is
 eight words -- Schema change, Inference, Safety, Go annotations, Inspection,
@@ -226,11 +241,8 @@ reason better than "this one does not fit the eight". A tag scattered over a
 grid is decoration; the same tag three cards running is a section, which is why
 the order is grouped rather than being the order the runs were written in.
 
-The home page offers four at a time. Two are fixed -- the schema cycle and the
-inference cycle, which are what Ptah is for -- and two are drawn at random from
-the rest on each load, so a second visit has something new without the others
-hiding behind a "more examples" link. The picker markup carries two empty slots
-that JavaScript labels.
+The homepage plays the schema cycle in its hero and links five more by their
+own titles; `/in-practice/#run-<key>` opens a run directly.
 
 `/in-practice/` is the whole set as a grid. A tile carries the run's name, its
 tag, one sentence, the first command it runs and how much there is; pressing one opens the
@@ -246,15 +258,10 @@ JavaScript, where the tiles do nothing and are hidden. With it they are
 `display: none`, because twenty-four transcripts in the tab order would be
 twenty-four detours around the thing the tile is for.
 
-All in-practice pages and home transcripts are generated:
-
-    node scripts/build-runs.mjs           write them
-    node scripts/build-runs.mjs --check   fail when they are out of date
-
-The deploy workflow runs `--check`, so a run edited in `assets/runs.js`
-without regenerating fails before it can ship a page that disagrees with the
-player, in any language. `transcript()` in that script mirrors `settle()` in `assets/site.js`
-line for line; when one changes, change the other.
+The in-practice pages and the homepage transcript are written by the build,
+so a run edited in `public/assets/runs.js` cannot ship a page that disagrees
+with the player. `transcript()` in `src/lib/runs.mjs` mirrors `settle()` in
+`public/assets/site.js` line for line; when one changes, change the other.
 
 The terminal scrolls and expands. Scrolling follows the newest line only while
 the reader is already at the bottom, so scrolling back to re-read a finding is
@@ -293,26 +300,35 @@ Alignment is judged per block, not per line -- `Artifact type:` is followed by
 one space because it is the widest label in its table, and on its own it looks
 like prose -- so a run of output lines is wide when any line in it is, and a
 note, a command or a blank ends the run. `wideRuns()` says it in both
-`assets/site.js` and `scripts/build-runs.mjs`; when one changes, change the
+`public/assets/site.js` and `src/lib/runs.mjs`; when one changes, change the
 other.
 
-The first session is also in each language’s `index.html` as a transcript,
-between `<!--session:transcript-->` markers. That is the page without
-JavaScript, and it is what a crawler and a screen reader read; the player hides
-it from sight and replays it. The generator owns those bytes, so the two cannot
-drift.
+The hero's session is also in each language's homepage as a transcript. That
+is the page without JavaScript, and it is what a crawler and a screen reader
+read; the player hides it from sight and replays it. The build writes it from
+the same run, so the two cannot drift.
 
-The release version on the pages has three layers. The HTML in git carries
-the last release known when it was committed (`v0.3.0`). At deploy time the
-workflow asks the GitHub API for the latest `stokaro/ptah` release with the
-Actions token and writes it into every element marked `data-version` or
-`data-version-bare` (`scripts/stamp-version.mjs`); the workflow also runs on a
+Everything else the homepage shows as a command or as output -- the "Try it"
+matrix, the three scenarios, the five source formats, the ORM loader, the seven
+export targets, the agent session and the inference plan -- is in
+`src/data/captures/*.json`: the files a run used, the command, its stdout,
+stderr and exit code, and the Ptah release and machine it ran on. Every one of
+them ran on Ptah v0.7.0. `src/data/captures.mjs` selects and arranges them and
+never writes output of its own; a command it splits over two lines for the
+width of a frame is checked against the command that ran. Re-capture rather
+than edit when Ptah's output changes.
+
+The release version on the pages has three layers. `src/data/release.json`
+holds the last release known when it was committed, and a local build names
+it. The deploy workflow asks the GitHub API for the latest `stokaro/ptah`
+release and builds with it in `PTAH_VERSION`, which reaches every element
+marked `data-version` or `data-version-bare`; the workflow also runs on a
 schedule every six hours and on the `ptah-release` and `installers-updated`
 repository dispatches that `stokaro/ptah` sends, so the served value stays
-recent. In the browser, `assets/site.js` asks the same API
-once per session and rewrites the elements again; when that request fails
-(offline, anonymous rate limit), the deploy-time value stands. Bump the value
-in git occasionally so a local preview is not far off.
+recent. In the browser, `public/assets/site.js` asks the same API once per
+session and rewrites the elements again; when that request fails (offline,
+anonymous rate limit), the deploy-time value stands. Bump the committed value
+occasionally so a local build is not far off.
 
 The ASCII wordmark in the hero and in `og.png` is the one the binaries print
 on their entry screen: copy it verbatim from `cmd/internal/banner/banner.go` in
@@ -324,8 +340,8 @@ always exists and always documents the current command tree, and the docs site
 has a version switcher. Do not "fix" them to a release path without changing
 this rule.
 
-Design source: the "Ptah website" design project (option 2a for the homepage,
-1d for install, 1f for mobile, 1g for dark mode). Type is Instrument Sans for
+Design source: the "Ptah website" design project (5a for the homepage at 1280,
+5b at 390 and 5c at 1024; 1d for install, 1g for dark mode). Type is Instrument Sans for
 prose and interface chrome and IBM Plex Mono for anything that can be pasted
 into a terminal; the ASCII wordmark is set in the system monospace stack
 (`ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
@@ -369,7 +385,7 @@ issue and renew the TLS certificate.
 
 ## Fonts
 
-The fonts under `assets/fonts/` are subsets served by Google Fonts and licensed
+The fonts under `public/assets/fonts/` are subsets served by Google Fonts and licensed
 under the SIL Open Font License 1.1; the license texts sit beside the files.
 `*-symbols.woff2` files carry only the box-drawing and arrow glyphs the ASCII
 diagrams use, so those glyphs stay in the same face as the text around them.

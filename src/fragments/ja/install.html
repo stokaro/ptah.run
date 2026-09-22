@@ -1,0 +1,112 @@
+<main id="main" class="page">
+  <div class="wrap">
+
+    <div class="page-head">
+      <h1>Ptah（プタハ）のインストール</h1>
+      <p class="lede">リリースインストーラーは、使っている OS とアーキテクチャ向けのアーカイブをダウンロードし、SHA-256 チェックサムを検証し、管理者権限なしで <code>ptah</code>、<code>ptah-compat</code>、<code>ptah-ls</code> を導入する。</p>
+      <p class="meta"><span>現在のリリース <span class="v" data-version>v0.3.0</span> · pre-GA: ネイティブのコマンド体系と公開 Go API は変わる可能性がある · MIT</span></p>
+    </div>
+
+    <div class="tabs">
+      <div class="tabs-head">
+      <div class="tablist" role="tablist" aria-label="インストール方法">
+        <button class="tab" role="tab" id="tab-macos" data-tab="macos" aria-controls="panel-macos" aria-selected="true">macOS</button>
+        <button class="tab" role="tab" id="tab-linux" data-tab="linux" aria-controls="panel-linux" aria-selected="false" tabindex="-1">Linux</button>
+        <button class="tab" role="tab" id="tab-windows" data-tab="windows" aria-controls="panel-windows" aria-selected="false" tabindex="-1">Windows</button>
+        <button class="tab" role="tab" id="tab-brew" data-tab="brew" aria-controls="panel-brew" aria-selected="false" tabindex="-1">Homebrew</button>
+        <button class="tab" role="tab" id="tab-go" data-tab="go" aria-controls="panel-go" aria-selected="false" tabindex="-1">Go</button>
+        <button class="tab" role="tab" id="tab-source" data-tab="source" aria-controls="panel-source" aria-selected="false" tabindex="-1">ソース</button>
+      </div>
+      <span class="detected" aria-live="polite"></span>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-macos" aria-labelledby="tab-macos">
+        <div class="panel-title">macOS</div>
+        <div class="cmd">
+          <pre id="cmd-macos" data-copy-text="curl -fsSL https://ptah.run/install.sh | sh"><span class="p">$</span> curl -fsSL https://ptah.run/install.sh | sh</pre>
+          <button class="copy" type="button" data-copy="cmd-macos" data-copy-name="macOS 用インストールコマンド"><span class="copy-text">コピー</span><span class="sr-only">（macOS 用インストールコマンド）</span></button>
+        </div>
+        <p>導入先は <code>~/.local/bin</code>。端末、<code>tar</code>、<code>curl</code> が必要。Homebrew でもよい: <code>brew install stokaro/ptah/ptah</code>。アーカイブの取得にはブラウザではなく <code>curl</code> か <code>gh</code> を使うこと。ブラウザでのダウンロードには検疫属性が付き、アドホック署名のバイナリは Gatekeeper に拒否される。</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-linux" aria-labelledby="tab-linux">
+        <div class="panel-title">Linux</div>
+        <div class="cmd">
+          <pre id="cmd-linux" data-copy-text="curl -fsSL https://ptah.run/install.sh | sh"><span class="p">$</span> curl -fsSL https://ptah.run/install.sh | sh
+<span class="m"># curl がない場合</span>
+<span class="p">$</span> wget -qO- https://ptah.run/install.sh | sh</pre>
+          <button class="copy" type="button" data-copy="cmd-linux" data-copy-name="Linux 用インストールコマンド"><span class="copy-text">コピー</span><span class="sr-only">（Linux 用インストールコマンド）</span></button>
+        </div>
+        <p>導入先は <code>~/.local/bin</code>。アーカイブ: <code>ptah_<span data-version-bare>0.3.0</span>_linux_amd64.tar.gz</code>、<code>ptah_<span data-version-bare>0.3.0</span>_linux_arm64.tar.gz</code>。</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-windows" aria-labelledby="tab-windows">
+        <div class="panel-title">Windows</div>
+        <div class="cmd">
+          <pre id="cmd-windows" data-copy-text="irm https://ptah.run/install.ps1 | iex"><span class="p">PS&gt;</span> irm https://ptah.run/install.ps1 | iex</pre>
+          <button class="copy" type="button" data-copy="cmd-windows" data-copy-name="Windows 用インストールコマンド"><span class="copy-text">コピー</span><span class="sr-only">（Windows 用インストールコマンド）</span></button>
+        </div>
+        <p>PowerShell 5.1 以降。導入先は <code>%LOCALAPPDATA%\Ptah\bin</code> で、無効にしない限りユーザーの <code>Path</code> も更新する。バージョンを固定するには <code>$env:PTAH_INSTALL_VERSION = '<span data-version>v0.3.0</span>'</code>。</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-brew" aria-labelledby="tab-brew">
+        <div class="panel-title">Homebrew</div>
+        <div class="cmd">
+          <pre id="cmd-brew" data-copy-text="brew install stokaro/ptah/ptah"><span class="p">$</span> brew install stokaro/ptah/ptah
+<span class="m"># 開発ブランチ。ソースからビルドする</span>
+<span class="p">$</span> brew install --HEAD stokaro/ptah/ptah-edge</pre>
+          <button class="copy" type="button" data-copy="cmd-brew" data-copy-name="Homebrew 用インストールコマンド"><span class="copy-text">コピー</span><span class="sr-only">（Homebrew 用インストールコマンド）</span></button>
+        </div>
+        <p>macOS と Linux。どちらの formula も同じ名前のバイナリを提供するので、切り替えるときは先に一方を削除すること。</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-go" aria-labelledby="tab-go">
+        <div class="panel-title">Go</div>
+        <div class="cmd">
+          <pre id="cmd-go"><span class="p">$</span> go install ptah.run/cmd/ptah@<span data-version>v0.3.0</span>
+<span class="p">$</span> go install ptah.run/cmd/ptah-compat@<span data-version>v0.3.0</span>
+<span class="p">$</span> go install ptah.run/cmd/ptah-ls@<span data-version>v0.3.0</span></pre>
+        </div>
+        <p>バイナリは <code>GOBIN</code>、設定されていなければ <code>$(go env GOPATH)/bin</code> に入る。このディレクトリは自動では <code>PATH</code> に載らない。</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-source" aria-labelledby="tab-source">
+        <div class="panel-title">ソース</div>
+        <div class="cmd">
+          <pre id="cmd-source"><span class="p">$</span> git clone https://github.com/stokaro/ptah.git
+<span class="p">$</span> cd ptah
+<span class="p">$</span> make build</pre>
+        </div>
+        <p><code>make build</code> は <code>go.mod</code> が宣言するツールチェーンを使い、<code>ptah</code>、<code>ptah-compat</code>、<code>ptah-ls</code> と統合テストランナーを <code>bin/</code> 以下に書き出す。</p>
+      </div>
+    </div>
+
+    <section class="block" aria-labelledby="expected-title">
+      <div class="label" id="expected-title">想定される出力</div>
+      <pre class="code plain">ptah: sha256 verified against checksums.txt
+ptah: installed ptah, ptah-compat, ptah-ls in &lt;install directory&gt;
+Version: &lt;installed version&gt;</pre>
+      <p><code>Version:</code> の行は、導入されたバイナリ自身が出力したもの。スクリプトは成功を報告する前にそれを実行する。Linux と macOS では、導入先が <code>PATH</code> に載っていない場合に <code>export PATH="$HOME/.local/bin:$PATH"</code> を表示する。</p>
+    </section>
+
+    <section class="block" aria-labelledby="verify-title">
+      <div class="label" id="verify-title">確認する</div>
+      <pre class="code"><span class="p">$</span> ptah version
+<span class="p">$</span> ptah-compat version
+<span class="p">$</span> ptah-ls --version</pre>
+      <p>いずれもバージョン、コミット、ビルド日時、Go のツールチェーン、プラットフォームを表示する。<code>ptah-compat</code> は <code>--version</code> フラグではなく <code>version</code> コマンドを使う。</p>
+    </section>
+
+    <section class="tips" aria-label="その他の選択肢">
+      <div class="tip"><strong>バージョンを固定する</strong><code>install.sh | sh -s -- --version <span data-version>v0.3.0</span></code></div>
+      <div class="tip"><strong>署名を検証する</strong><span><code>checksums.txt</code> は Sigstore で署名されている。<code>cosign verify-blob</code> で検証するか、<code>--verify-signature</code> を渡す。</span></div>
+      <div class="tip"><strong>実行前に中身を読む</strong><code>curl -fsSL https://ptah.run/install.sh -o install.sh &amp;&amp; less install.sh</code></div>
+    </section>
+
+    <div class="actions">
+      <a class="btn" href="https://docs.ptah.run/edge/start/quick-start/">次はクイックスタート →</a>
+      <a class="btn btn-ghost" href="https://docs.ptah.run/edge/start/install-options/">その他の導入方法</a>
+    </div>
+
+  </div>
+</main>
