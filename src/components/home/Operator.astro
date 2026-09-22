@@ -1,0 +1,28 @@
+---
+import LoopSvg from "./LoopSvg.astro";
+import { LINKS } from "../../lib/site.mjs";
+
+interface Props {
+  t: any;
+}
+const c = Astro.props.t.operator;
+---
+<section class="hs hs-tight hs-grey op" aria-labelledby="op-title">
+  <div class="wrap">
+    <div class="op-text">
+      <div class="eyebrow">{c.eyebrow}</div>
+      <h2 id="op-title">{c.h2}</h2>
+      <p>{c.p}</p>
+      <div class="op-links"><a href={LINKS.operator}>{c.explore}</a><span>{c.note}</span></div>
+    </div>
+    <div class="loop">
+      <div class="loop-bar"><span>{c.loopTitle}</span><span>operator.ptah.run</span></div>
+      <LoopSvg c={c} />
+      <ol class="loop-list">{c.steps.map((s: string, i: number) => <li class:list={[{ "is-key": i === 4 }]}>{s}</li>)}</ol>
+      <dl class="loop-notes">
+        <dt class="is-key">05</dt><dd>{c.notes[0]}</dd>
+        <dt>07</dt><dd>{c.notes[1]}</dd>
+      </dl>
+    </div>
+  </div>
+</section>

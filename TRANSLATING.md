@@ -1,7 +1,8 @@
 # Translating ptah.run
 
 English is the content source for Japanese (`/ja/`), German (`/de/`) and French
-(`/fr/`). Preserve product behavior, limitations and project status. Commands,
+(`/fr/`). The homepage copy is `src/i18n/home.{en,ja,de,fr}.mjs`; the install and
+community pages are `src/fragments/<lang>/*.html`. Preserve product behavior, limitations and project status. Commands,
 flags, SQL, paths and recorded program output stay unchanged; translate the
 surrounding prose and demo narration. `README.md` describes the locale checks.
 
@@ -58,11 +59,11 @@ These are choices for consistency on this site, not universal rules of Japanese:
 
 `scripts/check-japanese.mjs` checks final punctuation in HTML headings and
 `<title>`, adjacent Japanese/Latin letters in ordinary HTML prose, and
-parenthetical language notices in link labels. It reads tracked `ja/**` HTML
-and the shared `404.html`; generated pages are checked after generation.
+parenthetical language notices in link labels. It reads the built Japanese
+pages in `dist/ja/` and the shared `dist/404.html`, so run `npm run build` first.
 Recorded code and transcripts are outside the prose spacing check.
 
-It also reads the `TEXT.ja` dictionary in `assets/site.js`, including function
+It also reads the `TEXT.ja` dictionary in `public/assets/site.js`, including function
 results for Japanese and Latin command names, detected platform names and
 playback rates. New runtime functions require explicit sample arguments. This
 covers those samples, not every possible input to a function. The fixtures test

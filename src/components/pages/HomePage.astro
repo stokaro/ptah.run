@@ -1,0 +1,53 @@
+---
+import Base from "../../layouts/Base.astro";
+import Hero from "../home/Hero.astro";
+import HowItWorks from "../home/HowItWorks.astro";
+import Scenarios from "../home/Scenarios.astro";
+import Sources from "../home/Sources.astro";
+import Export from "../home/Export.astro";
+import Agents from "../home/Agents.astro";
+import Sovereignty from "../home/Sovereignty.astro";
+import Operator from "../home/Operator.astro";
+import Databases from "../home/Databases.astro";
+import { HOME } from "../../i18n/home.mjs";
+import { ORIGIN, localizedPath } from "../../lib/site.mjs";
+import "../../styles/home.css";
+
+interface Props {
+  lang: string;
+}
+const { lang } = Astro.props;
+const t = HOME[lang];
+const jsonld = JSON.stringify(
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Ptah",
+    url: `${ORIGIN}${localizedPath(lang, "/")}`,
+    ...(lang === "en" ? {} : { inLanguage: lang }),
+    description: t.meta.jsonldDescription,
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Linux, macOS, Windows",
+    license: "https://github.com/stokaro/ptah/blob/master/LICENSE",
+    downloadUrl: "https://github.com/stokaro/ptah/releases",
+    sameAs: ["https://github.com/stokaro/ptah", "https://docs.ptah.run/"],
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  },
+  null,
+  2,
+);
+---
+<Base lang={lang} path="/" title={t.meta.title} description={t.meta.description} ogDescription={t.meta.ogDescription} jsonld={jsonld} runs>
+<main id="main" class="home">
+  <Hero lang={lang} t={t} />
+  <HowItWorks t={t} />
+  <Scenarios t={t} />
+  <Sources t={t} />
+  <Export t={t} />
+  <Agents t={t} />
+  <Sovereignty t={t} />
+  <Operator t={t} />
+  <Databases t={t} />
+</main>
+<script src="../../scripts/widgets.js"></script>
+</Base>

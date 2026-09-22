@@ -1,0 +1,170 @@
+{
+  "en": {
+    "index": {
+      "title": "Ptah — database migrations without surprises",
+      "description": "Open-source database change management. Ptah compares the schema you want with a live database and either writes versioned migrations or applies an approved plan. PostgreSQL, MySQL, MariaDB, SQLite and more.",
+      "ogTitle": "Ptah — database migrations without surprises",
+      "ogDescription": "Open-source database change management. Ptah compares the schema you want with a live database and either writes versioned migrations or applies an approved plan.",
+      "imageAlt": "The Ptah ASCII wordmark above the line: Database migrations without surprises.",
+      "navLabel": "Site",
+      "skip": "Skip to content",
+      "jsonld": "\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"SoftwareApplication\",\n  \"name\": \"Ptah\",\n  \"url\": \"https://ptah.run/\",\n  \"description\": \"Open-source database change management for schemas and persistent inference state.\",\n  \"applicationCategory\": \"DeveloperApplication\",\n  \"operatingSystem\": \"Linux, macOS, Windows\",\n  \"license\": \"https://github.com/stokaro/ptah/blob/master/LICENSE\",\n  \"downloadUrl\": \"https://github.com/stokaro/ptah/releases\",\n  \"sameAs\": [\"https://github.com/stokaro/ptah\", \"https://docs.ptah.run/\"],\n  \"offers\": { \"@type\": \"Offer\", \"price\": \"0\", \"priceCurrency\": \"USD\" }\n}\n"
+    },
+    "install": {
+      "title": "Install Ptah",
+      "description": "Install ptah, ptah-compat and ptah-ls with the verified release installer on Linux, macOS or Windows, or use Homebrew, go install, or a source checkout.",
+      "ogTitle": "Install Ptah",
+      "ogDescription": "Install ptah, ptah-compat and ptah-ls with the verified release installer on Linux, macOS or Windows, or use Homebrew, go install, or a source checkout.",
+      "imageAlt": "The Ptah ASCII wordmark above the line: Database migrations without surprises.",
+      "navLabel": "Site",
+      "skip": "Skip to content",
+      "jsonld": null
+    },
+    "community": {
+      "title": "Ptah community",
+      "description": "Where to ask a question about Ptah, report a bug or a vulnerability, and contribute to Ptah and the repositories around it.",
+      "ogTitle": "Ptah community",
+      "ogDescription": "Where to ask a question about Ptah, report a bug or a vulnerability, and contribute to Ptah and the repositories around it.",
+      "imageAlt": "The Ptah ASCII wordmark above the line: Database migrations without surprises.",
+      "navLabel": "Site",
+      "skip": "Skip to content",
+      "jsonld": null
+    },
+    "in-practice": {
+      "title": "Ptah in practice",
+      "description": "Twenty-four recorded runs of Ptah: schema drift, versioned migrations, embedding cutover, OCI artifacts, format conversion and the Atlas-compatible surface. Read one, or watch it typed.",
+      "ogTitle": "Ptah in practice",
+      "ogDescription": "Twenty-four recorded runs of Ptah. Read one, or watch it typed.",
+      "imageAlt": "The Ptah ASCII wordmark above the line: Database migrations without surprises.",
+      "navLabel": "Site",
+      "skip": "Skip to content",
+      "jsonld": null
+    }
+  },
+  "ja": {
+    "index": {
+      "title": "Ptah — 驚きのないデータベースマイグレーション",
+      "description": "オープンソースのデータベース変更管理ツール。Ptah は、目標スキーマと稼働中のデータベースを比較し、バージョン管理型マイグレーションを書くか、承認済みの計画を適用する。PostgreSQL、MySQL、MariaDB、SQLite ほか。",
+      "ogTitle": "Ptah — 驚きのないデータベースマイグレーション",
+      "ogDescription": "オープンソースのデータベース変更管理ツール。Ptah は、目標スキーマと稼働中のデータベースを比較し、バージョン管理型マイグレーションを書くか、承認済みの計画を適用する。",
+      "imageAlt": "The Ptah ASCII wordmark above the line: Database migrations without surprises.",
+      "navLabel": "サイト",
+      "skip": "本文へスキップ",
+      "jsonld": "\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"SoftwareApplication\",\n  \"name\": \"Ptah\",\n  \"url\": \"https://ptah.run/ja/\",\n  \"inLanguage\": \"ja\",\n  \"description\": \"スキーマと永続的な推論状態のための、オープンソースのデータベース変更管理ツール。\",\n  \"applicationCategory\": \"DeveloperApplication\",\n  \"operatingSystem\": \"Linux, macOS, Windows\",\n  \"license\": \"https://github.com/stokaro/ptah/blob/master/LICENSE\",\n  \"downloadUrl\": \"https://github.com/stokaro/ptah/releases\",\n  \"sameAs\": [\"https://github.com/stokaro/ptah\", \"https://docs.ptah.run/\"],\n  \"offers\": { \"@type\": \"Offer\", \"price\": \"0\", \"priceCurrency\": \"USD\" }\n}\n"
+    },
+    "install": {
+      "title": "Ptah のインストール",
+      "description": "検証付きのリリースインストーラーで ptah、ptah-compat、ptah-ls を Linux、macOS、Windows に導入する。Homebrew、go install、ソースからのビルドも使える。",
+      "ogTitle": "Ptah のインストール",
+      "ogDescription": "検証付きのリリースインストーラーで ptah、ptah-compat、ptah-ls を Linux、macOS、Windows に導入する。Homebrew、go install、ソースからのビルドも使える。",
+      "imageAlt": "The Ptah ASCII wordmark above the line: Database migrations without surprises.",
+      "navLabel": "サイト",
+      "skip": "本文へスキップ",
+      "jsonld": null
+    },
+    "community": {
+      "title": "Ptah コミュニティ",
+      "description": "Ptah について質問する場所、バグや脆弱性を報告する場所、そして Ptah とその周辺のリポジトリに貢献する方法。",
+      "ogTitle": "Ptah コミュニティ",
+      "ogDescription": "Ptah について質問する場所、バグや脆弱性を報告する場所、そして Ptah とその周辺のリポジトリに貢献する方法。",
+      "imageAlt": "The Ptah ASCII wordmark above the line: Database migrations without surprises.",
+      "navLabel": "サイト",
+      "skip": "本文へスキップ",
+      "jsonld": null
+    },
+    "in-practice": {
+      "title": "Ptah 実践例",
+      "description": "端末で記録した Ptah の実行 24 件。スキーマのドリフト、バージョン管理型マイグレーション、埋め込みの切り替え、OCI アーティファクト、フォーマット変換、Atlas 互換のコマンド体系。読むこともできるし、打ち込まれる様子を見ることもできる。",
+      "ogTitle": "Ptah 実践例",
+      "ogDescription": "端末で記録した Ptah の実行 24 件。読んでもよいし、打ち込まれる様子を見てもよい。",
+      "imageAlt": "Ptah の ASCII ロゴと、データベースのマイグレーションについての英語の見出し。",
+      "navLabel": "サイト",
+      "skip": "本文へスキップ",
+      "jsonld": null
+    }
+  },
+  "de": {
+    "index": {
+      "title": "Ptah — Datenbankmigrationen ohne Überraschungen",
+      "description": "Datenbankänderungen mit Open Source verwalten. Ptah vergleicht das gewünschte Schema mit einer laufenden Datenbank und erzeugt versionierte Migrationen oder wendet einen freigegebenen Plan an. PostgreSQL, MySQL, MariaDB, SQLite und weitere.",
+      "ogTitle": "Ptah — Datenbankmigrationen ohne Überraschungen",
+      "ogDescription": "Datenbankänderungen mit Open Source verwalten. Ptah vergleicht das gewünschte Schema mit einer laufenden Datenbank und erzeugt versionierte Migrationen oder wendet einen freigegebenen Plan an.",
+      "imageAlt": "Der Ptah-Schriftzug in ASCII mit einem englischen Hinweis auf Datenbankmigrationen.",
+      "navLabel": "Website",
+      "skip": "Zum Inhalt springen",
+      "jsonld": "\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"SoftwareApplication\",\n  \"name\": \"Ptah\",\n  \"url\": \"https://ptah.run/de/\",\n  \"description\": \"Open-Source-Verwaltung von Datenbankänderungen für Schemas und persistenten Inferenzzustand.\",\n  \"applicationCategory\": \"DeveloperApplication\",\n  \"operatingSystem\": \"Linux, macOS, Windows\",\n  \"license\": \"https://github.com/stokaro/ptah/blob/master/LICENSE\",\n  \"downloadUrl\": \"https://github.com/stokaro/ptah/releases\",\n  \"sameAs\": [\"https://github.com/stokaro/ptah\", \"https://docs.ptah.run/\"],\n  \"offers\": { \"@type\": \"Offer\", \"price\": \"0\", \"priceCurrency\": \"USD\" }\n}\n"
+    },
+    "install": {
+      "title": "Ptah installieren",
+      "description": "Installieren Sie ptah, ptah-compat und ptah-ls unter Linux, macOS oder Windows mit dem Release-Installer samt Prüfsummenprüfung. Alternativ: Homebrew, go install oder ein Quellcode-Checkout.",
+      "ogTitle": "Ptah installieren",
+      "ogDescription": "Installieren Sie ptah, ptah-compat und ptah-ls unter Linux, macOS oder Windows mit dem Release-Installer samt Prüfsummenprüfung. Alternativ: Homebrew, go install oder ein Quellcode-Checkout.",
+      "imageAlt": "Der Ptah-Schriftzug in ASCII mit einem englischen Hinweis auf Datenbankmigrationen.",
+      "navLabel": "Website",
+      "skip": "Zum Inhalt springen",
+      "jsonld": null
+    },
+    "community": {
+      "title": "Ptah-Community",
+      "description": "Anlaufstellen für Fragen zu Ptah, Fehlerberichte, Sicherheitsmeldungen und Beiträge zu Ptah und den zugehörigen Repositories.",
+      "ogTitle": "Ptah-Community",
+      "ogDescription": "Anlaufstellen für Fragen zu Ptah, Fehlerberichte, Sicherheitsmeldungen und Beiträge zu Ptah und den zugehörigen Repositories.",
+      "imageAlt": "Der Ptah-Schriftzug in ASCII mit einem englischen Hinweis auf Datenbankmigrationen.",
+      "navLabel": "Website",
+      "skip": "Zum Inhalt springen",
+      "jsonld": null
+    },
+    "in-practice": {
+      "title": "Ptah in der Praxis",
+      "description": "24 aufgezeichnete Ptah-Abläufe: Schema-Drift, versionierte Migrationen, Embedding-Umschaltung, OCI-Artefakte, Formatkonvertierung und Atlas-kompatible Befehle. Als Text oder Wiedergabe.",
+      "ogTitle": "Ptah in der Praxis",
+      "ogDescription": "24 aufgezeichnete Ptah-Abläufe. Als Text lesen oder im Terminal abspielen.",
+      "imageAlt": "Der Ptah-Schriftzug in ASCII über einer englischen Überschrift zu Datenbankmigrationen.",
+      "navLabel": "Website",
+      "skip": "Zum Inhalt springen",
+      "jsonld": null
+    }
+  },
+  "fr": {
+    "index": {
+      "title": "Ptah — des migrations de bases de données sans surprises",
+      "description": "Gestion open source des modifications de bases de données. Ptah compare le schéma souhaité à une base existante, puis génère des migrations versionnées ou applique un plan approuvé. PostgreSQL, MySQL, MariaDB, SQLite et d’autres moteurs.",
+      "ogTitle": "Ptah — des migrations de bases de données sans surprises",
+      "ogDescription": "Gestion open source des modifications de bases de données. Ptah compare le schéma souhaité à une base existante, puis génère des migrations versionnées ou applique un plan approuvé.",
+      "imageAlt": "Le nom Ptah en ASCII avec une accroche en anglais sur les migrations de bases de données.",
+      "navLabel": "Navigation du site",
+      "skip": "Aller au contenu",
+      "jsonld": "\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"SoftwareApplication\",\n  \"name\": \"Ptah\",\n  \"url\": \"https://ptah.run/fr/\",\n  \"description\": \"Gestion open source des modifications de bases de données : schémas et état d’inférence persistant.\",\n  \"applicationCategory\": \"DeveloperApplication\",\n  \"operatingSystem\": \"Linux, macOS, Windows\",\n  \"license\": \"https://github.com/stokaro/ptah/blob/master/LICENSE\",\n  \"downloadUrl\": \"https://github.com/stokaro/ptah/releases\",\n  \"sameAs\": [\"https://github.com/stokaro/ptah\", \"https://docs.ptah.run/\"],\n  \"offers\": { \"@type\": \"Offer\", \"price\": \"0\", \"priceCurrency\": \"USD\" }\n}\n"
+    },
+    "install": {
+      "title": "Installer Ptah",
+      "description": "Installez ptah, ptah-compat et ptah-ls sous Linux, macOS ou Windows avec le programme d’installation qui vérifie la somme de contrôle, ou utilisez Homebrew, go install ou les sources.",
+      "ogTitle": "Installer Ptah",
+      "ogDescription": "Installez ptah, ptah-compat et ptah-ls sous Linux, macOS ou Windows avec le programme d’installation qui vérifie la somme de contrôle, ou utilisez Homebrew, go install ou les sources.",
+      "imageAlt": "Le nom Ptah en ASCII avec une accroche en anglais sur les migrations de bases de données.",
+      "navLabel": "Navigation du site",
+      "skip": "Aller au contenu",
+      "jsonld": null
+    },
+    "community": {
+      "title": "Communauté Ptah",
+      "description": "Où poser une question sur Ptah, signaler un bug ou une vulnérabilité et contribuer à Ptah et aux dépôts associés.",
+      "ogTitle": "Communauté Ptah",
+      "ogDescription": "Où poser une question sur Ptah, signaler un bug ou une vulnérabilité et contribuer à Ptah et aux dépôts associés.",
+      "imageAlt": "Le nom Ptah en ASCII avec une accroche en anglais sur les migrations de bases de données.",
+      "navLabel": "Navigation du site",
+      "skip": "Aller au contenu",
+      "jsonld": null
+    },
+    "in-practice": {
+      "title": "Ptah en pratique",
+      "description": "24 exécutions enregistrées de Ptah : dérive de schéma, migrations versionnées, bascule d’embeddings, artefacts OCI, conversion de formats et commandes compatibles Atlas. À lire ou à regarder.",
+      "ogTitle": "Ptah en pratique",
+      "ogDescription": "24 exécutions enregistrées de Ptah. Lisez-les ou regardez-les dans le terminal.",
+      "imageAlt": "Le nom Ptah en ASCII au-dessus d’un titre en anglais sur les migrations de bases de données.",
+      "navLabel": "Navigation du site",
+      "skip": "Aller au contenu",
+      "jsonld": null
+    }
+  }
+}

@@ -9,8 +9,10 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { LOCALES, localizedPath } from "./locales.mjs";
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const output = resolve(process.env.SCREENSHOT_DIR || join(root, "artifacts/locales"));
+const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+// The built site is what is served: run `npm run build` first.
+const root = join(repo, "dist");
+const output = resolve(process.env.SCREENSHOT_DIR || join(repo, "artifacts/locales"));
 await mkdir(output, { recursive: true });
 const types = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".svg": "image/svg+xml", ".woff2": "font/woff2", ".png": "image/png", ".ico": "image/x-icon" };
 const server = createServer(async (request, response) => {
@@ -114,6 +116,55 @@ try {
           assert.equal(await page.locator('.demo-modal').isVisible(), true);
           assert.equal(await page.locator('[data-demo-title]').textContent(), { ja: "スキーマを変更する", de: "Ein Schema ändern", fr: "Modifier un schéma" }[lang]);
           await page.keyboard.press('Escape');
+          await page.locator('.demo-modal').waitFor({ state: "hidden" });
+          // A link to one run opens that run.
+          await page.goto(origin + `/${lang}/in-practice/#run-inference`);
+          await page.locator('.demo-modal').waitFor({ state: "visible" });
+          assert.equal(await page.locator('[data-demo-title]').textContent(), { ja: "埋め込みを移行する", de: "Embeddings migrieren", fr: "Migrer des embeddings" }[lang]);
+          await page.keyboard.press('Escape');
+        }
+        // The homepage's switchers: each shows exactly one state at a time and
+        // follows its controls, in every language.
+        for (const lang of Object.keys(LOCALES)) {
+          await page.setViewportSize({ width: 1280, height: 900 });
+          await page.goto(origin + localizedPath(lang, "/"));
+          const shown = (selector) => page.locator(selector).evaluateAll((els) => els.filter((el) => el.getClientRects().length).length);
+          assert.equal(await shown('.hframe .walk'), 1, `${lang}: walkthrough shows first`);
+          assert.equal(await shown('.tryit'), 0, `${lang}: Try it starts hidden`);
+          await page.locator('[data-set="mode=try"]').click();
+          assert.equal(await shown('.tryit'), 1, `${lang}: Try it opens`);
+          assert.equal(await shown('.tryit-out'), 1, `${lang}: one output at a time`);
+          for (const edit of ["none", "add", "drop", "table"]) {
+            for (const dialect of ["sqlite", "postgres", "mysql"]) {
+              await page.locator(`[data-set="edit=${edit}"]`).click();
+              await page.locator(`[data-set="dialect=${dialect}"]`).click();
+              const out = page.locator(`.tryit-out[data-when="edit=${edit} dialect=${dialect}"]`);
+              assert.equal(await out.isVisible(), true, `${lang}: ${edit} on ${dialect}`);
+              assert.equal(await shown('.tryit-out'), 1, `${lang}: ${edit} on ${dialect} shows one output`);
+              assert.equal(await shown('.tryit-src'), 1, `${lang}: ${edit} on ${dialect} shows one file`);
+            }
+          }
+          await page.locator('[data-set="mode=walk"]').click();
+          assert.equal(await shown('.hframe .walk'), 1, `${lang}: back to the walkthrough`);
+          for (const [set, panel] of [["scn=s2", "#scn-s2"], ["scn=s3", "#scn-s3"], ["scn=s1", "#scn-s1"]]) {
+            await page.locator(`[data-set="${set}"]`).click();
+            assert.equal(await page.locator(panel).isVisible(), true, `${lang}: ${set}`);
+          }
+          await page.locator('[data-set="scn=s3"]').click();
+          const steps = await page.locator('.step').count();
+          assert(steps >= 5, `${lang}: lifecycle has ${steps} steps`);
+          await page.locator('.step').nth(steps - 1).click();
+          assert.equal(await page.locator('.step.is-done').count(), steps - 1, `${lang}: earlier steps are marked done`);
+          for (const tab of await page.locator('.tab5').all()) {
+            await tab.click();
+            assert.equal(await shown('.fmt-src'), 1, `${lang}: one schema source at a time`);
+          }
+          for (const target of await page.locator('.target').all()) {
+            await target.click();
+            assert.equal(await shown('.fan-body'), 1, `${lang}: one export at a time`);
+            assert.equal(await page.locator('.fan-arrow.is-on').count(), 1, `${lang}: one arrow lit`);
+          }
+          assert.deepEqual(errors, [], `${lang}: browser errors on the homepage`);
         }
       }
       await context.close();

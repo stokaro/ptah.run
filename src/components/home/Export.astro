@@ -1,0 +1,44 @@
+---
+/* Schema export as a fan-out: one source file, seven targets, and the real
+ * output of the selected one. On a phone the drawing gives way to a list. */
+import Rich from "../Rich.astro";
+import FanSvg from "./FanSvg.astro";
+import { hl, hlCmd } from "../../lib/term.mjs";
+import { EXPORT } from "../../data/captures.mjs";
+
+interface Props {
+  t: any;
+}
+const c = Astro.props.t.export;
+const targets = EXPORT.targets;
+const first = targets[0].id;
+---
+<section class="hs hs-tight hs-grey" aria-labelledby="export-title">
+  <div class="wrap">
+    <div class="hs-head">
+      <div class="hs-title"><div class="eyebrow">{c.eyebrow}</div><h2 id="export-title">{c.h2}</h2></div>
+      <p>{c.lead}</p>
+    </div>
+    <div class="fan" data-widget data-state={`exp=${first}`}>
+      <div class="fan-left">
+        <FanSvg first={first} source={EXPORT.source} sourceSub={c.sourceSub} />
+        <div class="fan-targets" role="tablist" aria-label={c.targetsLabel}>
+          {targets.map((x: any) => (
+            <button class="target" type="button" role="tab" data-set={`exp=${x.id}`} aria-selected={x.id === first ? "true" : "false"}>
+              <span>--to {x.to}</span><span>{c.kinds[x.kind]}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div class="fan-out">
+        {targets.map((x: any) => (
+          <pre class:list={["fan-cmd", { "is-on": x.id === first }]} data-when={`exp=${x.id}`}><span class="p">$</span> <Fragment set:html={x.cmd.split("\n").map(hlCmd).join("\n")} /></pre>
+        ))}
+        {targets.map((x: any) => (
+          <pre class:list={["fan-body", { "is-on": x.id === first }]} data-when={`exp=${x.id}`}>{x.out && <span class="m">{x.out}</span>}{x.out && x.then && "\n\n"}{x.then && <span class="c"><span class="p">$</span> {x.then}</span>}{x.then && "\n"}<Fragment set:html={x.body ? hl(x.lang, x.body) : ""} /></pre>
+        ))}
+      </div>
+    </div>
+    <p class="hs-note"><Rich parts={c.note} /></p>
+  </div>
+</section>

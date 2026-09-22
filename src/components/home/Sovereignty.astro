@@ -1,0 +1,30 @@
+---
+import Rich from "../Rich.astro";
+import { renderLines } from "../../lib/term.mjs";
+import { PROOF } from "../../data/captures.mjs";
+
+interface Props {
+  t: any;
+}
+const c = Astro.props.t.sovereignty;
+---
+<section class="hs" id="sovereignty" aria-labelledby="sov-title">
+  <div class="wrap">
+    <div class="hs-head">
+      <h2 id="sov-title">{c.h2}</h2>
+      <p>{c.lead}</p>
+    </div>
+    <ul class="pillars">
+      {c.pillars.map((p: any) => (
+        <li><span class="pillar-word">{p.word}</span><span class="pillar-title">{p.title}</span><p><Rich parts={p.text} /></p></li>
+      ))}
+    </ul>
+    <div class="proof">
+      <div class="proof-text"><div class="eyebrow">{c.proofEyebrow}</div><p><Rich parts={c.proof} /></p></div>
+      <div class="tframe">
+        <div class="tframe-bar"><span><span class="p">$</span> {PROOF.command}</span><span>{c.proofBar}</span></div>
+        <pre class="wrap-lines" set:html={renderLines(PROOF.lines)}></pre>
+      </div>
+    </div>
+  </div>
+</section>

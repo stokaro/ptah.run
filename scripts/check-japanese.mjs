@@ -2,8 +2,7 @@
 // Check the bounded project conventions documented in TRANSLATING.md.
 // Terminology is reviewed in context; there is no global word blacklist.
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
@@ -101,13 +100,17 @@ if (process.argv.includes('--selftest')) {
   console.log(`check-japanese: ${cases} style and runtime fixtures passed`);
 }
 
-const pages = execFileSync('git', ['ls-files', '*.html'], { cwd: root, encoding: 'utf8' })
-  .trim().split('\n').filter((path) => path.startsWith('ja/') || path === '404.html');
-assert(pages.some((path) => path.startsWith('ja/')), 'no tracked Japanese pages');
-const problems = pages.flatMap((path) => htmlProblems(readFileSync(join(root, path), 'utf8'))
-  .map((problem) => `${path}: ${problem}`));
-problems.push(...runtimeProblems(readFileSync(join(root, 'assets/site.js'), 'utf8'))
-  .map((problem) => `assets/site.js: ${problem}`));
+// The built Japanese tree, and the 404 that carries a Japanese paragraph. Run
+// `npm run build` first; four pages is the floor, so an empty or unbuilt
+// dist/ fails instead of passing on nothing.
+const dist = join(root, 'dist');
+const pages = ['404.html', ...readdirSync(join(dist, 'ja'), { recursive: true })
+  .filter((path) => path.endsWith('.html')).map((path) => `ja/${path.split('\\').join('/')}`)];
+assert(pages.filter((path) => path.startsWith('ja/')).length >= 4, 'fewer than four built Japanese pages; run npm run build');
+const problems = pages.flatMap((path) => htmlProblems(readFileSync(join(dist, path), 'utf8'))
+  .map((problem) => `dist/${path}: ${problem}`));
+problems.push(...runtimeProblems(readFileSync(join(root, 'public/assets/site.js'), 'utf8'))
+  .map((problem) => `public/assets/site.js: ${problem}`));
 if (problems.length) {
   console.error(problems.join('\n'));
   process.exitCode = 1;

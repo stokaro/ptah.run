@@ -1,0 +1,10 @@
+---
+import InPracticePage from "../../../components/pages/InPracticePage.astro";
+import { PREFIXED } from "../../../lib/site.mjs";
+
+export function getStaticPaths() {
+  return PREFIXED.map((lang) => ({ params: { lang } }));
+}
+const { lang } = Astro.params;
+---
+<InPracticePage lang={lang} />

@@ -1,0 +1,15 @@
+---
+import Base from "../../layouts/Base.astro";
+import { fragment } from "../../lib/fragments.mjs";
+import meta from "../../i18n/page-meta.json";
+
+interface Props {
+  lang: "en" | "ja" | "de" | "fr";
+  page: "install" | "community";
+}
+const { lang, page } = Astro.props;
+const m = meta[lang][page];
+---
+<Base lang={lang} path={`/${page}/`} title={m.title} description={m.description} ogTitle={m.ogTitle} ogDescription={m.ogDescription} current={page}>
+  <Fragment set:html={fragment(`${lang}/${page}`)} />
+</Base>

@@ -1,0 +1,45 @@
+---
+import { LOCALES, LINKS, localizedPath, prefix } from "../lib/site.mjs";
+import { UI } from "../i18n/ui.mjs";
+
+interface Props {
+  lang: string;
+  path: string;
+  current?: "install" | "in-practice" | "community";
+}
+const { lang, path, current } = Astro.props;
+const T = UI[lang];
+const P = prefix(lang);
+const here = (name: string) => (current === name ? "page" : undefined);
+---
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href={`${P}/`}><img src="/assets/logo.svg" alt="" width="22" height="22">Ptah</a>
+    <nav class="nav" aria-label={T.navLabel}>
+      <ul class="nav-links" id="nav-links">
+        <li><a href={LINKS.docs}>{T.docs}</a></li>
+        <li><a href={`${P}/install/`} aria-current={here("install")}>{T.install}</a></li>
+        <li><a href={`${P}/in-practice/`} aria-current={here("in-practice")}>{T.inPractice}</a></li>
+        <li><a href={LINKS.playground}>{T.playground}</a></li>
+        <li><a href={LINKS.operator}>{T.operator}</a></li>
+        <li><a href={LINKS.blog}>{T.blog}</a></li>
+        <li><a href={LINKS.github}>GitHub&nbsp;↗</a></li>
+      </ul>
+      <details class="lang-picker">
+        <summary class="icon-btn lang-btn" aria-label={LOCALES[lang].switchLabel}>{LOCALES[lang].short}</summary>
+        <ul class="language-links">
+          {Object.entries(LOCALES).map(([code, locale]) => (
+            <li><a href={localizedPath(code, path)} hreflang={code} lang={code} aria-current={code === lang ? "page" : undefined}>{locale.name}</a></li>
+          ))}
+        </ul>
+      </details>
+      <button class="icon-btn theme-btn" type="button" aria-label={T.theme} aria-pressed="false">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/></svg>
+      </button>
+      <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label={T.menu}>
+        <svg class="icon-menu" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg class="icon-close" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,7 @@
+---
+import Base from "../layouts/Base.astro";
+import { fragment } from "../lib/fragments.mjs";
+---
+<Base lang="en" path="/404.html" title="Page not found — Ptah" standalone>
+  <Fragment set:html={fragment("404")} />
+</Base>

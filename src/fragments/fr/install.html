@@ -1,0 +1,112 @@
+<main id="main" class="page">
+  <div class="wrap">
+
+    <div class="page-head">
+      <h1>Installer Ptah</h1>
+      <p class="lede">Le programme d’installation télécharge l’archive adaptée à votre système et à votre architecture, vérifie sa somme SHA-256 et installe <code>ptah</code>, <code>ptah-compat</code> et <code>ptah-ls</code> sans droits administrateur.</p>
+      <p class="meta"><span>Version actuelle <span class="v" data-version>v0.3.0</span> · pre-GA : l’arborescence des commandes natives et l’API Go publique peuvent encore changer · MIT</span></p>
+    </div>
+
+    <div class="tabs">
+      <div class="tabs-head">
+      <div class="tablist" role="tablist" aria-label="Méthode d’installation">
+        <button class="tab" role="tab" id="tab-macos" data-tab="macos" aria-controls="panel-macos" aria-selected="true">macOS</button>
+        <button class="tab" role="tab" id="tab-linux" data-tab="linux" aria-controls="panel-linux" aria-selected="false" tabindex="-1">Linux</button>
+        <button class="tab" role="tab" id="tab-windows" data-tab="windows" aria-controls="panel-windows" aria-selected="false" tabindex="-1">Windows</button>
+        <button class="tab" role="tab" id="tab-brew" data-tab="brew" aria-controls="panel-brew" aria-selected="false" tabindex="-1">Homebrew</button>
+        <button class="tab" role="tab" id="tab-go" data-tab="go" aria-controls="panel-go" aria-selected="false" tabindex="-1">Go</button>
+        <button class="tab" role="tab" id="tab-source" data-tab="source" aria-controls="panel-source" aria-selected="false" tabindex="-1">Sources</button>
+      </div>
+      <span class="detected" aria-live="polite"></span>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-macos" aria-labelledby="tab-macos">
+        <div class="panel-title">macOS</div>
+        <div class="cmd">
+          <pre id="cmd-macos" data-copy-text="curl -fsSL https://ptah.run/install.sh | sh"><span class="p">$</span> curl -fsSL https://ptah.run/install.sh | sh</pre>
+          <button class="copy" type="button" data-copy="cmd-macos" data-copy-name="commande d’installation pour macOS"><span class="copy-text">Copier</span><span class="sr-only"> commande d’installation pour macOS</span></button>
+        </div>
+        <p>Installation dans <code>~/.local/bin</code>. Nécessite un terminal, <code>tar</code> et <code>curl</code>. Homebrew convient aussi : <code>brew install stokaro/ptah/ptah</code>. Téléchargez les archives avec <code>curl</code> ou <code>gh</code>. Les téléchargements par navigateur portent un attribut de quarantaine qui conduit Gatekeeper à refuser les binaires signés ad hoc.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-linux" aria-labelledby="tab-linux">
+        <div class="panel-title">Linux</div>
+        <div class="cmd">
+          <pre id="cmd-linux" data-copy-text="curl -fsSL https://ptah.run/install.sh | sh"><span class="p">$</span> curl -fsSL https://ptah.run/install.sh | sh
+<span class="m"># sans curl</span>
+<span class="p">$</span> wget -qO- https://ptah.run/install.sh | sh</pre>
+          <button class="copy" type="button" data-copy="cmd-linux" data-copy-name="commande d’installation pour Linux"><span class="copy-text">Copier</span><span class="sr-only"> commande d’installation pour Linux</span></button>
+        </div>
+        <p>Installation dans <code>~/.local/bin</code>. Archives : <code>ptah_<span data-version-bare>0.3.0</span>_linux_amd64.tar.gz</code>, <code>ptah_<span data-version-bare>0.3.0</span>_linux_arm64.tar.gz</code>.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-windows" aria-labelledby="tab-windows">
+        <div class="panel-title">Windows</div>
+        <div class="cmd">
+          <pre id="cmd-windows" data-copy-text="irm https://ptah.run/install.ps1 | iex"><span class="p">PS&gt;</span> irm https://ptah.run/install.ps1 | iex</pre>
+          <button class="copy" type="button" data-copy="cmd-windows" data-copy-name="commande d’installation pour Windows"><span class="copy-text">Copier</span><span class="sr-only"> commande d’installation pour Windows</span></button>
+        </div>
+        <p>PowerShell 5.1 ou ultérieur. Installation dans <code>%LOCALAPPDATA%\Ptah\bin</code> et mise à jour du <code>Path</code> utilisateur, sauf désactivation. Fixez une version avec <code>$env:PTAH_INSTALL_VERSION = '<span data-version>v0.3.0</span>'</code>.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-brew" aria-labelledby="tab-brew">
+        <div class="panel-title">Homebrew</div>
+        <div class="cmd">
+          <pre id="cmd-brew" data-copy-text="brew install stokaro/ptah/ptah"><span class="p">$</span> brew install stokaro/ptah/ptah
+<span class="m"># branche de développement, compilation des sources</span>
+<span class="p">$</span> brew install --HEAD stokaro/ptah/ptah-edge</pre>
+          <button class="copy" type="button" data-copy="cmd-brew" data-copy-name="commande d’installation pour Homebrew"><span class="copy-text">Copier</span><span class="sr-only"> commande d’installation pour Homebrew</span></button>
+        </div>
+        <p>macOS ou Linux. Les deux formules fournissent des binaires portant les mêmes noms. Désinstallez l’une avant de passer à l’autre.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-go" aria-labelledby="tab-go">
+        <div class="panel-title">Go</div>
+        <div class="cmd">
+          <pre id="cmd-go"><span class="p">$</span> go install ptah.run/cmd/ptah@<span data-version>v0.3.0</span>
+<span class="p">$</span> go install ptah.run/cmd/ptah-compat@<span data-version>v0.3.0</span>
+<span class="p">$</span> go install ptah.run/cmd/ptah-ls@<span data-version>v0.3.0</span></pre>
+        </div>
+        <p>Les binaires sont placés dans <code>GOBIN</code>, ou dans <code>$(go env GOPATH)/bin</code> si cette variable n’est pas définie. Ce répertoire n’est pas ajouté automatiquement au <code>PATH</code>.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-source" aria-labelledby="tab-source">
+        <div class="panel-title">Sources</div>
+        <div class="cmd">
+          <pre id="cmd-source"><span class="p">$</span> git clone https://github.com/stokaro/ptah.git
+<span class="p">$</span> cd ptah
+<span class="p">$</span> make build</pre>
+        </div>
+        <p><code>make build</code> produit <code>ptah</code>, <code>ptah-compat</code>, <code>ptah-ls</code> et le lanceur de tests d’intégration dans <code>bin/</code>, avec la chaîne de compilation déclarée dans <code>go.mod</code>.</p>
+      </div>
+    </div>
+
+    <section class="block" aria-labelledby="expected-title">
+      <div class="label" id="expected-title">Sortie attendue</div>
+      <pre class="code plain">ptah: sha256 verified against checksums.txt
+ptah: installed ptah, ptah-compat, ptah-ls in &lt;install directory&gt;
+Version: &lt;installed version&gt;</pre>
+      <p>La ligne <code>Version:</code> provient du binaire installé : le script l’exécute avant d’annoncer le succès. Sous Linux et macOS, si le répertoire cible n’est pas dans le <code>PATH</code>, le programme affiche <code>export PATH="$HOME/.local/bin:$PATH"</code>.</p>
+    </section>
+
+    <section class="block" aria-labelledby="verify-title">
+      <div class="label" id="verify-title">Vérifier</div>
+      <pre class="code"><span class="p">$</span> ptah version
+<span class="p">$</span> ptah-compat version
+<span class="p">$</span> ptah-ls --version</pre>
+      <p>Chaque commande affiche la version, le commit, la date de compilation, la chaîne Go et la plateforme. <code>ptah-compat</code> utilise la commande <code>version</code> plutôt que l’option <code>--version</code>.</p>
+    </section>
+
+    <section class="tips" aria-label="Autres options">
+      <div class="tip"><strong>Fixer une version</strong><code>install.sh | sh -s -- --version <span data-version>v0.3.0</span></code></div>
+      <div class="tip"><strong>Vérifier la signature</strong><span><code>checksums.txt</code> est signé avec Sigstore. Vérifiez la signature avec <code>cosign verify-blob</code> ou passez <code>--verify-signature</code>.</span></div>
+      <div class="tip"><strong>Examiner avant d’exécuter</strong><code>curl -fsSL https://ptah.run/install.sh -o install.sh &amp;&amp; less install.sh</code></div>
+    </section>
+
+    <div class="actions">
+      <a class="btn" href="https://docs.ptah.run/edge/start/quick-start/">Suite : démarrage rapide →</a>
+      <a class="btn btn-ghost" href="https://docs.ptah.run/edge/start/install-options/">Autres méthodes d’installation</a>
+    </div>
+
+  </div>
+</main>

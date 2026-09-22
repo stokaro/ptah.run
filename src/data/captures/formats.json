@@ -1,0 +1,55 @@
+{
+ "ptah": "v0.8.0 (061fac0c6, official release binaries)",
+ "formats": {
+  "sql": {
+   "file": "schema.sql",
+   "content": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL,\n  created_at TEXT\n);\n",
+   "plan": {
+    "cmd": "ptah schema apply --schema-file schema.sql --db-url sqlite://app.db --dry-run",
+    "stdout": "Planned schema changes:\nALTER TABLE \"users\" ADD COLUMN \"created_at\" TEXT;\n",
+    "stderr": "",
+    "exit": 0
+   }
+  },
+  "yaml": {
+   "file": "schema.yaml",
+   "content": "tables:\n  users:\n    columns:\n      id:\n        type: INTEGER\n        primary: true\n      email:\n        type: TEXT\n        not_null: true\n      created_at:\n        type: TEXT\n",
+   "plan": {
+    "cmd": "ptah schema apply --schema-file schema.yaml --db-url sqlite://app.db --dry-run",
+    "stdout": "Planned schema changes:\nALTER TABLE \"users\" ADD COLUMN \"created_at\" TEXT;\n",
+    "stderr": "",
+    "exit": 0
+   }
+  },
+  "hcl": {
+   "file": "schema.hcl",
+   "content": "table \"users\" {\n  column \"id\" {\n    type = integer\n    null = true\n  }\n\n  column \"email\" {\n    type = text\n    null = false\n  }\n\n  column \"created_at\" {\n    type = text\n    null = true\n  }\n\n  primary_key {\n    columns = [column.id]\n  }\n}\n",
+   "plan": {
+    "cmd": "ptah schema apply --schema-file schema.hcl --db-url sqlite://app.db --dry-run",
+    "stdout": "Planned schema changes:\nALTER TABLE \"users\" ADD COLUMN \"created_at\" TEXT;\n",
+    "stderr": "",
+    "exit": 0
+   }
+  },
+  "dbml": {
+   "file": "schema.dbml",
+   "content": "Table users {\n  id integer [pk]\n  email text [not null]\n  created_at text\n}\n",
+   "plan": {
+    "cmd": "ptah schema apply --schema-file schema.dbml --db-url sqlite://app.db --dry-run",
+    "stdout": "Planned schema changes:\nALTER TABLE \"users\" ADD COLUMN \"created_at\" TEXT;\n",
+    "stderr": "",
+    "exit": 0
+   }
+  },
+  "go": {
+   "file": "models/user.go",
+   "content": "package models\n\n//ptah:schema:table name=\"users\"\ntype User struct {\n\t//ptah:schema:field name=\"id\" type=\"INTEGER\" primary=\"true\"\n\tID int64\n\n\t//ptah:schema:field name=\"email\" type=\"TEXT\" not_null=\"true\"\n\tEmail string\n\n\t//ptah:schema:field name=\"created_at\" type=\"TEXT\"\n\tCreatedAt *string\n}\n",
+   "plan": {
+    "cmd": "ptah schema apply --root-dir ./models --db-url sqlite://app.db --dry-run",
+    "stdout": "Planned schema changes:\nALTER TABLE \"users\" ADD COLUMN \"created_at\" TEXT;\n",
+    "stderr": "",
+    "exit": 0
+   }
+  }
+ }
+}

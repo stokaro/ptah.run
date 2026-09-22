@@ -1,0 +1,33 @@
+---
+import Rich from "../Rich.astro";
+import PipelineSvg from "./PipelineSvg.astro";
+
+interface Props {
+  t: any;
+}
+const c = Astro.props.t.how;
+const SOURCES = ["schema.sql", "schema.yaml", "schema.hcl", "schema.dbml", "models/*.go", "orm loader · stdout"];
+---
+<section class="hs hs-tight hs-grey" aria-labelledby="how-title">
+  <div class="wrap">
+    <div class="hs-head">
+      <div class="hs-title"><div class="eyebrow">{c.eyebrow}</div><h2 id="how-title">{c.h2}</h2></div>
+      <p><Rich parts={c.lead} /></p>
+    </div>
+    <div class="pipe-card">
+      <PipelineSvg c={c} />
+      <ol class="pipe-list" aria-label={c.aria}>
+        <li class="pipe-sources">{SOURCES.map((s) => <code>{s}</code>)}</li>
+        <li class="pipe-down" aria-hidden="true">↓</li>
+        <li class="pipe-pair"><span class="pipe-box">{c.desired}</span><span aria-hidden="true">⟷</span><span class="pipe-box"><a href="#databases">{c.liveBox}</a></span></li>
+        <li class="pipe-down" aria-hidden="true">↓</li>
+        <li class="pipe-compare">{c.compare}</li>
+        <li class="pipe-down" aria-hidden="true">↓</li>
+        <li class="pipe-out"><code>schema drift</code><em>{c.proof} <span class="exit exit-0">0</span> <span class="exit exit-1">1</span> <span class="exit exit-2">2</span></em></li>
+        <li class="pipe-out"><code>schema plan · --dry-run</code><em>{c.review}</em></li>
+        <li class="pipe-out"><code>migrations lint</code><em>{c.gate}</em></li>
+        <li class="pipe-out is-apply"><code>schema apply · migrations up</code><em>{c.afterApprovalLive}</em></li>
+      </ol>
+    </div>
+  </div>
+</section>

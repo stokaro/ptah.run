@@ -1,0 +1,88 @@
+---
+/* Every page's <head>, header and footer. A page passes its language, its
+ * path in the default tree, and its title and description; addresses,
+ * alternates and the Go import tags are computed here, so one page cannot
+ * disagree with another about where the others live. */
+import "../styles/site.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { ORIGIN, LANGS, localizedPath, GO_IMPORT, GO_SOURCE } from "../lib/site.mjs";
+import { UI } from "../i18n/ui.mjs";
+
+interface Props {
+  lang: string;
+  path: string;
+  title: string;
+  description?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  jsonld?: string;
+  // The 404 is served for every unknown address, so it names no canonical
+  // address and no alternates of its own, and asks not to be indexed.
+  standalone?: boolean;
+  mainClass?: string;
+  // The recorded sessions, for a page that plays one.
+  runs?: boolean;
+  current?: "install" | "in-practice" | "community";
+}
+
+const { lang, path, title, description, ogTitle, ogDescription, jsonld, standalone = false, runs = false, current } =
+  Astro.props;
+const T = UI[lang];
+const url = `${ORIGIN}${localizedPath(lang, path)}`;
+const themeInit =
+  '(function(){var d=document.documentElement,t=null;try{t=localStorage.getItem("ptah-theme")}catch(e){}if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.setAttribute("data-theme",t);d.classList.add("js")})();';
+---
+<!doctype html>
+<html lang={lang}>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title}</title>
+{description && <meta name="description" content={description}>}
+{standalone && <meta name="robots" content="noindex">}
+{!standalone && <link rel="canonical" href={url}>}
+{!standalone && LANGS.map((code) => <link rel="alternate" hreflang={code} href={`${ORIGIN}${localizedPath(code, path)}`}>)}
+{!standalone && <link rel="alternate" hreflang="x-default" href={`${ORIGIN}${path}`}>}
+<meta name="go-import" content={GO_IMPORT}>
+<meta name="go-source" content={GO_SOURCE}>
+<meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161311" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+{!standalone && (
+  <>
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Ptah">
+    <meta property="og:title" content={ogTitle ?? title}>
+    <meta property="og:description" content={ogDescription ?? description}>
+    <meta property="og:url" content={url}>
+    <meta property="og:image" content={`${ORIGIN}/og.png`}>
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content={T.imageAlt}>
+    <meta name="twitter:card" content="summary_large_image">
+  </>
+)}
+<link rel="preload" href="/assets/fonts/instrument-sans-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<script is:inline set:html={themeInit}></script>
+{jsonld && <script is:inline type="application/ld+json" set:html={jsonld}></script>}
+</head>
+<body>
+<a class="skip" href="#main">{T.skip}</a>
+
+<Header lang={lang} path={standalone ? "/" : path} current={current} />
+
+<slot />
+
+<Footer lang={lang} />
+
+<div class="sr-only" role="status" id="copy-status"></div>
+{runs && <script is:inline src="/assets/runs.js" defer></script>}
+{runs && lang !== "en" && <script is:inline src={`/assets/runs.${lang}.js`} defer></script>}
+<script is:inline src="/assets/site.js" defer></script>
+<slot name="scripts" />
+</body>
+</html>

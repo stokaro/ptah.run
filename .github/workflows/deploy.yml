@@ -32,38 +32,9 @@ jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-
-      # Discover tracked pages. The locale check below compares this inventory
-      # with the sitemap and version-stamp list, including missing pages.
-      - name: Every page references files that exist
-        run: |
-          set -euo pipefail
-          status=0
-          while IFS= read -r page; do
-            while IFS= read -r path; do
-              [ -n "$path" ] || continue
-              # Directory links resolve to their index.html.
-              if [ -d "$path" ] && [ -f "$path/index.html" ]; then continue; fi
-              if [ ! -f "$path" ]; then
-                echo "::error file=$page::references /$path, which does not exist"
-                status=1
-              fi
-            done < <(grep -oE '(href|src)="/[^"#?]+' "$page" | sed -E 's/^(href|src)="\///' | sort -u)
-          done < <(git ls-files '*.html')
-          exit "$status"
-
-      - name: CNAME names the production domain
-        run: test "$(tr -d '[:space:]' < CNAME)" = "ptah.run"
-
-      - name: No github.io address on the pages
-        run: |
-          if git ls-files -z '*.html' | xargs -0 -r grep -n "github\.io"; then
-            echo "::error::the pages must use ptah.run addresses, never github.io"
-            exit 1
-          fi
 
       - uses: actions/setup-node@v7
         with:
@@ -72,8 +43,25 @@ jobs:
 
       - run: npm ci
 
+      # The pages are what Astro writes, so every check reads dist/. The
+      # version is the committed one: a pull request is checked against what
+      # it commits, and the deploy below builds again with the live release.
+      - name: Build the site
+        run: npm run build
+
       - name: All language trees match their source, links and metadata
         run: npm run check
+
+      # A build with a release passed in names that release on every page,
+      # and nothing else.
+      - name: The release version reaches every page
+        run: |
+          set -euo pipefail
+          PTAH_VERSION=v9.9.9 npm run build
+          PTAH_VERSION=v9.9.9 node scripts/check-locales.mjs
+          ! grep -rl --include='*.html' -E 'data-version>v0\.' dist/ || { echo "::error::a page kept the committed version"; exit 1; }
+          if PTAH_VERSION=9.9.9 npm run build 2>/dev/null; then echo "::error::a malformed PTAH_VERSION was accepted"; exit 1; fi
+          npm run build
 
       - run: npx playwright install --with-deps chromium
 
@@ -87,19 +75,6 @@ jobs:
           name: localization-browser-checks
           path: artifacts/locales/
           if-no-files-found: error
-
-      - name: The version stamp works on a copy of the pages
-        run: |
-          set -euo pipefail
-          tmp="$(mktemp -d)"
-          # The whole tracked tree, so this check cannot be the one that misses
-          # a page somebody added. stamp-version.mjs names its pages because it
-          # has to run here, outside a git checkout; check-locales.mjs is what
-          # holds that list to the tree.
-          git ls-files -z | tar --null -T - -cf - | tar -xf - -C "$tmp"
-          (cd "$tmp" && node scripts/stamp-version.mjs v9.9.9 && node scripts/stamp-version.mjs v9.9.9 --check)
-          ! (cd "$tmp" && node scripts/stamp-version.mjs v0.0.1 --check) || { echo "::error::--check did not detect a stale version"; exit 1; }
-          rm -rf "$tmp"
 
   deploy:
     name: Deploy to GitHub Pages
@@ -117,22 +92,31 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # The pages leave the repository with the last release known at commit
-      # time. Ask GitHub for the current one and write it in before uploading,
-      # so a browser that cannot reach the API still sees a recent version.
-      # When this lookup fails, the committed value stays: a stale number is
-      # better than a missed deploy.
-      - name: Stamp the latest Ptah release into the pages
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # The pages leave the build naming the latest release. Ask GitHub for it
+      # and build with it, so a browser that cannot reach the API still sees a
+      # recent version. When this lookup fails, the committed value in
+      # src/data/release.json stays: a stale number is better than a missed
+      # deploy.
+      - name: Build with the latest Ptah release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -uo pipefail
           tag="$(gh api repos/stokaro/ptah/releases/latest --jq .tag_name 2>/dev/null || true)"
-          if [ -z "$tag" ]; then
-            echo "::warning::could not read the latest stokaro/ptah release; keeping the committed version"
-            exit 0
+          if [ -n "$tag" ]; then
+            export PTAH_VERSION="$tag"
+          else
+            echo "::warning::could not read the latest stokaro/ptah release; building with the committed version"
           fi
-          node scripts/stamp-version.mjs "$tag"
+          set -e
+          npm run build
 
       # https://ptah.run/install.sh and /install.ps1 are the installers from the
       # master branch of stokaro/ptah (docs/site/public/). They are not kept in
@@ -146,18 +130,18 @@ jobs:
           set -euo pipefail
           for f in install.sh install.ps1; do
             gh api "repos/stokaro/ptah/contents/docs/site/public/$f?ref=master" \
-              -H "Accept: application/vnd.github.raw+json" > "$f"
-            test "$(wc -c < "$f")" -gt 4096
-            grep -q "PTAH_INSTALL" "$f"
+              -H "Accept: application/vnd.github.raw+json" > "dist/$f"
+            test "$(wc -c < "dist/$f")" -gt 4096
+            grep -q "PTAH_INSTALL" "dist/$f"
           done
-          head -1 install.sh | grep -qx '#!/bin/sh'
-          sh -n install.sh
-          ls -la install.sh install.ps1
+          head -1 dist/install.sh | grep -qx '#!/bin/sh'
+          sh -n dist/install.sh
+          ls -la dist/install.sh dist/install.ps1
 
       - name: Upload the site
         uses: actions/upload-pages-artifact@v5
         with:
-          path: .
+          path: dist
 
       - name: Deploy
         id: deployment

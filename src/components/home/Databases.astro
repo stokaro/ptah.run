@@ -1,0 +1,34 @@
+---
+/* Coverage per engine, with the counts from the support matrix. The engine
+ * list and the rating rule live in src/data/captures.mjs beside their source. */
+import Rich from "../Rich.astro";
+import { ENGINES } from "../../data/captures.mjs";
+
+interface Props {
+  t: any;
+}
+const c = Astro.props.t.databases;
+---
+<section class="hs hs-tight" id="databases" aria-labelledby="dbs-title">
+  <div class="wrap">
+    <div class="hs-head">
+      <div class="hs-title"><div class="eyebrow">{c.eyebrow}</div><h2 id="dbs-title">{c.h2}</h2></div>
+      <p><Rich parts={c.counts(ENGINES.counts.declared, ENGINES.counts.probed, ENGINES.counts.certified)} /></p>
+    </div>
+    <ul class="engines">
+      {ENGINES.list.map((e: any) => (
+        <li>
+          <div class="engine-head">
+            <span class="engine-name">{e.name}</span>
+            <span class="dots" role="img" aria-label={`${e.rating} / 3`}>{[0, 1, 2].map((i) => <i class:list={[{ on: i < e.rating }]}></i>)}</span>
+          </div>
+          <span class="engine-note">{c.notes[e.id] ?? e.note}</span>
+        </li>
+      ))}
+    </ul>
+    <div class="aside2">
+      <div><div class="eyebrow eyebrow-mute">{c.toolingLabel}</div><p><Rich parts={c.tooling} /></p></div>
+      <div><div class="eyebrow eyebrow-mute">{c.atlasLabel}</div><p><Rich parts={c.atlas} /></p></div>
+    </div>
+  </div>
+</section>

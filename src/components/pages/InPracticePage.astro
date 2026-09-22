@@ -1,0 +1,74 @@
+---
+/* Every recorded run as a grid. A tile says what the session is and what it
+ * starts with; opening one puts the whole transcript in an overlay. Without
+ * JavaScript the tiles do nothing and the transcripts behind them are the
+ * page. The tile's id is the run's key, so /in-practice/#run-inference opens
+ * that one directly. */
+import Base from "../../layouts/Base.astro";
+import PlayerControls from "../PlayerControls.astro";
+import { RUNS, about, transcript, preview, commandCount, eventLineCount } from "../../lib/runs.mjs";
+import { UI } from "../../i18n/ui.mjs";
+import { LINKS, prefix } from "../../lib/site.mjs";
+
+interface Props {
+  lang: string;
+}
+const { lang } = Astro.props;
+const T = UI[lang];
+const first = RUNS.pinned[0];
+---
+<Base lang={lang} path="/in-practice/" title={T.ipTitle} description={T.ipDescription} ogDescription={T.ipOgDescription} current="in-practice" runs>
+<main id="main" class="page">
+  <div class="wrap">
+
+    <div class="page-head">
+      <h1>{T.ipH1}</h1>
+      <p class="lede">{T.ipLede(RUNS.order.length)}</p>
+    </div>
+
+    <ul class="tiles">
+      {RUNS.order.map((key: string) => {
+        const s = RUNS.scenarios[key];
+        const t = about(lang, key);
+        return (
+          <li class="tile-slot" id={`run-${key}`}>
+            <button class="tile" type="button" data-demo-tile data-demo-scenario={key}>
+              <span class="tile-head">
+                <span class="tile-name">{t.label}</span><span class="tile-tag">{t.tag}</span>
+              </span>
+              <span class="tile-note">{t.caption}</span>
+              <span class="tile-cmd"><span class="tile-prompt">$</span> {preview(s.script)}</span>
+              <span class="tile-meta">{T.counts(commandCount(s.script), eventLineCount(s.script))}</span>
+            </button>
+            <pre class="tile-transcript" aria-label={T.transcriptLabel(t.label)} set:html={transcript(s.script, lang)}></pre>
+          </li>
+        );
+      })}
+    </ul>
+
+    <div class="actions">
+      <a class="btn" href={LINKS.quickStart}>{T.quickStart}</a>
+      <a class="btn btn-ghost" href={`${prefix(lang)}/install/`}>{T.installPtah}</a>
+    </div>
+
+  </div>
+</main>
+
+<div class="term demo" data-demo data-demo-scenario={first} hidden>
+  <div class="term-bar">
+    <span class="demo-where">{RUNS.scenarios[first].where}</span>
+    <span class="demo-sync" data-demo-sync hidden></span>
+    <PlayerControls lang={lang} />
+  </div>
+  <pre class="demo-screen" data-demo-screen aria-hidden="true" hidden></pre>
+  <pre class="demo-transcript" data-demo-transcript></pre>
+  <div class="demo-progress" data-demo-progress hidden aria-hidden="true"><span></span></div>
+</div>
+
+<dialog class="demo-modal" data-demo-modal aria-labelledby="run-title">
+  <div class="demo-modal-head">
+    <h2 id="run-title" data-demo-title></h2>
+    <p data-demo-caption></p>
+  </div>
+</dialog>
+</Base>

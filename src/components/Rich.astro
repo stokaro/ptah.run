@@ -1,0 +1,24 @@
+---
+/* A sentence with inline pieces, as the copy modules write it: a string is
+ * text, {code} inline code (with href, a link around it), {exit} an exit code
+ * chip, {strong} emphasis, {href, text} a link. Keeping the pieces as data
+ * rather than HTML lets a translation reorder them without touching markup. */
+type Piece =
+  | string
+  | { code: string; href?: string }
+  | { exit: number }
+  | { strong: string }
+  | { href: string; text: string };
+
+interface Props {
+  parts: Piece[] | string;
+}
+const parts = typeof Astro.props.parts === "string" ? [Astro.props.parts] : Astro.props.parts;
+---
+{parts.map((p) =>
+  typeof p === "string" ? p
+  : "exit" in p ? <span class={`exit exit-${p.exit}`}>{p.exit}</span>
+  : "code" in p ? (p.href ? <a href={p.href}><code>{p.code}</code></a> : <code>{p.code}</code>)
+  : "strong" in p ? <strong>{p.strong}</strong>
+  : <a href={p.href}>{p.text}</a>
+)}

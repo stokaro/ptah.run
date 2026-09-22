@@ -1,0 +1,56 @@
+---
+/* Two ways to put a model on the project, over one contract, and two moments
+ * from a recorded ptah assist session. */
+import Rich from "../Rich.astro";
+import { MOMENTS } from "../../data/captures.mjs";
+
+interface Props {
+  t: any;
+}
+const c = Astro.props.t.agents;
+---
+<section class="hs" aria-labelledby="agents-title">
+  <div class="wrap">
+    <div class="hs-head">
+      <div class="hs-title"><div class="eyebrow">{c.eyebrow}</div><h2 id="agents-title">{c.h2}</h2></div>
+      <p>{c.lead}</p>
+    </div>
+    <div class="lanes">
+      <div class="lanes-rows">
+        <div class="lane">
+          <div class="lane-who"><span>ptah assist</span><span>{c.assistWho}</span></div>
+          <div class="lane-path">
+            <div class="node"><span>{c.you}</span><span>{c.terminal}</span></div>
+            <div class="link" aria-hidden="true"><span>⇄</span><span></span></div>
+            <div class="node node-acc"><span>ptah assist</span><span>{c.profile}</span></div>
+            <div class="link" aria-hidden="true"><span>⇄</span><span>{c.tools}</span></div>
+            <div class="node"><span>{c.project}</span><span>{c.projectSub}</span></div>
+          </div>
+        </div>
+        <div class="lane">
+          <div class="lane-who"><span>ptah mcp</span><span>{c.mcpWho}</span></div>
+          <div class="lane-path">
+            <div class="node"><span>{c.you}</span><span>{c.inClient}</span></div>
+            <div class="link" aria-hidden="true"><span>⇄</span><span></span></div>
+            <div class="node"><span>{c.client}</span><span>{c.clients}</span></div>
+            <div class="link" aria-hidden="true"><span>⇄</span><span>ptah mcp</span></div>
+            <div class="node"><span>{c.project}</span><span>{c.projectSub}</span></div>
+          </div>
+        </div>
+      </div>
+      <ul class="contract">
+        {c.contract.map((x: any) => <li><span>{x.title}</span><span><Rich parts={x.text} /></span></li>)}
+      </ul>
+    </div>
+    <div class="moments">
+      <div class="tframe">
+        <div class="tframe-bar"><span>{c.moment1}</span><span>{c.recorded}</span></div>
+        <pre set:html={MOMENTS.approval}></pre>
+      </div>
+      <div class="tframe">
+        <div class="tframe-bar"><span>{c.moment2}</span><span>{c.recorded}</span></div>
+        <pre set:html={MOMENTS.hold}></pre>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,196 @@
+{
+ "ptah": "v0.8.0 (061fac0c6, official release binaries)",
+ "steps": [
+  {
+   "step": "plan",
+   "measured_second_generation": {
+    "command": "ptah inference plan --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable'",
+    "stdout": "generation 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85\n  source.table = docs (configured: the specification)\n  model.identifier = ptah-docs-stub-v2 (configured: the specification)\n  model.revision = 1 (configured: the specification)\n  provider.credential =  (configured: the specification, as a reference rather than a value)\n  generation.reproducibility = full (inferred: the specification pins an immutable model revision)\n  source.estimated_rows = 3 (measured)\n  run.consistency_mode = outbox (configured: the migration specification)\n  target.exists = false (measured)\n  target.capability.vector_type = true (measured)\n  target.capability.vector_index = true (measured)\n  [prepare] create the vector column and metadata for generation 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85\n  [capture] install the outbox mechanism and record its starting position\n  [backfill] embed 3 in-scope source rows\n  [catch-up] process every source change recorded after the snapshot began\n  [index] build the vector index and wait for it to be valid\n  [verify] run every verification layer against the exact target generation\n  [cutover] point queries at generation 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85, which nothing currently reads\n\nWhat is not established:\n  - generation.reproducibility = full (inferred: the specification pins an immutable model revision)\n\nWhat leaves the database:\n  - ptah-docs-stub-v2 at http://embeddings:8080/v1, declared local\n  - the text of title, body\n  - for 3 rows\n\nConsistency mode: outbox\n  - the outbox event and the source change are one transaction, so a change that committed has an event",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g1_first_line": "run g1: cut_over, running",
+   "status_g2_first_line": "error: not found: run g2",
+   "status_g1": {
+    "command": "ptah inference status --spec /work/spec-g1.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g1",
+    "stdout": "run g1: cut_over, running\n  - generation: b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866\n  - scanned 3, embedded 3, skipped 0, deleted 0\n  - 2 batches committed, 0 retries since the last one\n  - 3 prompt tokens, 6 total, as the provider reported them\n  - snapshot boundary: 765\n  - catch-up watermark: 773\n  - lease: held by nobody, fencing token 5\n\nverified: true, cutover ready: true\n  - an approval is required, for plan 7ab538bb0ac4\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g2": {
+    "command": "ptah inference status --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2",
+    "stdout": "",
+    "stderr": "error: not found: run g2",
+    "exit": 2
+   },
+   "recorded_first_generation_session": {
+    "source": "ptah.run@e753baad:assets/runs.js lines 386-391 (first generation only, trimmed, v0.7.0-era)"
+   }
+  },
+  {
+   "step": "prepare",
+   "measured_second_generation": {
+    "command": "ptah inference prepare --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2",
+    "stdout": "prepared run g2 for generation 4f8a8e77ec39\n  - snapshot boundary: 788",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g1_first_line": "run g1: cut_over, running",
+   "status_g2_first_line": "run g2: boundary_captured, running",
+   "status_g1": {
+    "command": "ptah inference status --spec /work/spec-g1.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g1",
+    "stdout": "run g1: cut_over, running\n  - generation: b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866\n  - scanned 3, embedded 3, skipped 0, deleted 0\n  - 2 batches committed, 0 retries since the last one\n  - 3 prompt tokens, 6 total, as the provider reported them\n  - snapshot boundary: 765\n  - catch-up watermark: 773\n  - lease: held by nobody, fencing token 5\n\nverified: true, cutover ready: true\n  - an approval is required, for plan 7ab538bb0ac4\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g2": {
+    "command": "ptah inference status --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2",
+    "stdout": "run g2: boundary_captured, running\n  - generation: 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85\n  - scanned 0, embedded 0, skipped 0, deleted 0\n  - 0 batches committed, 0 retries since the last one\n  - the provider reported no token usage\n  - snapshot boundary: 788\n  - catch-up watermark: none yet, because catch-up has not run\n  - lease: ptah-cli, fencing token 1\n\nverified: false, cutover ready: false\n  - an approval is required, for plan 9bc9b6c6e309\n  - [consistency/blocking] catch-up has not reached the barrier, so changes after the snapshot are unprocessed\n  - [consistency/blocking] the backfill has not reached the end of its snapshot\n  - [coverage/blocking] 3 in-scope source rows have no vector in this generation\n  - [vector_validity/blocking] 3 rows carry no vector and are not marked skipped or deleted\n  - blocked: catch-up has reached transaction 0 and the backfill's boundary is 788, so changes between them are unprocessed\n  - blocked: the required index is absent, invalid or still building\n  - blocked: verification did not pass and nothing was accepted\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one\n  - not measured: a lease on this run is held by \"ptah-cli\" until 2026-09-22T22:01:50Z, and whether that worker could still write was not decided: every command claims under one name, so the holder does not identify a process",
+    "stderr": "",
+    "exit": 0
+   },
+   "recorded_first_generation_session": {
+    "source": "ptah.run@e753baad:assets/runs.js lines 393-395 (first generation only, trimmed, v0.7.0-era)"
+   }
+  },
+  {
+   "step": "backfill",
+   "measured_second_generation": {
+    "command": "ptah inference backfill --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2 --batch-rows 10",
+    "stdout": "backfill finished: 3 scanned, 3 embedded, 0 skipped",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g1_first_line": "run g1: cut_over, running",
+   "status_g2_first_line": "run g2: backfilled, running",
+   "status_g1": {
+    "command": "ptah inference status --spec /work/spec-g1.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g1",
+    "stdout": "run g1: cut_over, running\n  - generation: b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866\n  - scanned 3, embedded 3, skipped 0, deleted 0\n  - 2 batches committed, 0 retries since the last one\n  - 3 prompt tokens, 6 total, as the provider reported them\n  - snapshot boundary: 765\n  - catch-up watermark: 773\n  - lease: held by nobody, fencing token 5\n\nverified: true, cutover ready: true\n  - an approval is required, for plan 7ab538bb0ac4\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g2": {
+    "command": "ptah inference status --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2",
+    "stdout": "run g2: backfilled, running\n  - generation: 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85\n  - scanned 3, embedded 3, skipped 0, deleted 0\n  - 1 batches committed, 0 retries since the last one\n  - 3 prompt tokens, 6 total, as the provider reported them\n  - snapshot boundary: 788\n  - catch-up watermark: none yet, because catch-up has not run\n  - lease: ptah-cli, fencing token 2\n\nverified: false, cutover ready: false\n  - an approval is required, for plan d5b8b425138f\n  - [consistency/blocking] catch-up has not reached the barrier, so changes after the snapshot are unprocessed\n  - [structural/blocking] the generation's index does not exist\n  - blocked: catch-up has reached transaction 0 and the backfill's boundary is 788, so changes between them are unprocessed\n  - blocked: the required index is absent, invalid or still building\n  - blocked: verification did not pass and nothing was accepted\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one\n  - not measured: a lease on this run is held by \"ptah-cli\" until 2026-09-22T22:15:50Z, and whether that worker could still write was not decided: every command claims under one name, so the holder does not identify a process",
+    "stderr": "",
+    "exit": 0
+   },
+   "recorded_first_generation_session": {
+    "source": "ptah.run@e753baad:assets/runs.js lines 396-398 (first generation only, trimmed, v0.7.0-era)"
+   }
+  },
+  {
+   "step": "catchup",
+   "measured_second_generation": {
+    "command": "ptah inference catchup --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2 --batch-rows 10",
+    "stdout": "caught up to transaction 796: 0 changed rows, 0 tombstoned\n  - the outbox keeps events this run has processed: floor 773 for public.docs is held by run g1 (generation b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866)",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g1_first_line": "run g1: cut_over, running",
+   "status_g2_first_line": "run g2: caught_up, running",
+   "status_g1": {
+    "command": "ptah inference status --spec /work/spec-g1.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g1",
+    "stdout": "run g1: cut_over, running\n  - generation: b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866\n  - scanned 3, embedded 3, skipped 0, deleted 0\n  - 2 batches committed, 0 retries since the last one\n  - 3 prompt tokens, 6 total, as the provider reported them\n  - snapshot boundary: 765\n  - catch-up watermark: 773\n  - lease: held by nobody, fencing token 5\n\nverified: true, cutover ready: true\n  - an approval is required, for plan 7ab538bb0ac4\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g2": {
+    "command": "ptah inference status --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2",
+    "stdout": "run g2: caught_up, running\n  - generation: 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85\n  - scanned 3, embedded 3, skipped 0, deleted 0\n  - 2 batches committed, 0 retries since the last one\n  - 3 prompt tokens, 6 total, as the provider reported them\n  - snapshot boundary: 788\n  - catch-up watermark: 796\n  - lease: ptah-cli, fencing token 3\n\nverified: false, cutover ready: false\n  - an approval is required, for plan bc3989337310\n  - [structural/blocking] the generation's index does not exist\n  - blocked: the required index is absent, invalid or still building\n  - blocked: verification did not pass and nothing was accepted\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one\n  - not measured: a lease on this run is held by \"ptah-cli\" until 2026-09-22T22:15:51Z, and whether that worker could still write was not decided: every command claims under one name, so the holder does not identify a process",
+    "stderr": "",
+    "exit": 0
+   },
+   "recorded_first_generation_session": {
+    "source": "ptah.run@e753baad:assets/runs.js lines 399-401 (first generation only, trimmed, v0.7.0-era)"
+   }
+  },
+  {
+   "step": "index",
+   "measured_second_generation": {
+    "command": "ptah inference index --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2",
+    "stdout": "generation 4f8a8e77ec39 has a valid index",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g1_first_line": "run g1: cut_over, running",
+   "status_g2_first_line": "run g2: indexed, running",
+   "status_g1": {
+    "command": "ptah inference status --spec /work/spec-g1.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g1",
+    "stdout": "run g1: cut_over, running\n  - generation: b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866\n  - scanned 3, embedded 3, skipped 0, deleted 0\n  - 2 batches committed, 0 retries since the last one\n  - 3 prompt tokens, 6 total, as the provider reported them\n  - snapshot boundary: 765\n  - catch-up watermark: 773\n  - lease: held by nobody, fencing token 5\n\nverified: true, cutover ready: true\n  - an approval is required, for plan 7ab538bb0ac4\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g2": {
+    "command": "ptah inference status --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2",
+    "stdout": "run g2: indexed, running\n  - generation: 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85\n  - scanned 3, embedded 3, skipped 0, deleted 0\n  - 2 batches committed, 0 retries since the last one\n  - 3 prompt tokens, 6 total, as the provider reported them\n  - snapshot boundary: 788\n  - catch-up watermark: 796\n  - lease: held by nobody, fencing token 4\n\nverified: true, cutover ready: true\n  - an approval is required, for plan a7847e225dff\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one",
+    "stderr": "",
+    "exit": 0
+   },
+   "recorded_first_generation_session": {
+    "source": "ptah.run@e753baad:assets/runs.js lines 402-403 (first generation only, trimmed, v0.7.0-era)"
+   }
+  },
+  {
+   "step": "verify",
+   "measured_second_generation": {
+    "command": "ptah inference verify --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2",
+    "stdout": "generation 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85: 3 source rows, 3 target rows\n  - every deterministic layer passed\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g1_first_line": "run g1: cut_over, running",
+   "status_g2_first_line": "run g2: verified, running",
+   "status_g1": {
+    "command": "ptah inference status --spec /work/spec-g1.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g1",
+    "stdout": "run g1: cut_over, running\n  - generation: b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866\n  - scanned 3, embedded 3, skipped 0, deleted 0\n  - 2 batches committed, 0 retries since the last one\n  - 3 prompt tokens, 6 total, as the provider reported them\n  - snapshot boundary: 765\n  - catch-up watermark: 773\n  - lease: held by nobody, fencing token 5\n\nverified: true, cutover ready: true\n  - an approval is required, for plan 7ab538bb0ac4\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g2": {
+    "command": "ptah inference status --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2",
+    "stdout": "run g2: verified, running\n  - generation: 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85\n  - scanned 3, embedded 3, skipped 0, deleted 0\n  - 2 batches committed, 0 retries since the last one\n  - 3 prompt tokens, 6 total, as the provider reported them\n  - snapshot boundary: 788\n  - catch-up watermark: 796\n  - lease: held by nobody, fencing token 4\n\nverified: true, cutover ready: true\n  - an approval is required, for plan 949aa4c67b4b\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one",
+    "stderr": "",
+    "exit": 0
+   },
+   "recorded_first_generation_session": {
+    "source": "ptah.run@e753baad:assets/runs.js lines 404-408 (first generation only, trimmed, v0.7.0-era)"
+   }
+  },
+  {
+   "step": "cutover",
+   "measured_second_generation": {
+    "command": "ptah inference cutover --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2",
+    "stdout": "plan 949aa4c67b4b\ncutover refused:\n  - this policy requires an approval and none was given",
+    "stderr": "error: cutover refused",
+    "exit": 2
+   },
+   "measured_second_generation_approved": {
+    "command": "ptah inference cutover --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2 --approve 949aa4c67b4b --approver 'site check'",
+    "stdout": "queries now read generation 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85 (plan 949aa4c67b4b)\n  - no stabilization window was asked for, so nothing is keeping the previous generation current and there is no rollback to it",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g1_first_line_after_refused": "run g1: cut_over, running",
+   "status_g2_first_line_after_refused": "run g2: verified, running",
+   "status_g1_first_line": "run g1: cut_over, running",
+   "status_g2_first_line": "run g2: cut_over, running",
+   "status_g1": {
+    "command": "ptah inference status --spec /work/spec-g1.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g1",
+    "stdout": "run g1: cut_over, running\n  - generation: b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866\n  - scanned 3, embedded 3, skipped 0, deleted 0\n  - 2 batches committed, 0 retries since the last one\n  - 3 prompt tokens, 6 total, as the provider reported them\n  - snapshot boundary: 765\n  - catch-up watermark: 773\n  - lease: held by nobody, fencing token 5\n\nverified: true, cutover ready: true\n  - an approval is required, for plan a398fcab1e9b\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one",
+    "stderr": "",
+    "exit": 0
+   },
+   "status_g2": {
+    "command": "ptah inference status --spec /work/spec-g2.yaml --db-url 'postgres://ptah:ptah@postgres:5432/ptah?sslmode=disable' --run-id g2",
+    "stdout": "run g2: cut_over, running\n  - generation: 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85\n  - scanned 3, embedded 3, skipped 0, deleted 0\n  - 2 batches committed, 0 retries since the last one\n  - 3 prompt tokens, 6 total, as the provider reported them\n  - snapshot boundary: 788\n  - catch-up watermark: 796\n  - lease: held by nobody, fencing token 5\n\nverified: true, cutover ready: true\n  - an approval is required, for plan d4c9f29a980f\n  - not measured: the stored vectors were not read back, so their dimension was checked and their values were not; the target refuses a non-finite component on write, so nothing here could have carried one",
+    "stderr": "",
+    "exit": 0
+   },
+   "recorded_first_generation_session": {
+    "source": "ptah.run@e753baad:assets/runs.js lines 409-427 (first generation only, trimmed, v0.7.0-era)"
+   },
+   "pointer_after_cutover": " target_table |                        active_generation                         |                       previous_generation                        | cut_over_by |                           plan_digest                            \n--------------+------------------------------------------------------------------+------------------------------------------------------------------+-------------+------------------------------------------------------------------\n docs         | 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85 | b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866 | site check  | 949aa4c67b4b9d1cf0505b7868f395020441126df7a8367900e10555c6514b5e\n(1 row)\n\n id |                       embedding_generation                       | embedding_state |                     embedding_v2_generation                      | embedding_v2_state \n----+------------------------------------------------------------------+-----------------+------------------------------------------------------------------+--------------------\n  1 | b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866 | upsert          | 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85 | upsert\n  2 | b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866 | upsert          | 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85 | upsert\n  3 | b7cc9eb5c7d2ee13ad46ba3d5da8a479ec57b128d771e4151fab5bf6d1da0866 | upsert          | 4f8a8e77ec3904675efb9678ec1b3de138a135b21d267621d93decf47e581d85 | upsert\n(3 rows)"
+  }
+ ]
+}
