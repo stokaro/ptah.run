@@ -13,7 +13,7 @@
  * moves the pill in the terminal bar, `wait` is a beat, `blank` is a spacer.
  *
  * Loaded by the home page and by /in-practice/, and read by
- * scripts/build-runs.mjs, which writes the transcripts on that page. Both
+ * src/lib/runs.mjs, which writes the transcripts at build time. Both
  * ends read this file so neither can drift from it.
  */
 (function (root) {

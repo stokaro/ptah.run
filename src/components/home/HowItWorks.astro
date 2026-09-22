@@ -24,7 +24,7 @@ const SOURCES = ["schema.sql", "schema.yaml", "schema.hcl", "schema.dbml", "mode
         <li class="pipe-compare">{c.compare}</li>
         <li class="pipe-down" aria-hidden="true">↓</li>
         <li class="pipe-out"><code>schema drift</code><em>{c.proof} <span class="exit exit-0">0</span> <span class="exit exit-1">1</span> <span class="exit exit-2">2</span></em></li>
-        <li class="pipe-out"><code>schema plan · --dry-run</code><em>{c.review}</em></li>
+        <li class="pipe-out"><code>schema plan · <span class="nw">--dry-run</span></code><em>{c.review}</em></li>
         <li class="pipe-out"><code>migrations lint</code><em>{c.gate}</em></li>
         <li class="pipe-out is-apply"><code>schema apply · migrations up</code><em>{c.afterApprovalLive}</em></li>
       </ol>

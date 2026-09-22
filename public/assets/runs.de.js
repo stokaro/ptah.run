@@ -1,5 +1,5 @@
 /* Narration translated from assets/runs.js; recorded commands and output stay unchanged.
- * scripts/build-runs.mjs checks every source key before writing any page. */
+ * src/lib/runs.mjs checks every source key and stops the build on a gap. */
 (function (root) {
   "use strict";
   var narration = {
