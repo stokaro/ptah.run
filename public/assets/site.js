@@ -589,6 +589,17 @@
       return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
+    // A browser may break a line after any hyphen, so a narrow frame printed
+    // `--auto-` on one row and `approve` on the next. A flag is one word to
+    // whoever reads or types it, in a command, a note or an error that names
+    // it, so it wraps whole. src/lib/runs.mjs does the same for the printed
+    // session.
+    var FLAG = /(^|\s)(--?[a-z][\w-]*)/g;
+
+    function shown(text) {
+      return esc(text).replace(FLAG, '$1<span class="nw">$2</span>');
+    }
+
     // The screen is rebuilt from a list of finished lines plus the one being
     // typed, so a replay is a reset of that list rather than a DOM rewind.
     var CURSOR = '<span class="demo-cursor" data-on="1">\u258d</span>';
@@ -604,7 +615,7 @@
     // apart, or the rule that underlines them. Wrapping one turns a table into
     // rubble, which is what a phone did to `oci inspect`, so these scroll
     // instead while the prose around them keeps wrapping. The same two tests
-    // are in scripts/build-runs.mjs; when one changes, change the other.
+    // are in src/lib/runs.mjs; when one changes, change the other.
     var COLUMNS = /[^\s] {2,}\S/;
     var TABLE_RULE = /^[-+=|\s]{8,}$/;
 
@@ -657,7 +668,7 @@
       if (typing !== null) {
         var cls = CLASS[typing.kind];
         var head = typing.kind === "cmd" ? '<span class="p">$</span> ' : "";
-        var body = esc(typing.text) + CURSOR;
+        var body = shown(typing.text) + CURSOR;
         rows.push(head + (cls ? '<span class="' + cls + '">' + body + "</span>" : body));
       } else if (idle || paused) {
         // A shell that is not being typed at still shows a caret, and the
@@ -694,7 +705,7 @@
 
     function commit(kind, text) {
       var cls = CLASS[kind];
-      var body = esc(text);
+      var body = shown(text);
       if (kind === "cmd") body = '<span class="p">$</span> ' + body;
       lines.push(cls ? '<span class="' + cls + '">' + body + "</span>" : body);
       // A shell scrolls; the frame is fixed, so the oldest lines go rather

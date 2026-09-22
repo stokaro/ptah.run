@@ -8,8 +8,8 @@
  * the `#` comments the demo types to say what is about to happen.
  *
  * Every table here is keyed by the English it replaces, and
- * scripts/build-runs.mjs refuses to write a page unless the keys and the
- * English source cover each other exactly. So an English line edited in
+ * src/lib/runs.mjs stops the build unless the keys and the English source
+ * cover each other exactly. So an English line edited in
  * assets/runs.js orphans its key and fails the check, which is how the edit
  * reaches this file instead of silently leaving a Japanese page behind.
  *

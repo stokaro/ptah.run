@@ -58,14 +58,31 @@ try {
                 .filter((element) => element.getClientRects().length)
                 .filter((element) => { const box = element.getBoundingClientRect(); return box.left < -1 || box.right > innerWidth + 1; })
                 .map((element) => element.className || element.tagName);
+              // A flag in a command, a note or an error is one word. A browser
+              // breaks after any hyphen, which printed `--auto-` above `approve`
+              // in a phone-width frame; each flag has to sit on one row.
+              const broken = [];
+              const texts = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+              for (let node; (node = texts.nextNode()); ) {
+                if (!node.parentElement.closest("pre, code") || !node.parentElement.getClientRects().length) continue;
+                for (const match of node.data.matchAll(/(?:^|\s)(--?[a-z][\w-]*-[\w-]*)/g)) {
+                  const start = match.index + match[0].indexOf(match[1]);
+                  const range = document.createRange();
+                  range.setStart(node, start);
+                  range.setEnd(node, start + match[1].length);
+                  const rows = new Set([...range.getClientRects()].filter((box) => box.width > 0).map((box) => Math.round(box.top)));
+                  if (rows.size > 1) broken.push(match[1]);
+                }
+              }
               return { lang: document.documentElement.lang, width: innerWidth,
-                scrollWidth: document.documentElement.scrollWidth, clipped, outside };
+                scrollWidth: document.documentElement.scrollWidth, clipped, outside, broken };
             });
             readings.push({ route, javaScriptEnabled, colorScheme, ...reading });
             assert.equal(reading.lang, lang, route);
             assert(reading.scrollWidth <= width + 1, `${route} at ${width}: page width ${reading.scrollWidth}`);
             assert.deepEqual(reading.clipped, [], `${route} at ${width}: clipped text`);
             assert.deepEqual(reading.outside, [], `${route} at ${width}: content outside viewport`);
+            assert.deepEqual(reading.broken, [], `${route} at ${width}: a flag broken across two rows`);
             assert.deepEqual(errors, [], `${route}: browser errors`);
             await page.locator(".lang-picker summary").click();
             for (const code of Object.keys(LOCALES)) {

@@ -97,10 +97,10 @@ const anchors = (html) => new Set(all(html, /\sid="([^"]+)"/g));
 
 const CODE_BLOCK = /<(code|pre)\b([^>]*)>([\s\S]*?)<\/\1>/g;
 
-// Written by scripts/build-runs.mjs out of assets/runs.js and
-// the narration dictionaries. All language trees come out of one run and `build-runs.mjs
-// --check` fails when it has not been made, so the generator owns these and a
-// second comparison here would only report its translated narration.
+// Written by src/lib/runs.mjs out of assets/runs.js and the narration
+// dictionaries, which stops the build on a missing or orphaned key. The
+// generator owns these, so a second comparison here would only report its
+// translated narration.
 const GENERATED = /\bdata-demo-transcript\b|\bdata-demo-screen\b|\btile-transcript\b/;
 
 // Element text, tags dropped and the entities a page actually writes decoded.
