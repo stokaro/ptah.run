@@ -364,9 +364,15 @@ export const MOMENTS = { approval: moment(assistRec.approval), hold: moment(assi
 // declared and how many are tested, meaning certified or legacy-tested. The
 // support policy grants either level only to a line something actually runs
 // against; legacy-tested is a line past its upstream end of life that CI
-// still runs. The rest are best-effort: one ClickHouse line nothing probes,
-// and Spanner's only line, which runs against the emulator because that is
-// the only Spanner a container can provide.
+// still runs. The rest are best-effort: ClickHouse 25.8, whose upstream
+// support has ended and which nothing probes, and Spanner's only line, which
+// runs against the emulator because that is the only Spanner a container can
+// provide.
+//
+// An engine shows its tested lines only. A line the vendor no longer supports
+// stays in the matrix as a record, not as a gap in the engine's coverage, so
+// counting it against ClickHouse would say less than the testing does.
+// `lines` stays here for the total check below.
 //
 // The notes beside each engine come from the matrix's Coverage column, which
 // is about feature depth, a different question from how much testing stands
