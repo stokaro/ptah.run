@@ -1042,6 +1042,7 @@ html:not(.js) [data-js-only] {
   display: grid;
   grid-template-rows: auto 1fr;
   min-width: 0;
+  min-height: 0;
 }
 .fan-cmd {
   margin: 0;
@@ -1055,13 +1056,19 @@ html:not(.js) [data-js-only] {
 .fan-cmd .p {
   color: var(--termamber);
 }
+/* Beside the fan-out, the output fills the card down to its bottom edge and
+ * scrolls inside it: the fan-out on the left sets the card's height, and
+ * `contain: size` keeps a long document from stretching the card past it.
+ * Stacked below the targets on a narrow screen there is no height to fill,
+ * so the output keeps a fixed one there. */
 .fan-body {
   margin: 0;
   padding: 16px 18px;
   font: 12.5px/1.65 var(--mono);
   color: var(--fg);
   overflow: auto;
-  max-height: 290px;
+  min-height: 0;
+  contain: size;
 }
 .fan-body .k { color: var(--acc); }
 .fan-body .s { color: var(--str); }
@@ -1492,6 +1499,10 @@ html:not(.js) [data-js-only] {
   }
   .fan-left svg {
     display: none;
+  }
+  .fan-body {
+    contain: none;
+    max-height: 290px;
   }
   .fan-targets {
     width: auto;
