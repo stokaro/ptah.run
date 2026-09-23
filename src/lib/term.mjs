@@ -33,13 +33,20 @@ export function renderLines(lines) {
 // Source files and exported documents. Token classes: k keyword, s string,
 // n number or type, c comment. The rules are per language and deliberately
 // small: they colour what a reader scans for and leave the rest alone.
+//
+// hl() places each group's span by adding up the lengths of the groups before
+// it, starting at the match. So every character of a match belongs to a
+// group: text a rule matches only for context, like the ": " before a YAML
+// number, is a group with no class. Left out of the groups, it shifts every
+// span after it -- "maxLength: 255" coloured ": 2" instead of "255".
 const RULES = {
   yaml: [
     [/^(\s*#.*)$/, ["c"]],
     [/^(\s*-?\s*)([\w.$-]+)(:)/, [null, "k", null]],
     [/(\s#.*)$/, ["c"]],
     [/("[^"]*"|'[^']*')/g, ["s"]],
-    [/:\s+(true|false|null|\d+(?:\.\d+)?)\b/g, ["n"]],
+    // A number only when it is the whole value: 3.0.3 is a version string.
+    [/(:\s+)(true|false|null|-?\d+(?:\.\d+)?)(?=\s*(?:#|$))/g, [null, "n"]],
   ],
   graphql: [
     [/^(\s*#.*)$/, ["c"]],
@@ -69,7 +76,7 @@ const RULES = {
     [/^(\s*#.*)$/, ["c"]],
     [/^(\s*)(table|column|primary_key|index|foreign_key|schema|enum|values)\b/, [null, "k"]],
     [/("[^"]*")/g, ["s"]],
-    [/=\s*(true|false|null|\d+)\b/g, ["n"]],
+    [/(=\s*)(true|false|null|\d+)\b/g, [null, "n"]],
   ],
   sql: [
     [/^(\s*--.*)$/, ["c"]],
