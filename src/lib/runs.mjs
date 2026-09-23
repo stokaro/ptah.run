@@ -33,10 +33,10 @@ const CLASS = { mute: "m", sql: "a", new: "n", err: "e", note: "c" };
 export const esc = (text) =>
   String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-// A flag wraps whole wherever a session names it, as shown() in the player
+// A flag wraps whole wherever a session names it, as flagsWhole() in the player
 // does it.
 const FLAG = /(^|\s)(--?[a-z][\w-]*)/g;
-const shown = (text) => esc(text).replace(FLAG, '$1<span class="nw">$2</span>');
+const flagsWhole = (text) => esc(text).replace(FLAG, '$1<span class="nw">$2</span>');
 
 /* ---------- Narration coverage ----------
  *
@@ -118,7 +118,7 @@ export function transcript(script, lang) {
     // A note opens a step, and the typed run puts a blank row in front of it.
     // Printing it without one makes the printed session a different text.
     if (kind === "note" && rows.length && rows[rows.length - 1] !== "") rows.push("");
-    let body = shown(line(lang, kind, text));
+    let body = flagsWhole(line(lang, kind, text));
     if (kind === "cmd") body = `<span class="p">$</span> ${body}`;
     const cls = CLASS[kind];
     rows.push(cls ? `<span class="${cls}">${body}</span>` : body);
