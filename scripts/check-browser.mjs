@@ -211,8 +211,27 @@ try {
       await context.close();
     }
   }
+  // Every run above asks for reduced motion, where the player lays the whole
+  // session out at once and never types. Typing is its own path, and a reader
+  // with motion allowed is the one who takes it: the screen has to fill, with
+  // no error, on the homepage in each language and on /in-practice/.
+  const played = [];
+  for (const route of [...Object.keys(LOCALES).map((lang) => localizedPath(lang, "/")), "/in-practice/#run-inference"]) {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: "no-preference" });
+    const page = await context.newPage();
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto(origin + route);
+    const typed = await page
+      .waitForFunction(() => (document.querySelector("[data-demo-screen]")?.textContent ?? "").replace(/\u258d/g, "").trim().length > 20, null, { timeout: 10000 })
+      .then(() => true, () => false);
+    assert.deepEqual(errors, [], `${route}: the playing session threw`);
+    assert(typed, `${route}: the player typed nothing in 10 seconds`);
+    played.push(route);
+    await context.close();
+  }
   await writeFile(join(output, "readings.json"), JSON.stringify(readings, null, 2) + "\n");
-  console.log(`${readings.length} layout readings passed; switches, mobile navigation, copy controls, install tabs, player and missing-translation refusals passed`);
+  console.log(`${readings.length} layout readings passed; switches, mobile navigation, copy controls, install tabs, player and missing-translation refusals passed; the player typed on ${played.length} pages`);
 } finally {
   await browser?.close();
   await new Promise((done) => server.close(done));

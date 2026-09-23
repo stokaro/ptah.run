@@ -596,7 +596,10 @@
     // session.
     var FLAG = /(^|\s)(--?[a-z][\w-]*)/g;
 
-    function shown(text) {
+    // Not `shown`: paint() declares a `var shown` for the line counter, and a
+    // var is hoisted over the whole function, so a helper of that name is
+    // undefined inside paint() and every typed line throws.
+    function flagsWhole(text) {
       return esc(text).replace(FLAG, '$1<span class="nw">$2</span>');
     }
 
@@ -668,7 +671,7 @@
       if (typing !== null) {
         var cls = CLASS[typing.kind];
         var head = typing.kind === "cmd" ? '<span class="p">$</span> ' : "";
-        var body = shown(typing.text) + CURSOR;
+        var body = flagsWhole(typing.text) + CURSOR;
         rows.push(head + (cls ? '<span class="' + cls + '">' + body + "</span>" : body));
       } else if (idle || paused) {
         // A shell that is not being typed at still shows a caret, and the
@@ -705,7 +708,7 @@
 
     function commit(kind, text) {
       var cls = CLASS[kind];
-      var body = shown(text);
+      var body = flagsWhole(text);
       if (kind === "cmd") body = '<span class="p">$</span> ' + body;
       lines.push(cls ? '<span class="' + cls + '">' + body + "</span>" : body);
       // A shell scrolls; the frame is fixed, so the oldest lines go rather
