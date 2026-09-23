@@ -312,6 +312,14 @@ export default {
       " ",
       { href: "https://docs.ptah.run/edge/databases/support-matrix/", text: "Support matrix →" },
     ],
+    level: (lines, tested) =>
+      tested === 0
+        ? "best-effort"
+        : tested === lines
+          ? lines === 1
+            ? "1 line, tested"
+            : `${lines} lines, all tested`
+          : `${tested} of ${lines} lines tested`,
     notes: {
       postgres: "primary target, broadest coverage",
       sqlite: "local work, examples, tests",
@@ -322,7 +330,7 @@ export default {
       sqlserver: "conservative portable subset",
       oracle: "renders, plans, reads a live catalog",
       clickhouse: "capability-limited",
-      spanner: "most conservative, best-effort testing",
+      spanner: "most conservative, tested only against the emulator",
     },
     toolingLabel: "Tooling",
     tooling: [

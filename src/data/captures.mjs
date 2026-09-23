@@ -358,22 +358,45 @@ export const MOMENTS = { approval: moment(assistRec.approval), hold: moment(assi
 
 /* ---------- Databases ---------- */
 
-// The counts and the Coverage column of the generated support matrix
-// (docs/site/src/content/docs/databases/support-matrix.md in stokaro/ptah).
-// Rating: 3 primary target; 2 supported or a PostgreSQL-compatible path;
-// 1 a conservative subset, capability-limited, or renders, plans and reads.
+// The declared release lines of the generated support matrix
+// (docs/site/src/content/docs/databases/support-matrix.md in stokaro/ptah,
+// from internal/capabilityprobe/cells.go): per engine, how many lines are
+// declared and how many are tested, meaning certified or legacy-tested. The
+// support policy grants either level only to a line something actually runs
+// against; legacy-tested is a line past its upstream end of life that CI
+// still runs. The rest are best-effort: one ClickHouse line nothing probes,
+// and Spanner's only line, which runs against the emulator because that is
+// the only Spanner a container can provide.
+//
+// The notes beside each engine come from the matrix's Coverage column, which
+// is about feature depth, a different question from how much testing stands
+// behind a line.
 export const ENGINES = {
-  counts: { declared: 32, probed: 31, certified: 28 },
+  counts: { declared: 32, probed: 31, certified: 28, legacyTested: 2 },
   list: [
-    { id: "postgres", name: "PostgreSQL", rating: 3 },
-    { id: "sqlite", name: "SQLite", rating: 2 },
-    { id: "mysql", name: "MySQL", rating: 2 },
-    { id: "mariadb", name: "MariaDB", rating: 2 },
-    { id: "cockroachdb", name: "CockroachDB", rating: 2 },
-    { id: "yugabytedb", name: "YugabyteDB", rating: 2 },
-    { id: "sqlserver", name: "SQL Server", rating: 1 },
-    { id: "oracle", name: "Oracle", rating: 1 },
-    { id: "clickhouse", name: "ClickHouse", rating: 1 },
-    { id: "spanner", name: "Spanner", rating: 1 },
+    { id: "postgres", name: "PostgreSQL", lines: 6, tested: 6 },
+    { id: "sqlite", name: "SQLite", lines: 1, tested: 1 },
+    { id: "mysql", name: "MySQL", lines: 3, tested: 3 },
+    { id: "mariadb", name: "MariaDB", lines: 4, tested: 4 },
+    { id: "cockroachdb", name: "CockroachDB", lines: 3, tested: 3 },
+    { id: "yugabytedb", name: "YugabyteDB", lines: 3, tested: 3 },
+    { id: "sqlserver", name: "SQL Server", lines: 3, tested: 3 },
+    { id: "oracle", name: "Oracle", lines: 2, tested: 2 },
+    { id: "clickhouse", name: "ClickHouse", lines: 6, tested: 5 },
+    { id: "spanner", name: "Spanner", lines: 1, tested: 0 },
   ],
 };
+
+// The per-engine figures and the totals are copied from the same table, so
+// they have to agree; a line added to one and not the other stops the build
+// rather than showing two answers.
+{
+  const sum = (key) => ENGINES.list.reduce((total, engine) => total + engine[key], 0);
+  const tested = ENGINES.counts.certified + ENGINES.counts.legacyTested;
+  if (sum("lines") !== ENGINES.counts.declared || sum("tested") !== tested) {
+    throw new Error(
+      `ENGINES: the engines add up to ${sum("lines")} lines and ${sum("tested")} tested, ` +
+        `the totals say ${ENGINES.counts.declared} and ${tested}`,
+    );
+  }
+}

@@ -313,6 +313,14 @@ export default {
       " で確かめられる。",
       { href: "https://docs.ptah.run/edge/databases/support-matrix/", text: "対応表 →" },
     ],
+    level: (lines, tested) =>
+      tested === 0
+        ? "ベストエフォート"
+        : tested === lines
+          ? lines === 1
+            ? "リリースライン 1、テスト済み"
+            : `リリースライン ${lines}、すべてテスト済み`
+          : `リリースライン ${lines} のうち ${tested} がテスト済み`,
     notes: {
       postgres: "主要な対象、最も広い対応範囲",
       sqlite: "ローカルでの作業、例、テスト",
@@ -323,7 +331,7 @@ export default {
       sqlserver: "保守的で移植性の高いサブセット",
       oracle: "DDL の生成、計画、稼働中のカタログの読み取り",
       clickhouse: "機能に制限あり",
-      spanner: "最も保守的、テストはベストエフォート",
+      spanner: "最も保守的、テストはエミュレーターのみ",
     },
     toolingLabel: "ツール",
     tooling: [
