@@ -1346,32 +1346,19 @@ html:not(.js) [data-js-only] {
 .engines li:nth-last-child(-n + 5) {
   border-bottom: 0;
 }
-.engine-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
 .engine-name {
   font: 500 15px var(--sans);
+}
+.engine-level {
+  font: 11.5px var(--mono);
+  color: var(--fg2);
+}
+.engine-level.is-best-effort {
+  color: var(--mute);
 }
 .engine-note {
   font: 12.5px var(--sans);
   color: var(--mute);
-}
-.dots {
-  display: inline-flex;
-  gap: 2px;
-  flex-shrink: 0;
-}
-.dots i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--line);
-}
-.dots i.on {
-  background: var(--acc);
 }
 .aside2 {
   display: grid;
