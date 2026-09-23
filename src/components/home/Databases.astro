@@ -1,31 +1,93 @@
 ---
-/* Per engine: how many release lines are tested, then what the engine
- * covers. The figures live in src/data/captures.mjs beside their
- * source. */
+/* Pick an engine and read what Ptah manages there, the limitation worth
+ * knowing and which release lines are tested. The release lines and the
+ * counts live in src/data/captures.mjs beside their source, the generated
+ * support matrix; the prose per engine is the copy's. Without JavaScript the
+ * first engine is the page and the tabs are not drawn. */
 import Rich from "../Rich.astro";
 import { ENGINES } from "../../data/captures.mjs";
+import { hlCmd } from "../../lib/term.mjs";
 
 interface Props {
   t: any;
 }
 const c = Astro.props.t.databases;
+const first = ENGINES.list[0].id;
+const DOCS = "https://docs.ptah.run/edge/databases/";
+const CAPS = 'ptah db capabilities --db-url "$DATABASE_URL"';
+
+// A run of consecutive whole numbers reads as a range, the way the design
+// writes PostgreSQL's; any other set is listed.
+const lines = (names: string[]) => {
+  const numbers = names.map(Number);
+  const consecutive = names.length > 2 && numbers.every((n, i) => Number.isInteger(n) && (i === 0 || n === numbers[i - 1] + 1));
+  return consecutive ? `${names[0]} – ${names[names.length - 1]}` : names.join(" · ");
+};
 ---
 <section class="hs hs-tight" id="databases" aria-labelledby="dbs-title">
   <div class="wrap">
     <div class="hs-head">
       <div class="hs-title"><div class="eyebrow">{c.eyebrow}</div><h2 id="dbs-title">{c.h2}</h2></div>
-      <p><Rich parts={c.counts(ENGINES.counts.declared, ENGINES.counts.probed, ENGINES.counts.certified)} /></p>
+      <p>{c.lead}</p>
     </div>
-    <ul class="engines">
-      {ENGINES.list.map((e: any) => (
-        <li>
-          <span class="engine-name">{e.name}</span>
-          <span class:list={["engine-level", { "is-best-effort": e.tested === 0 }]}>{c.level(e.tested)}</span>
-          <span class="engine-note">{c.notes[e.id]}</span>
-        </li>
-      ))}
-    </ul>
-    <div class="aside2">
+
+    <div class="dbx" data-widget data-state={`db=${first}`}>
+      <div class="dbx-tabs" role="tablist" aria-label={c.tabsLabel} data-js-only>
+        {ENGINES.list.map((e: any) => (
+          <button class="dbx-tab" type="button" role="tab" id={`dbx-tab-${e.id}`} aria-controls={`dbx-${e.id}`} data-set={`db=${e.id}`} aria-selected={e.id === first ? "true" : "false"} tabindex={e.id === first ? "0" : "-1"}>
+            <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><ellipse cx="9" cy="4" rx="6.5" ry="2.5"></ellipse><path d="M2.5 4v10c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5V4M2.5 9c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5"></path></svg>
+            <span>{e.name}</span>
+          </button>
+        ))}
+      </div>
+      {ENGINES.list.map((e: any) => {
+        const d = c.engines[e.id];
+        return (
+          <div class:list={["dbx-panel", { "is-on": e.id === first }]} id={`dbx-${e.id}`} role="tabpanel" aria-labelledby={`dbx-tab-${e.id}`} data-when={`db=${e.id}`}>
+            <div class="dbx-main">
+              <div class="dbx-name"><span>{e.name}</span><span class="dbx-role">{d.role}</span></div>
+              <p class="dbx-can">{d.can}</p>
+              <div class="dbx-limit"><span class="dbx-dot"></span><span><strong>{d.limitTitle}</strong> {d.limit}</span></div>
+              <a href={`${DOCS}${e.docs}/`}>{c.explore(e.name)}</a>
+            </div>
+            <div class="dbx-evidence">
+              {e.tested > 0 ? (
+                <div class="dbx-lines">
+                  <div class="eyebrow eyebrow-mute">{c.linesTitle}</div>
+                  {e.certified.length > 0 && <div class="dbx-line"><code>{lines(e.certified)}</code><span>{c.certified}</span></div>}
+                  {e.legacy.length > 0 && <div class="dbx-line"><code>{lines(e.legacy)}</code><span>{c.legacy}</span></div>}
+                </div>
+              ) : (
+                <div class="dbx-lines">
+                  <div class="eyebrow eyebrow-mute">{c.boundaryTitle}</div>
+                  {d.boundary.map((b: any) => <div class="dbx-line"><span>{b.v}</span><span>{b.s}</span></div>)}
+                </div>
+              )}
+              <div class="dbx-note">{d.note}</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+
+    <div class="dbx-cards">
+      <div class="dbx-card">
+        <h3>{c.capsTitle}</h3>
+        <p>{c.capsP}</p>
+        <div class="dbx-cmd">
+          <pre id="dbx-caps" data-copy-text={CAPS}><span class="p">$</span> <Fragment set:html={hlCmd(CAPS)} /></pre>
+          <button class="copy" type="button" data-copy="dbx-caps" data-copy-name={c.copyName}><span class="copy-text">{c.copy}</span><span class="sr-only"> {c.copyName}</span></button>
+        </div>
+        <a href={c.capsHref}>{c.capsLink}</a>
+      </div>
+      <div class="dbx-card">
+        <h3>{c.ciTitle}</h3>
+        <p><Rich parts={c.ciP(ENGINES.counts.certified)} /></p>
+        <a href={`${DOCS}support-evidence/`}>{c.ciLink}</a>
+      </div>
+    </div>
+
+    <div class="aside2 dbx-aside">
       <div><div class="eyebrow eyebrow-mute">{c.toolingLabel}</div><p><Rich parts={c.tooling} /></p></div>
       <div><div class="eyebrow eyebrow-mute">{c.atlasLabel}</div><p><Rich parts={c.atlas} /></p></div>
     </div>
