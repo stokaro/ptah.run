@@ -306,14 +306,7 @@ export default {
       " ",
       { href: "https://docs.ptah.run/edge/databases/support-matrix/", text: "Matrice de support →" },
     ],
-    level: (lines, tested) =>
-      tested === 0
-        ? "sans garantie"
-        : tested === lines
-          ? lines === 1
-            ? "1 branche, testée"
-            : `${lines} branches, toutes testées`
-          : `${tested} branches testées sur ${lines}`,
+    level: (tested) => (tested === 0 ? "sans garantie" : tested === 1 ? "1 branche testée" : `${tested} branches testées`),
     notes: {
       postgres: "cible principale, couverture la plus large",
       sqlite: "travail local, exemples, tests",

@@ -313,14 +313,7 @@ export default {
       " で確かめられる。",
       { href: "https://docs.ptah.run/edge/databases/support-matrix/", text: "対応表 →" },
     ],
-    level: (lines, tested) =>
-      tested === 0
-        ? "ベストエフォート"
-        : tested === lines
-          ? lines === 1
-            ? "リリースライン 1、テスト済み"
-            : `リリースライン ${lines}、すべてテスト済み`
-          : `リリースライン ${lines} のうち ${tested} がテスト済み`,
+    level: (tested) => (tested === 0 ? "ベストエフォート" : `テスト済みのリリースライン ${tested}`),
     notes: {
       postgres: "主要な対象、最も広い対応範囲",
       sqlite: "ローカルでの作業、例、テスト",

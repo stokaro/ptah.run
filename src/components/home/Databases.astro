@@ -1,6 +1,6 @@
 ---
-/* Per engine: how many release lines are declared and tested, then what
- * the engine covers. The figures live in src/data/captures.mjs beside their
+/* Per engine: how many release lines are tested, then what the engine
+ * covers. The figures live in src/data/captures.mjs beside their
  * source. */
 import Rich from "../Rich.astro";
 import { ENGINES } from "../../data/captures.mjs";
@@ -20,7 +20,7 @@ const c = Astro.props.t.databases;
       {ENGINES.list.map((e: any) => (
         <li>
           <span class="engine-name">{e.name}</span>
-          <span class:list={["engine-level", { "is-best-effort": e.tested === 0 }]}>{c.level(e.lines, e.tested)}</span>
+          <span class:list={["engine-level", { "is-best-effort": e.tested === 0 }]}>{c.level(e.tested)}</span>
           <span class="engine-note">{c.notes[e.id]}</span>
         </li>
       ))}
