@@ -374,35 +374,52 @@ export const MOMENTS = { approval: moment(assistRec.approval), hold: moment(assi
 // counting it against ClickHouse would say less than the testing does.
 // `lines` stays here for the total check below.
 //
-// The notes beside each engine come from the matrix's Coverage column, which
-// is about feature depth, a different question from how much testing stands
-// behind a line.
+// What the section says about each engine, beside these figures, is the
+// homepage copy's, and every sentence of it is one the engine's page in the
+// documentation supports.
+//
+// `certified` and `legacy` are the tested lines themselves, as the matrix's
+// Release line column names them (SQL Server by its year), and `docs` is the
+// engine's page, where the matrix's first table links it.
 export const ENGINES = {
   counts: { declared: 32, probed: 31, certified: 28, legacyTested: 2 },
   list: [
-    { id: "postgres", name: "PostgreSQL", lines: 6, tested: 6 },
-    { id: "sqlite", name: "SQLite", lines: 1, tested: 1 },
-    { id: "mysql", name: "MySQL", lines: 3, tested: 3 },
-    { id: "mariadb", name: "MariaDB", lines: 4, tested: 4 },
-    { id: "cockroachdb", name: "CockroachDB", lines: 3, tested: 3 },
-    { id: "yugabytedb", name: "YugabyteDB", lines: 3, tested: 3 },
-    { id: "sqlserver", name: "SQL Server", lines: 3, tested: 3 },
-    { id: "oracle", name: "Oracle", lines: 2, tested: 2 },
-    { id: "clickhouse", name: "ClickHouse", lines: 6, tested: 5 },
-    { id: "spanner", name: "Spanner", lines: 1, tested: 0 },
+    { id: "postgres", name: "PostgreSQL", lines: 6, tested: 6, certified: ["14", "15", "16", "17", "18"], legacy: ["13"], docs: "postgresql" },
+    { id: "sqlite", name: "SQLite", lines: 1, tested: 1, certified: ["3"], legacy: [], docs: "sqlite" },
+    { id: "mysql", name: "MySQL", lines: 3, tested: 3, certified: ["8.4", "9.7", "26.7"], legacy: [], docs: "mysql" },
+    { id: "mariadb", name: "MariaDB", lines: 4, tested: 4, certified: ["10.11", "11.4", "11.8", "12.3"], legacy: [], docs: "mysql" },
+    { id: "cockroachdb", name: "CockroachDB", lines: 3, tested: 3, certified: ["25.4", "26.2", "26.3"], legacy: [], docs: "distributed" },
+    { id: "yugabytedb", name: "YugabyteDB", lines: 3, tested: 3, certified: ["2024.2", "2025.2", "2026.1"], legacy: [], docs: "distributed" },
+    { id: "sqlserver", name: "SQL Server", lines: 3, tested: 3, certified: ["2019", "2022", "2025"], legacy: [], docs: "sqlserver" },
+    { id: "oracle", name: "Oracle", lines: 2, tested: 2, certified: ["21", "23"], legacy: [], docs: "oracle" },
+    { id: "clickhouse", name: "ClickHouse", lines: 6, tested: 5, certified: ["26.3", "26.7", "26.8", "26.9"], legacy: ["24.10"], docs: "clickhouse" },
+    { id: "spanner", name: "Spanner", lines: 1, tested: 0, certified: [], legacy: [], docs: "distributed" },
   ],
 };
 
 // The per-engine figures and the totals are copied from the same table, so
 // they have to agree; a line added to one and not the other stops the build
-// rather than showing two answers.
+// rather than showing two answers. The same holds for the lines an engine
+// names and the count beside them.
 {
   const sum = (key) => ENGINES.list.reduce((total, engine) => total + engine[key], 0);
+  const count = (key) => ENGINES.list.reduce((total, engine) => total + engine[key].length, 0);
   const tested = ENGINES.counts.certified + ENGINES.counts.legacyTested;
   if (sum("lines") !== ENGINES.counts.declared || sum("tested") !== tested) {
     throw new Error(
       `ENGINES: the engines add up to ${sum("lines")} lines and ${sum("tested")} tested, ` +
         `the totals say ${ENGINES.counts.declared} and ${tested}`,
     );
+  }
+  if (count("certified") !== ENGINES.counts.certified || count("legacy") !== ENGINES.counts.legacyTested) {
+    throw new Error(
+      `ENGINES: the engines name ${count("certified")} certified and ${count("legacy")} legacy-tested lines, ` +
+        `the totals say ${ENGINES.counts.certified} and ${ENGINES.counts.legacyTested}`,
+    );
+  }
+  for (const engine of ENGINES.list) {
+    if (engine.certified.length + engine.legacy.length !== engine.tested) {
+      throw new Error(`ENGINES: ${engine.name} names ${engine.certified.length + engine.legacy.length} tested lines and counts ${engine.tested}`);
+    }
   }
 }

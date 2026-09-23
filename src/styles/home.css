@@ -1329,43 +1329,211 @@ html:not(.js) [data-js-only] {
 .hs-head a {
   color: var(--acc);
 }
-.engines {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+/* The engine picker: ten tabs in two rows of five over one panel, what Ptah
+ * manages on the engine beside the release lines behind it. */
+.dbx {
   border: 1px solid var(--line);
   border-radius: 3px;
   overflow: hidden;
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
-.engines li {
+.dbx-tabs {
   display: grid;
-  gap: 6px;
-  align-content: start;
-  padding: 16px 18px;
-  border-right: 1px solid var(--line2);
-  border-bottom: 1px solid var(--line2);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line);
+  background: var(--code);
 }
-.engines li:nth-child(5n) {
+.dbx-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: -1px;
+  border: 0;
+  border-right: 1px solid var(--line2);
+  border-bottom: 2px solid transparent;
+  background: none;
+  font: 500 14px var(--sans);
+  color: var(--fg2);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.dbx-tab:nth-child(5n) {
   border-right: 0;
 }
-.engines li:nth-last-child(-n + 5) {
-  border-bottom: 0;
+.dbx-tab:hover,
+.dbx-tab[aria-selected="true"] {
+  background: var(--bg);
+  color: var(--fg);
 }
-.engine-name {
-  font: 500 15px var(--sans);
+.dbx-tab[aria-selected="true"] {
+  border-bottom-color: var(--acc);
 }
-.engine-level {
-  font: 11.5px var(--mono);
+.dbx-tab svg {
+  flex-shrink: 0;
+  color: var(--mute);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+}
+.dbx-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  min-height: 200px;
+}
+.dbx-main,
+.dbx-evidence {
+  display: grid;
+  align-content: start;
+  padding: 26px 28px;
+}
+.dbx-main {
+  gap: 14px;
+  border-right: 1px solid var(--line);
+}
+.dbx-evidence {
+  gap: 16px;
+}
+.dbx-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+}
+.dbx-name > span:first-child {
+  font: 500 24px/1.1 var(--sans);
+  letter-spacing: -0.02em;
+}
+.dbx-role {
+  font: 12px var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.dbx-can {
+  font: 17px/1.5 var(--sans);
+  color: var(--fg);
+  text-wrap: pretty;
+}
+.dbx-limit {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  font: 14px/1.5 var(--sans);
   color: var(--fg2);
 }
-.engine-level.is-best-effort {
-  color: var(--mute);
+.dbx-limit strong {
+  color: var(--fg);
+  font-weight: 600;
 }
-.engine-note {
-  font: 12.5px var(--sans);
+.dbx-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+}
+.dbx-main a,
+.dbx-card a {
+  font: 500 14px var(--sans);
+  color: var(--acc);
+  text-decoration: none;
+}
+.dbx-lines {
+  display: grid;
+  gap: 8px;
+}
+.dbx-lines .eyebrow {
+  font-size: 11.5px;
+}
+.dbx-line {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: baseline;
+  font: 14px var(--sans);
+  color: var(--fg2);
+}
+/* A release line is an identifier, the same in every language, so it is
+ * code; it reads as the design's mono figure, not as an inline chip. */
+.dbx-line > :first-child {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 500 14px var(--mono);
+  color: var(--fg);
+}
+.dbx-note {
+  font: 12.5px/1.5 var(--sans);
   color: var(--mute);
+  text-wrap: pretty;
+}
+
+/* The two ways to check a server: ask it, or read what CI measured. */
+.dbx-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+.dbx-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  align-content: start;
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+.dbx-card h3 {
+  font: 600 16px var(--sans);
+}
+.dbx-card p {
+  font: 14px/1.5 var(--sans);
+  color: var(--fg2);
+}
+.dbx-card strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+.dbx-card a {
+  font-size: 13.5px;
+}
+/* The command scrolls inside its box on a narrow screen instead of widening
+ * the card, and the page, to its own length. */
+.dbx-cmd {
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--code);
+}
+.dbx-cmd pre {
+  margin: 0;
+  min-width: 0;
+  overflow-x: auto;
+  font: 13px var(--mono);
+}
+.dbx-cmd .p { color: var(--amber); }
+.dbx-cmd .f { color: var(--acc); }
+.dbx-cmd .s { color: var(--str); }
+/* The design draws this Copy as a small button, not as the bare label the
+ * code blocks carry. */
+.dbx-cmd .copy {
+  margin: 0;
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--fg2);
+}
+.dbx-aside {
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
 }
 .aside2 {
   display: grid;
@@ -1518,20 +1686,8 @@ html:not(.js) [data-js-only] {
   .target > span:last-child {
     text-align: right;
   }
-  .engines {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .engines li,
-  .engines li:nth-child(5n),
-  .engines li:nth-last-child(-n + 5) {
-    border-right: 1px solid var(--line2);
-    border-bottom: 1px solid var(--line2);
-  }
-  .engines li:nth-child(2n) {
-    border-right: 0;
-  }
-  .engines li:nth-last-child(-n + 2) {
-    border-bottom: 0;
+  .dbx-cards {
+    grid-template-columns: minmax(0, 1fr);
   }
   .aside2 {
     grid-template-columns: minmax(0, 1fr);
@@ -1733,11 +1889,32 @@ html:not(.js) [data-js-only] {
   .loop-list li.is-key {
     color: var(--amber);
   }
-  .engine-note {
-    display: none;
+  /* Two columns of engines, and the panel's two halves one above the other. */
+  .dbx-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .engines li {
-    padding: 12px 14px;
+  .dbx-tab,
+  .dbx-tab:nth-child(5n) {
+    border-right: 1px solid var(--line2);
+    padding: 11px 14px;
+  }
+  .dbx-tab:nth-child(2n) {
+    border-right: 0;
+  }
+  .dbx-panel {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+  .dbx-main {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .dbx-main,
+  .dbx-evidence {
+    padding: 20px 18px;
+  }
+  .dbx-can {
+    font-size: 16px;
   }
 }
 
