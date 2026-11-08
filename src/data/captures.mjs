@@ -361,13 +361,14 @@ export const MOMENTS = { approval: moment(assistRec.approval), hold: moment(assi
 // The declared release lines of the generated support matrix
 // (docs/site/src/content/docs/databases/support-matrix.md in stokaro/ptah,
 // from internal/capabilityprobe/cells.go): per engine, how many lines are
-// declared and how many are tested, meaning certified or legacy-tested. The
+// declared and how many are tested, meaning certified or legacy-tested. Official
+// executable plugins publish their own release lines; they have zero rows in
+// this built-in engine matrix and link to their own provider docs. The
 // support policy grants either level only to a line something actually runs
 // against; legacy-tested is a line past its upstream end of life that CI
-// still runs. The rest are best-effort: ClickHouse 25.8, whose upstream
-// support has ended and which nothing probes, and Spanner's only line, which
-// runs against the emulator because that is the only Spanner a container can
-// provide.
+// still runs. The other declared lines are best-effort: MySQL 26.7 and
+// ClickHouse 26.7 and 25.8, which CI does not probe. Spanner's emulator
+// evidence belongs to its plugin, not this matrix.
 //
 // An engine shows its tested lines only. A line the vendor no longer supports
 // stays in the matrix as a record, not as a gap in the engine's coverage, so
@@ -379,21 +380,23 @@ export const MOMENTS = { approval: moment(assistRec.approval), hold: moment(assi
 // documentation supports.
 //
 // `certified` and `legacy` are the tested lines themselves, as the matrix's
-// Release line column names them (SQL Server by its year), and `docs` is the
-// engine's page, where the matrix's first table links it.
+// Release line column names them (SQL Server by its year). Built-in engines
+// use a database page slug in `docs`; plugins use a full provider page URL.
 export const ENGINES = {
-  counts: { declared: 32, probed: 31, certified: 28, legacyTested: 2 },
+  counts: { declared: 33, probed: 30, certified: 28, legacyTested: 2 },
   list: [
     { id: "postgres", name: "PostgreSQL", lines: 6, tested: 6, certified: ["14", "15", "16", "17", "18"], legacy: ["13"], docs: "postgresql" },
     { id: "sqlite", name: "SQLite", lines: 1, tested: 1, certified: ["3"], legacy: [], docs: "sqlite" },
-    { id: "mysql", name: "MySQL", lines: 3, tested: 3, certified: ["8.4", "9.7", "26.7"], legacy: [], docs: "mysql" },
+    { id: "mysql", name: "MySQL", lines: 4, tested: 3, certified: ["8.4", "9.7", "26.10"], legacy: [], docs: "mysql" },
     { id: "mariadb", name: "MariaDB", lines: 4, tested: 4, certified: ["10.11", "11.4", "11.8", "12.3"], legacy: [], docs: "mysql" },
     { id: "cockroachdb", name: "CockroachDB", lines: 3, tested: 3, certified: ["25.4", "26.2", "26.3"], legacy: [], docs: "distributed" },
     { id: "yugabytedb", name: "YugabyteDB", lines: 3, tested: 3, certified: ["2024.2", "2025.2", "2026.1"], legacy: [], docs: "distributed" },
     { id: "sqlserver", name: "SQL Server", lines: 3, tested: 3, certified: ["2019", "2022", "2025"], legacy: [], docs: "sqlserver" },
     { id: "oracle", name: "Oracle", lines: 2, tested: 2, certified: ["21", "23"], legacy: [], docs: "oracle" },
-    { id: "clickhouse", name: "ClickHouse", lines: 6, tested: 5, certified: ["26.3", "26.7", "26.8", "26.9"], legacy: ["24.10"], docs: "clickhouse" },
-    { id: "spanner", name: "Spanner", lines: 1, tested: 0, certified: [], legacy: [], docs: "distributed" },
+    { id: "clickhouse", name: "ClickHouse", lines: 7, tested: 5, certified: ["26.3", "26.8", "26.9", "26.10"], legacy: ["24.10"], docs: "clickhouse" },
+    { id: "ydb", name: "YDB", lines: 0, tested: 0, certified: [], legacy: [], plugin: true, docs: "https://docs.ptah.run/edge/extend/providers/ydb/usage/", setup: "https://docs.ptah.run/edge/extend/providers/ydb/" },
+    { id: "spanner", name: "Spanner", lines: 0, tested: 0, certified: [], legacy: [], plugin: true, docs: "https://docs.ptah.run/edge/extend/providers/spanner/usage/", setup: "https://docs.ptah.run/edge/extend/providers/spanner/" },
+    { id: "duckdb", name: "DuckDB", lines: 0, tested: 0, certified: [], legacy: [], plugin: true, docs: "https://docs.ptah.run/edge/extend/providers/duckdb/usage/", setup: "https://docs.ptah.run/edge/extend/providers/duckdb/" },
   ],
 };
 

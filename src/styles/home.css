@@ -1329,8 +1329,8 @@ html:not(.js) [data-js-only] {
 .hs-head a {
   color: var(--acc);
 }
-/* The engine picker: ten tabs in two rows of five over one panel, what Ptah
- * manages on the engine beside the release lines behind it. */
+/* The engine picker: twelve tabs in three rows of four over one panel. Plugin
+ * panels show installation commands; built-in engines show release lines. */
 .dbx {
   border: 1px solid var(--line);
   border-radius: 3px;
@@ -1338,7 +1338,7 @@ html:not(.js) [data-js-only] {
 }
 .dbx-tabs {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   border-bottom: 1px solid var(--line);
   background: var(--code);
 }
@@ -1358,8 +1358,17 @@ html:not(.js) [data-js-only] {
   cursor: pointer;
   transition: background 0.12s;
 }
-.dbx-tab:nth-child(5n) {
+.dbx-tab:nth-child(4n) {
   border-right: 0;
+}
+.dbx-plugin-badge {
+  margin-left: auto;
+  padding: 2px 5px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font: 10px var(--mono);
+  color: var(--fg2);
+  white-space: nowrap;
 }
 .dbx-tab:hover,
 .dbx-tab[aria-selected="true"] {
@@ -1435,6 +1444,7 @@ html:not(.js) [data-js-only] {
   background: var(--amber);
 }
 .dbx-main a,
+.dbx-install a,
 .dbx-card a {
   font: 500 14px var(--sans);
   color: var(--acc);
@@ -1468,6 +1478,22 @@ html:not(.js) [data-js-only] {
   font: 12.5px/1.5 var(--sans);
   color: var(--mute);
   text-wrap: pretty;
+}
+.dbx-install {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+.dbx-install code {
+  max-width: 100%;
+  font: 12px/1.5 var(--mono);
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+.dbx-install-label {
+  margin-top: 4px;
+  font: 12.5px var(--sans);
+  color: var(--fg2);
 }
 
 /* The two ways to check a server: ask it, or read what CI measured. */
@@ -1894,7 +1920,7 @@ html:not(.js) [data-js-only] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .dbx-tab,
-  .dbx-tab:nth-child(5n) {
+  .dbx-tab:nth-child(4n) {
     border-right: 1px solid var(--line2);
     padding: 11px 14px;
   }
