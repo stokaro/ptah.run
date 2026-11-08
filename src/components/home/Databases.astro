@@ -1,9 +1,10 @@
 ---
 /* Pick an engine and read what Ptah manages there, the limitation worth
- * knowing and which release lines are tested. The release lines and the
- * counts live in src/data/captures.mjs beside their source, the generated
- * support matrix; the prose per engine is the copy's. Without JavaScript the
- * first engine is the page and the tabs are not drawn. */
+ * knowing, and either its tested release lines or its plugin installation.
+ * Built-in release lines and counts live in src/data/captures.mjs beside their
+ * source, the generated support matrix. Plugin releases are documented by the
+ * providers themselves. Without JavaScript the first engine is the page and
+ * the tabs are not drawn. */
 import Rich from "../Rich.astro";
 import { ENGINES } from "../../data/captures.mjs";
 import { hlCmd } from "../../lib/term.mjs";
@@ -36,7 +37,7 @@ const lines = (names: string[]) => {
         {ENGINES.list.map((e: any) => (
           <button class="dbx-tab" type="button" role="tab" id={`dbx-tab-${e.id}`} aria-controls={`dbx-${e.id}`} data-set={`db=${e.id}`} aria-selected={e.id === first ? "true" : "false"} tabindex={e.id === first ? "0" : "-1"}>
             <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><ellipse cx="9" cy="4" rx="6.5" ry="2.5"></ellipse><path d="M2.5 4v10c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5V4M2.5 9c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5"></path></svg>
-            <span>{e.name}</span>
+            <span>{e.name}</span>{e.plugin && <span class="dbx-plugin-badge">{c.pluginBadge}</span>}
           </button>
         ))}
       </div>
@@ -48,10 +49,24 @@ const lines = (names: string[]) => {
               <div class="dbx-name"><span>{e.name}</span><span class="dbx-role">{d.role}</span></div>
               <p class="dbx-can">{d.can}</p>
               <div class="dbx-limit"><span class="dbx-dot"></span><span><strong>{d.limitTitle}</strong> {d.limit}</span></div>
-              <a href={`${DOCS}${e.docs}/`}>{c.explore(e.name)}</a>
+              <a href={e.plugin ? e.docs : `${DOCS}${e.docs}/`}>{c.explore(e.name)}</a>
             </div>
             <div class="dbx-evidence">
-              {e.tested > 0 ? (
+              {e.plugin ? (
+                <>
+                  {d.boundary && <div class="dbx-lines">
+                    <div class="eyebrow eyebrow-mute">{c.boundaryTitle}</div>
+                    {d.boundary.map((b: any) => <div class="dbx-line"><span>{b.v}</span><span>{b.s}</span></div>)}
+                  </div>}
+                  <div class="dbx-install">
+                    <div class="eyebrow eyebrow-mute">{c.pluginInstallTitle}</div>
+                    <code>ptah providers install {e.id}</code>
+                    <div class="dbx-install-label">{c.pluginCheckTitle}</div>
+                    <code>ptah providers check --provider-engine {e.id} --json</code>
+                    <a href={e.setup}>{c.pluginSetupLink}</a>
+                  </div>
+                </>
+              ) : e.tested > 0 ? (
                 <div class="dbx-lines">
                   <div class="eyebrow eyebrow-mute">{c.linesTitle}</div>
                   {e.certified.length > 0 && <div class="dbx-line"><code>{lines(e.certified)}</code><span>{c.certified}</span></div>}
